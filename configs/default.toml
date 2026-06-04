@@ -1,0 +1,73 @@
+# Editable experiment configuration.
+# Paths are resolved relative to the project root unless they are absolute.
+
+[data]
+data_dir = "data"
+dataset_name = "rotatedhill"
+dataset_key = "stress"
+stress_format = "voigt_3d"
+feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
+test_size = 0.1
+random_state = 42
+shuffle = true
+
+[noise]
+enabled = false
+scale = 0.02
+random_state = 42
+relative_to_feature_std = true
+
+[augmentation]
+enabled = true
+include_original = true
+k_values = []
+n_aug_per_sample = 5
+k_range = [0.5, 1.75]
+random_state = 42
+shuffle = true
+homogeneity_degree = 1.0
+surface_target = 1.0
+
+[invariants]
+# Von Mises can start with ["I1", "I2", "I3"].
+# Hill / rotated Hill generally need structural tensor invariants such as I11.
+selected = ["I1", "I2", "I3"]
+enable_second_order = false
+enable_fourth_order = false
+homogenize = false
+init_scale = 0.05
+eps = 1e-12
+
+[encoder]
+enabled = false
+# Use 0 to keep the same dimension as the selected invariant pool.
+output_dim = 0
+init = "identity"
+
+[model]
+hidden_dims = [64, 64]
+activation = "silu"
+output_activation = "softplus"
+
+[loss]
+lambda_param = 0.0
+lambda_structure = 1e-3
+lambda_encoder_l1_ratio = 1e-4
+lambda_encoder_l2 = 1e-4
+eps = 1e-12
+
+[train]
+run_id = "debug_invariant_generator"
+results_dir = "results"
+split_dir = "results/splits"
+use_saved_split = true
+save_split_if_missing = true
+seed = 42
+epochs = 1000
+# 0 means full-batch training, matching the dataset-sum L_data in the notes.
+batch_size = 0
+learning_rate = 1e-3
+grad_clip_norm = 10.0
+device = "auto"
+log_every = 50
+save_every = 100
