@@ -317,8 +317,13 @@ def train_from_config(config: Config) -> TrainResult:
                 print(
                     "[INFO] "
                     f"epoch={epoch:05d} "
-                    f"loss={train_loss_terms['loss_total']:.6g} "
+                    f"train_total={train_loss_terms['loss_total']:.6g} "
                     f"data={train_loss_terms['loss_data']:.6g} "
+                    f"param={train_loss_terms['loss_param']:.6g} "
+                    f"structure={train_loss_terms['loss_structure']:.6g} "
+                    f"encoder={train_loss_terms['loss_encoder']:.6g} "
+                    f"test_total={test_loss_terms['loss_total']:.6g} "
+                    f"test_data={test_loss_terms['loss_data']:.6g} "
                     f"test_mse={test_metrics['mse']:.6g}"
                 )
 

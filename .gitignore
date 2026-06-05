@@ -1,4 +1,5 @@
 .pytest_cache/
+.matplotlib-cache/
 .uv-cache/
 .venv/
 __pycache__/
