@@ -1,9 +1,14 @@
 .pytest_cache/
+.jupyter-data/
+.jupyter-runtime/
+.ipython/
+.cache/
+.config/
 .matplotlib-cache/
 .uv-cache/
 .venv/
 __pycache__/
 *.py[cod]
 data/
-
+.vscode 
 results/
