@@ -3,7 +3,7 @@
 
 [data]
 data_dir = "data"
-dataset_name = "rotatedhill"
+dataset_name = "vonMises25"
 dataset_key = "stress"
 stress_format = "voigt_3d"
 feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
