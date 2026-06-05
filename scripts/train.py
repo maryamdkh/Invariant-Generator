@@ -23,7 +23,6 @@ def main() -> None:
     print(f"[INFO] Best epoch:       {result.best_epoch}")
     print(f"[INFO] Best test MSE:    {result.best_test_mse:.8g}")
     print(f"[INFO] Best checkpoint:  {result.best_checkpoint}")
-    print(f"[INFO] Final checkpoint: {result.final_checkpoint}")
     print(f"[INFO] History:          {result.history_path}")
 
 

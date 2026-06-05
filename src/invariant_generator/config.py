@@ -121,6 +121,8 @@ class TrainConfig:
     device: str = "auto"
 
     log_every: int = 50
+    # Positive values overwrite checkpoint_latest.pt at this interval. A
+    # successful run removes it, leaving checkpoint_best.pt as the saved model.
     save_every: int = 100
 
 

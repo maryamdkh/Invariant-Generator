@@ -70,4 +70,6 @@ learning_rate = 1e-3
 grad_clip_norm = 10.0
 device = "auto"
 log_every = 50
+# Positive values overwrite checkpoint_latest.pt at this interval for crash
+# recovery. A successful run removes it, leaving checkpoint_best.pt.
 save_every = 100

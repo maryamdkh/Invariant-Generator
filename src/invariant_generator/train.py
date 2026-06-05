@@ -28,7 +28,7 @@ from invariant_generator.utils import (
 class TrainResult:
     experiment_dir: Path
     best_checkpoint: Path
-    final_checkpoint: Path
+    recovery_checkpoint: Path
     history_path: Path
     best_epoch: int
     best_test_mse: float
@@ -99,7 +99,7 @@ def train_from_config(config: Config) -> TrainResult:
     best_test_mse = float("inf")
     best_epoch = 0
     best_checkpoint = experiment_dir / "checkpoint_best.pt"
-    final_checkpoint = experiment_dir / "checkpoint_final.pt"
+    recovery_checkpoint = experiment_dir / "checkpoint_latest.pt"
     started_at = now_utc_iso()
     t0 = time.perf_counter()
 
@@ -151,8 +151,7 @@ def train_from_config(config: Config) -> TrainResult:
             or (config.train.log_every > 0 and epoch % config.train.log_every == 0)
         )
         should_save = (
-            epoch == config.train.epochs
-            or (config.train.save_every > 0 and epoch % config.train.save_every == 0)
+            config.train.save_every > 0 and epoch % config.train.save_every == 0
         )
 
         if should_log or should_save:
@@ -193,7 +192,7 @@ def train_from_config(config: Config) -> TrainResult:
 
         if should_save:
             _save_checkpoint(
-                experiment_dir / f"checkpoint_epoch_{epoch:05d}.pt",
+                recovery_checkpoint,
                 model=model,
                 optimizer=optimizer,
                 epoch=epoch,
@@ -207,14 +206,6 @@ def train_from_config(config: Config) -> TrainResult:
         data.y_test,
         device=device,
         batch_size=8192,
-    )
-    _save_checkpoint(
-        final_checkpoint,
-        model=model,
-        optimizer=optimizer,
-        epoch=config.train.epochs,
-        metrics=final_metrics,
-        config=config,
     )
 
     finished_at = now_utc_iso()
@@ -231,10 +222,15 @@ def train_from_config(config: Config) -> TrainResult:
         },
     )
 
+    # A successful run should leave the durable best checkpoint, not an extra
+    # final/latest checkpoint. If training is interrupted, this file remains as
+    # the rolling recovery point.
+    recovery_checkpoint.unlink(missing_ok=True)
+
     return TrainResult(
         experiment_dir=experiment_dir,
         best_checkpoint=best_checkpoint,
-        final_checkpoint=final_checkpoint,
+        recovery_checkpoint=recovery_checkpoint,
         history_path=history_path,
         best_epoch=best_epoch,
         best_test_mse=best_test_mse,
