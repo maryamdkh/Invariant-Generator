@@ -66,10 +66,97 @@ def _save_checkpoint(
             "optimizer_state_dict": optimizer.state_dict(),
             "metrics": metrics,
             "config": to_jsonable(config),
+            "parameter_counts": model.parameter_counts(),
         },
         path,
     )
     return path
+
+
+def _module_grad_norm(module: torch.nn.Module | None) -> float:
+    if module is None:
+        return 0.0
+
+    total = 0.0
+    for param in module.parameters():
+        if param.grad is None:
+            continue
+        grad_norm = param.grad.detach().float().norm(2)
+        total += float(grad_norm.cpu()) ** 2
+    return total**0.5
+
+
+def _gradient_diagnostics(model: InvariantYieldModel) -> dict[str, float]:
+    return {
+        "grad_norm_total": _module_grad_norm(model),
+        "grad_norm_invariant_pool": _module_grad_norm(model.invariant_pool),
+        "grad_norm_encoder": _module_grad_norm(model.encoder),
+        "grad_norm_regressor": _module_grad_norm(model.regressor),
+    }
+
+
+def _encoder_diagnostics(
+    model: InvariantYieldModel,
+    invariant_names: list[str],
+) -> dict[str, float]:
+    S = model.encoder_matrix()
+    if S is None:
+        return {}
+
+    S_detached = S.detach().float().cpu()
+    diagnostics = {
+        "encoder_weight_l1": float(torch.linalg.vector_norm(S_detached.reshape(-1), ord=1)),
+        "encoder_weight_l2": float(torch.linalg.vector_norm(S_detached.reshape(-1), ord=2)),
+        "encoder_weight_max_abs": float(S_detached.abs().max()),
+    }
+
+    column_l1 = S_detached.abs().sum(dim=0)
+    column_l2 = torch.linalg.vector_norm(S_detached, ord=2, dim=0)
+    for idx, name in enumerate(invariant_names):
+        diagnostics[f"encoder_col_l1_{name}"] = float(column_l1[idx])
+        diagnostics[f"encoder_col_l2_{name}"] = float(column_l2[idx])
+
+    return diagnostics
+
+
+@torch.no_grad()
+def _evaluate_loss_terms(
+    model: InvariantYieldModel,
+    criterion: YieldSurfaceLoss,
+    X: np.ndarray,
+    y: np.ndarray,
+    *,
+    device: torch.device,
+    batch_size: int,
+) -> dict[str, float]:
+    model.eval()
+    X_tensor = torch.as_tensor(X, dtype=torch.float32)
+    y_tensor = torch.as_tensor(y, dtype=torch.float32)
+    if batch_size <= 0:
+        batch_size = X_tensor.shape[0]
+
+    data_loss = torch.zeros((), device=device)
+    for start in range(0, X_tensor.shape[0], batch_size):
+        X_batch = X_tensor[start : start + batch_size].to(device)
+        y_batch = y_tensor[start : start + batch_size].to(device)
+        prediction = model(X_batch)
+        if prediction.shape != y_batch.shape:
+            y_batch = y_batch.reshape_as(prediction)
+        data_loss = data_loss + (prediction - y_batch).pow(2).sum()
+
+    zero = data_loss.new_zeros((1,))
+    regularization = criterion(model, zero, zero).detached()
+    data = float(data_loss.cpu())
+    param = regularization["param"]
+    structure = regularization["structure"]
+    encoder = regularization["encoder"]
+    return {
+        "loss_total": data + param + structure + encoder,
+        "loss_data": data,
+        "loss_param": param,
+        "loss_structure": structure,
+        "loss_encoder": encoder,
+    }
 
 
 def train_from_config(config: Config) -> TrainResult:
@@ -84,9 +171,11 @@ def train_from_config(config: Config) -> TrainResult:
     data = prepare_training_data(config)
     model = InvariantYieldModel.from_config(config).to(device)
     criterion = YieldSurfaceLoss(config.loss)
+
     # No optimizer weight decay is used here: all regularization should appear
     # explicitly in YieldSurfaceLoss so the optimized objective matches the notes.
     optimizer = torch.optim.Adam(model.parameters(), lr=config.train.learning_rate)
+    parameter_counts = model.parameter_counts()
 
     loader = _make_loader(
         data.X_train,
@@ -110,6 +199,13 @@ def train_from_config(config: Config) -> TrainResult:
     print(f"[INFO] Test shape:   {data.X_test.shape}")
     print(f"[INFO] Invariants:   {', '.join(config.invariants.selected)}")
     print(f"[INFO] Results dir:  {experiment_dir}")
+    print(
+        "[INFO] Trainable params: "
+        f"{parameter_counts['trainable']} "
+        f"(invariants={parameter_counts['invariant_pool_trainable']}, "
+        f"encoder={parameter_counts['encoder_trainable']}, "
+        f"regressor={parameter_counts['regressor_trainable']})"
+    )
 
     for epoch in trange(1, config.train.epochs + 1, desc="training"):
         model.train()
@@ -120,6 +216,13 @@ def train_from_config(config: Config) -> TrainResult:
             "loss_structure": 0.0,
             "loss_encoder": 0.0,
         }
+        epoch_grad_terms = {
+            "grad_norm_total": 0.0,
+            "grad_norm_invariant_pool": 0.0,
+            "grad_norm_encoder": 0.0,
+            "grad_norm_regressor": 0.0,
+        }
+        n_grad_observations = 0
 
         for X_batch, y_batch in loader:
             X_batch = X_batch.to(device)
@@ -129,6 +232,11 @@ def train_from_config(config: Config) -> TrainResult:
             prediction = model(X_batch)
             loss = criterion(model, prediction, y_batch)
             loss.total.backward()
+
+            grad_terms = _gradient_diagnostics(model)
+            for key, value in grad_terms.items():
+                epoch_grad_terms[key] += value
+            n_grad_observations += 1
 
             if config.train.grad_clip_norm is not None:
                 torch.nn.utils.clip_grad_norm_(
@@ -154,7 +262,27 @@ def train_from_config(config: Config) -> TrainResult:
             config.train.save_every > 0 and epoch % config.train.save_every == 0
         )
 
+        if n_grad_observations:
+            for key in epoch_grad_terms:
+                epoch_grad_terms[key] /= n_grad_observations
+
         if should_log or should_save:
+            train_loss_terms = _evaluate_loss_terms(
+                model,
+                criterion,
+                data.X_train,
+                data.y_train,
+                device=device,
+                batch_size=8192,
+            )
+            test_loss_terms = _evaluate_loss_terms(
+                model,
+                criterion,
+                data.X_test,
+                data.y_test,
+                device=device,
+                batch_size=8192,
+            )
             test_metrics = evaluate_model(
                 model,
                 data.X_test,
@@ -165,7 +293,11 @@ def train_from_config(config: Config) -> TrainResult:
             row: dict[str, float | int | str] = {
                 "epoch": epoch,
                 **epoch_terms,
+                **{f"train_{k}": v for k, v in train_loss_terms.items()},
+                **{f"test_{k}": v for k, v in test_loss_terms.items()},
                 **{f"test_{k}": v for k, v in test_metrics.items()},
+                **epoch_grad_terms,
+                **_encoder_diagnostics(model, config.invariants.selected),
             }
             history.append(row)
 
@@ -185,8 +317,8 @@ def train_from_config(config: Config) -> TrainResult:
                 print(
                     "[INFO] "
                     f"epoch={epoch:05d} "
-                    f"loss={epoch_terms['loss_total']:.6g} "
-                    f"data={epoch_terms['loss_data']:.6g} "
+                    f"loss={train_loss_terms['loss_total']:.6g} "
+                    f"data={train_loss_terms['loss_data']:.6g} "
                     f"test_mse={test_metrics['mse']:.6g}"
                 )
 
@@ -207,6 +339,22 @@ def train_from_config(config: Config) -> TrainResult:
         device=device,
         batch_size=8192,
     )
+    final_train_loss_terms = _evaluate_loss_terms(
+        model,
+        criterion,
+        data.X_train,
+        data.y_train,
+        device=device,
+        batch_size=8192,
+    )
+    final_test_loss_terms = _evaluate_loss_terms(
+        model,
+        criterion,
+        data.X_test,
+        data.y_test,
+        device=device,
+        batch_size=8192,
+    )
 
     finished_at = now_utc_iso()
     history_path = save_json(
@@ -217,8 +365,15 @@ def train_from_config(config: Config) -> TrainResult:
             "elapsed_seconds": time.perf_counter() - t0,
             "history": history,
             "final_metrics": final_metrics,
+            "final_train_loss": final_train_loss_terms,
+            "final_test_loss": final_test_loss_terms,
             "best_epoch": best_epoch,
             "best_test_mse": best_test_mse,
+            "parameter_counts": parameter_counts,
+            "encoder_diagnostics": _encoder_diagnostics(
+                model,
+                config.invariants.selected,
+            ),
         },
     )
 

@@ -161,6 +161,39 @@ class InvariantYieldModel(nn.Module):
     def forward(self, stress: torch.Tensor) -> torch.Tensor:
         return self.regressor(self.invariant_features(stress))
 
+    @staticmethod
+    def _parameter_count(module: nn.Module | None, *, trainable_only: bool) -> int:
+        if module is None:
+            return 0
+        return sum(
+            param.numel()
+            for param in module.parameters()
+            if not trainable_only or param.requires_grad
+        )
+
+    def parameter_counts(self) -> dict[str, int]:
+        """Return total/trainable parameter counts by model component."""
+        counts = {
+            "total": self._parameter_count(self, trainable_only=False),
+            "trainable": self._parameter_count(self, trainable_only=True),
+            "invariant_pool_total": self._parameter_count(
+                self.invariant_pool,
+                trainable_only=False,
+            ),
+            "invariant_pool_trainable": self._parameter_count(
+                self.invariant_pool,
+                trainable_only=True,
+            ),
+            "encoder_total": self._parameter_count(self.encoder, trainable_only=False),
+            "encoder_trainable": self._parameter_count(self.encoder, trainable_only=True),
+            "regressor_total": self._parameter_count(self.regressor, trainable_only=False),
+            "regressor_trainable": self._parameter_count(
+                self.regressor,
+                trainable_only=True,
+            ),
+        }
+        return counts
+
     def structural_norms(self) -> dict[str, torch.Tensor]:
         return self.invariant_pool.structural_norms()
 
