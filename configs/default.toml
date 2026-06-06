@@ -12,7 +12,7 @@ random_state = 42
 shuffle = true
 
 [noise]
-enabled = false
+enabled = true
 scale = 0.02
 random_state = 42
 relative_to_feature_std = true
@@ -50,7 +50,7 @@ activation = "silu"
 output_activation = "softplus"
 
 [loss]
-lambda_param = 0.0
+lambda_param = 1e-6
 lambda_structure = 1e-3
 lambda_encoder_l1_ratio = 1e-4
 lambda_encoder_l2 = 1e-4
@@ -63,13 +63,31 @@ split_dir = "results/splits"
 use_saved_split = true
 save_split_if_missing = true
 seed = 42
-epochs = 1000
+epochs = 2000
 # 0 means full-batch training, matching the dataset-sum L_data in the notes.
 batch_size = 0
-learning_rate = 1e-3
+learning_rate = 1e-4
 grad_clip_norm = 10.0
 device = "auto"
 log_every = 50
 # Positive values overwrite checkpoint_latest.pt at this interval for crash
 # recovery. A successful run removes it, leaving checkpoint_best.pt.
 save_every = 100
+
+# To stop gracefully, write one of these words into STOP_TRAINING.txt.
+stop_file = "STOP_TRAINING.txt"
+stop_keywords = ["stop", "quit", "exit", "halt"]
+
+# Reduce learning rate when test MSE plateaus. Patience counts evaluation
+# events, i.e. epochs where log/save triggers test evaluation.
+lr_plateau_enabled = true
+lr_plateau_factor = 0.5
+lr_plateau_patience = 5
+lr_plateau_min_lr = 1e-6
+lr_plateau_min_delta = 1e-6
+
+# Stop training when test MSE has not improved enough for this many
+# evaluation events.
+early_stopping_enabled = true
+early_stopping_patience = 20
+early_stopping_min_delta = 1e-6
