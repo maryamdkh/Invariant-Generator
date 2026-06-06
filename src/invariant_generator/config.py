@@ -125,6 +125,24 @@ class TrainConfig:
     # successful run removes it, leaving checkpoint_best.pt as the saved model.
     save_every: int = 100
 
+    # Optional manual stop control. Training stops gracefully when stop_file
+    # exists and contains one of stop_keywords, e.g. "stop".
+    stop_file: Path = field(default_factory=lambda: PROJECT_ROOT / "STOP_TRAINING.txt")
+    stop_keywords: list[str] = field(default_factory=lambda: ["stop", "quit", "exit", "halt"])
+
+    # Plateau scheduler settings. Patience is counted in evaluation events
+    # (epochs where logging/saving evaluates test metrics), not raw epochs.
+    lr_plateau_enabled: bool = True
+    lr_plateau_factor: float = 0.5
+    lr_plateau_patience: int = 5
+    lr_plateau_min_lr: float = 1e-6
+    lr_plateau_min_delta: float = 1e-6
+
+    # Early stopping settings, also counted in evaluation events.
+    early_stopping_enabled: bool = True
+    early_stopping_patience: int = 20
+    early_stopping_min_delta: float = 1e-6
+
 
 @dataclass(slots=True)
 class Config:
@@ -162,7 +180,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
         if key not in known:
             raise KeyError(f"Unknown config key [{section}].{key}")
 
-        if key in {"data_dir", "results_dir", "split_dir"}:
+        if key in {"data_dir", "results_dir", "split_dir", "stop_file"}:
             value = _resolve_project_path(value)
         elif key == "k_values":
             value = None if value == [] else [float(v) for v in value]
@@ -170,7 +188,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             if len(value) != 2:
                 raise ValueError("[augmentation].k_range must contain exactly two values.")
             value = (float(value[0]), float(value[1]))
-        elif key in {"selected", "feature_names", "hidden_dims"}:
+        elif key in {"selected", "feature_names", "hidden_dims", "stop_keywords"}:
             value = list(value)
 
         setattr(section_obj, key, value)

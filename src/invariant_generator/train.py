@@ -54,23 +54,66 @@ def _save_checkpoint(
     *,
     model: InvariantYieldModel,
     optimizer: torch.optim.Optimizer,
+    scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau | None = None,
     epoch: int,
     metrics: dict[str, float],
     config: Config,
+    stop_reason: str | None = None,
 ) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(
-        {
-            "epoch": int(epoch),
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "metrics": metrics,
-            "config": to_jsonable(config),
-            "parameter_counts": model.parameter_counts(),
-        },
-        path,
-    )
+    payload = {
+        "epoch": int(epoch),
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "metrics": metrics,
+        "config": to_jsonable(config),
+        "parameter_counts": model.parameter_counts(),
+        "stop_reason": stop_reason,
+    }
+    if scheduler is not None:
+        payload["scheduler_state_dict"] = scheduler.state_dict()
+    torch.save(payload, path)
     return path
+
+
+def _current_learning_rate(optimizer: torch.optim.Optimizer) -> float:
+    return float(optimizer.param_groups[0]["lr"])
+
+
+def _make_plateau_scheduler(
+    optimizer: torch.optim.Optimizer,
+    config: Config,
+) -> torch.optim.lr_scheduler.ReduceLROnPlateau | None:
+    if not config.train.lr_plateau_enabled:
+        return None
+    return torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode="min",
+        factor=config.train.lr_plateau_factor,
+        patience=config.train.lr_plateau_patience,
+        threshold=config.train.lr_plateau_min_delta,
+        threshold_mode="abs",
+        min_lr=config.train.lr_plateau_min_lr,
+    )
+
+
+def _read_stop_keyword(config: Config) -> str | None:
+    stop_file = config.train.stop_file
+    if not stop_file.exists():
+        return None
+
+    try:
+        text = stop_file.read_text(encoding="utf-8").lower()
+    except OSError as exc:
+        print(f"[WARN] Could not read stop file {stop_file}: {exc}")
+        return None
+
+    words = set(text.replace(",", " ").split())
+    for keyword in config.train.stop_keywords:
+        keyword = str(keyword).lower()
+        if keyword in words:
+            return keyword
+    return None
 
 
 def _module_grad_norm(module: torch.nn.Module | None) -> float:
@@ -175,6 +218,7 @@ def train_from_config(config: Config) -> TrainResult:
     # No optimizer weight decay is used here: all regularization should appear
     # explicitly in YieldSurfaceLoss so the optimized objective matches the notes.
     optimizer = torch.optim.Adam(model.parameters(), lr=config.train.learning_rate)
+    scheduler = _make_plateau_scheduler(optimizer, config)
     parameter_counts = model.parameter_counts()
 
     loader = _make_loader(
@@ -191,6 +235,8 @@ def train_from_config(config: Config) -> TrainResult:
     recovery_checkpoint = experiment_dir / "checkpoint_latest.pt"
     started_at = now_utc_iso()
     t0 = time.perf_counter()
+    stop_reason: str | None = None
+    evaluations_without_improvement = 0
 
     print(f"[INFO] Device:       {device}")
     print(f"[INFO] Dataset:      {config.data.dataset_name}")
@@ -199,6 +245,8 @@ def train_from_config(config: Config) -> TrainResult:
     print(f"[INFO] Test shape:   {data.X_test.shape}")
     print(f"[INFO] Invariants:   {', '.join(config.invariants.selected)}")
     print(f"[INFO] Results dir:  {experiment_dir}")
+    print(f"[INFO] Initial LR:   {_current_learning_rate(optimizer):.6g}")
+    print(f"[INFO] Stop file:    {config.train.stop_file}")
     print(
         "[INFO] Trainable params: "
         f"{parameter_counts['trainable']} "
@@ -208,6 +256,13 @@ def train_from_config(config: Config) -> TrainResult:
     )
 
     for epoch in trange(1, config.train.epochs + 1, desc="training"):
+        if epoch > 1:
+            stop_keyword = _read_stop_keyword(config)
+            if stop_keyword is not None:
+                stop_reason = f"stop keyword '{stop_keyword}' found in {config.train.stop_file}"
+                print(f"[INFO] Stopping before epoch {epoch}: {stop_reason}")
+                break
+
         model.train()
         epoch_terms = {
             "loss_total": 0.0,
@@ -231,6 +286,10 @@ def train_from_config(config: Config) -> TrainResult:
             optimizer.zero_grad(set_to_none=True)
             prediction = model(X_batch)
             loss = criterion(model, prediction, y_batch)
+            if not torch.isfinite(loss.total):
+                stop_reason = f"non-finite loss at epoch {epoch}"
+                print(f"[WARN] {stop_reason}")
+                break
             loss.total.backward()
 
             grad_terms = _gradient_diagnostics(model)
@@ -252,6 +311,9 @@ def train_from_config(config: Config) -> TrainResult:
             epoch_terms["loss_param"] += detached["param"]
             epoch_terms["loss_structure"] += detached["structure"]
             epoch_terms["loss_encoder"] += detached["encoder"]
+
+        if stop_reason is not None:
+            break
 
         should_log = (
             epoch == 1
@@ -299,19 +361,50 @@ def train_from_config(config: Config) -> TrainResult:
                 **epoch_grad_terms,
                 **_encoder_diagnostics(model, config.invariants.selected),
             }
+            row["learning_rate"] = _current_learning_rate(optimizer)
             history.append(row)
 
-            if test_metrics["mse"] < best_test_mse:
+            improved = test_metrics["mse"] < (
+                best_test_mse - config.train.early_stopping_min_delta
+            )
+            if improved:
                 best_test_mse = test_metrics["mse"]
                 best_epoch = epoch
+                evaluations_without_improvement = 0
                 _save_checkpoint(
                     best_checkpoint,
                     model=model,
                     optimizer=optimizer,
+                    scheduler=scheduler,
                     epoch=epoch,
                     metrics=test_metrics,
                     config=config,
                 )
+            else:
+                evaluations_without_improvement += 1
+
+            if scheduler is not None:
+                previous_lr = _current_learning_rate(optimizer)
+                scheduler.step(test_metrics["mse"])
+                current_lr = _current_learning_rate(optimizer)
+                if current_lr < previous_lr:
+                    row["learning_rate"] = current_lr
+                    print(
+                        "[INFO] "
+                        f"epoch={epoch:05d} "
+                        f"reducing learning_rate {previous_lr:.6g} -> {current_lr:.6g}"
+                    )
+
+            if (
+                config.train.early_stopping_enabled
+                and evaluations_without_improvement >= config.train.early_stopping_patience
+            ):
+                stop_reason = (
+                    "early stopping: "
+                    f"test_mse did not improve by {config.train.early_stopping_min_delta:g} "
+                    f"for {evaluations_without_improvement} evaluations"
+                )
+                print(f"[INFO] {stop_reason}")
 
             if should_log:
                 print(
@@ -324,7 +417,9 @@ def train_from_config(config: Config) -> TrainResult:
                     f"encoder={train_loss_terms['loss_encoder']:.6g} "
                     f"test_total={test_loss_terms['loss_total']:.6g} "
                     f"test_data={test_loss_terms['loss_data']:.6g} "
-                    f"test_mse={test_metrics['mse']:.6g}"
+                    f"test_mse={test_metrics['mse']:.6g} "
+                    f"lr={_current_learning_rate(optimizer):.6g} "
+                    f"stale={evaluations_without_improvement}"
                 )
 
         if should_save:
@@ -332,10 +427,15 @@ def train_from_config(config: Config) -> TrainResult:
                 recovery_checkpoint,
                 model=model,
                 optimizer=optimizer,
+                scheduler=scheduler,
                 epoch=epoch,
                 metrics=history[-1] if history else {},
                 config=config,
+                stop_reason=stop_reason,
             )
+
+        if stop_reason is not None:
+            break
 
     final_metrics = evaluate_model(
         model,
@@ -374,6 +474,9 @@ def train_from_config(config: Config) -> TrainResult:
             "final_test_loss": final_test_loss_terms,
             "best_epoch": best_epoch,
             "best_test_mse": best_test_mse,
+            "last_epoch": history[-1]["epoch"] if history else 0,
+            "stop_reason": stop_reason,
+            "final_learning_rate": _current_learning_rate(optimizer),
             "parameter_counts": parameter_counts,
             "encoder_diagnostics": _encoder_diagnostics(
                 model,

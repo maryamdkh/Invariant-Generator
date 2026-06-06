@@ -34,7 +34,7 @@ surface_target = 1.0
 selected = ["I1", "I2", "I3"]
 enable_second_order = false
 enable_fourth_order = false
-homogenize = false
+homogenize = true #do not know the meaning
 init_scale = 0.05
 eps = 1e-12
 
@@ -63,7 +63,7 @@ split_dir = "results/splits"
 use_saved_split = true
 save_split_if_missing = true
 seed = 42
-epochs = 2000
+epochs = 3000
 # 0 means full-batch training, matching the dataset-sum L_data in the notes.
 batch_size = 0
 learning_rate = 1e-4
@@ -81,8 +81,8 @@ stop_keywords = ["stop", "quit", "exit", "halt"]
 # Reduce learning rate when test MSE plateaus. Patience counts evaluation
 # events, i.e. epochs where log/save triggers test evaluation.
 lr_plateau_enabled = true
-lr_plateau_factor = 0.5
-lr_plateau_patience = 5
+lr_plateau_factor = 0.7
+lr_plateau_patience = 10
 lr_plateau_min_lr = 1e-6
 lr_plateau_min_delta = 1e-6
 
