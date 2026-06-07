@@ -3,7 +3,7 @@
 
 [data]
 data_dir = "data"
-dataset_name = "vonMises25"
+dataset_name = "hill"
 dataset_key = "stress"
 stress_format = "voigt_3d"
 feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
@@ -12,7 +12,7 @@ random_state = 42
 shuffle = true
 
 [noise]
-enabled = true
+enabled = false
 scale = 0.02
 random_state = 42
 relative_to_feature_std = true
@@ -31,15 +31,15 @@ surface_target = 1.0
 [invariants]
 # Von Mises can start with ["I1", "I2", "I3"].
 # Hill / rotated Hill generally need structural tensor invariants such as I11.
-selected = ["I1", "I2", "I3"]
-enable_second_order = false
+selected = ["I1", "I2", "I3","I4", "I5", "I6","I7", "I8", "I9", "I10"]#,"I11","I12","I13"
+enable_second_order = true
 enable_fourth_order = false
 homogenize = true #do not know the meaning
 init_scale = 0.05
 eps = 1e-12
 
 [encoder]
-enabled = false
+enabled = true
 # Use 0 to keep the same dimension as the selected invariant pool.
 output_dim = 0
 init = "identity"
@@ -52,18 +52,18 @@ output_activation = "softplus"
 [loss]
 lambda_param = 1e-6
 lambda_structure = 1e-3
-lambda_encoder_l1_ratio = 1e-4
-lambda_encoder_l2 = 1e-4
+lambda_encoder_l1_ratio = 5e-4
+lambda_encoder_l2 = 5e-4
 eps = 1e-12
 
 [train]
-run_id = "debug_invariant_generator"
+run_id = "hill_exp01"
 results_dir = "results"
 split_dir = "results/splits"
 use_saved_split = true
 save_split_if_missing = true
 seed = 42
-epochs = 3000
+epochs = 15000
 # 0 means full-batch training, matching the dataset-sum L_data in the notes.
 batch_size = 0
 learning_rate = 1e-4
