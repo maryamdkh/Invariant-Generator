@@ -39,6 +39,7 @@ class NoiseConfig:
 class AugmentationConfig:
     enabled: bool = True
     include_original: bool = True
+    augment_test: bool = False
 
     # If k_values is not None, each listed scaling factor is applied to every
     # sample. If it is None, random k values are sampled from k_range.

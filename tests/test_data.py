@@ -1,8 +1,11 @@
+import h5py
 import numpy as np
 
+from invariant_generator.config import Config
 from invariant_generator.data import (
     augment_homogeneous_surface_data,
     canonicalize_stress_features,
+    prepare_training_data,
 )
 
 
@@ -30,3 +33,42 @@ def test_homogeneous_augmentation_targets_follow_scaling_law():
     np.testing.assert_allclose(X_aug[0], np.ones(6))
     np.testing.assert_allclose(X_aug[2], 0.5 * np.ones(6))
     np.testing.assert_allclose(X_aug[3], 2.0 * np.ones(6))
+
+
+def test_prepare_training_data_can_augment_test_targets(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    X = np.array(
+        [
+            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    with h5py.File(data_dir / "toy.h5", "w") as f:
+        f.create_dataset("stress", data=X)
+
+    config = Config()
+    config.data.data_dir = data_dir
+    config.data.dataset_name = "toy"
+    config.data.dataset_key = "stress"
+    config.data.test_size = 0.5
+    config.data.shuffle = False
+    config.train.split_dir = tmp_path / "splits"
+    config.train.use_saved_split = False
+    config.train.save_split_if_missing = False
+    config.augmentation.augment_test = True
+    config.augmentation.k_values = [0.5, 2.0]
+    config.augmentation.include_original = True
+    config.augmentation.shuffle = False
+
+    data = prepare_training_data(config)
+
+    assert data.X_test.shape == (6, 6)
+    np.testing.assert_allclose(data.y_test, [1.0, 1.0, 0.5, 2.0, 0.5, 2.0])
+    np.testing.assert_allclose(data.X_test[0], X[0])
+    np.testing.assert_allclose(data.X_test[1], X[1])
+    np.testing.assert_allclose(data.X_test[2], 0.5 * X[0])
+    np.testing.assert_allclose(data.X_test[3], 2.0 * X[0])

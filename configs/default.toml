@@ -20,6 +20,8 @@ relative_to_feature_std = true
 [augmentation]
 enabled = true
 include_original = true
+# Evaluate the held-out split on the same homogeneous scaling law as training.
+augment_test = true
 k_values = []
 n_aug_per_sample = 5
 k_range = [0.5, 1.75]

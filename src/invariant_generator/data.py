@@ -375,17 +375,25 @@ def prepare_training_data(config: Config) -> PreparedData:
         )
 
     if config.augmentation.enabled:
+        augmentation_options = {
+            "k_values": config.augmentation.k_values,
+            "n_aug_per_sample": config.augmentation.n_aug_per_sample,
+            "k_range": config.augmentation.k_range,
+            "include_original": config.augmentation.include_original,
+            "surface_target": config.augmentation.surface_target,
+            "homogeneity_degree": config.augmentation.homogeneity_degree,
+            "random_state": config.augmentation.random_state,
+            "shuffle": config.augmentation.shuffle,
+        }
         X_train, y_train = augment_homogeneous_surface_data(
             X_train_raw,
-            k_values=config.augmentation.k_values,
-            n_aug_per_sample=config.augmentation.n_aug_per_sample,
-            k_range=config.augmentation.k_range,
-            include_original=config.augmentation.include_original,
-            surface_target=config.augmentation.surface_target,
-            homogeneity_degree=config.augmentation.homogeneity_degree,
-            random_state=config.augmentation.random_state,
-            shuffle=config.augmentation.shuffle,
+            **augmentation_options,
         )
+        if config.augmentation.augment_test:
+            X_test, y_test = augment_homogeneous_surface_data(
+                X_test,
+                **augmentation_options,
+            )
     else:
         X_train = X_train_raw
         y_train = np.full(X_train.shape[0], config.augmentation.surface_target, dtype=np.float64)
