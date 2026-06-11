@@ -31,9 +31,9 @@ homogeneity_degree = 1.0
 surface_target = 1.0
 
 [invariants]
-# Von Mises can start with ["I1", "I2", "I3"].
-# Hill / rotated Hill generally need structural tensor invariants such as I11.
-selected = ["I1", "I2", "I3","I4", "I5", "I6","I7", "I8", "I9", "I10","I11","I12","I13"] #["I1", "I2", "I3", "I11", "I5", "I12"] 
+# The Python config automatically uses the full candidate pool I1 ... I13.
+# The sparse encoder and post-training PySR ranking decide which invariants
+# matter most for this yield surface.
 enable_second_order = true
 enable_fourth_order = true
 homogenize = true ## STILL NEED TO BE VALIDATED
@@ -100,7 +100,7 @@ early_stopping_min_delta = 1e-7
 top_k = 5
 
 # Saving / output
-output_subdir = "results/symbolic/rotatedhill"
+output_subdir = "symbolic"
 
 # Search
 niterations = 10000000

@@ -8,6 +8,7 @@ import tomllib
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 STRESS_NAMES = ["s11", "s22", "s33", "s23", "s13", "s12"]
+INVARIANT_NAMES = [f"I{i}" for i in range(1, 14)]
 
 
 @dataclass(slots=True)
@@ -56,12 +57,14 @@ class AugmentationConfig:
 
 @dataclass(slots=True)
 class InvariantConfig:
-    # Available names: I1 ... I13. See invariants.py for definitions.
-    selected: list[str] = field(default_factory=lambda: ["I1", "I2", "I3"])
+    # Candidate invariant pool. By default, use all available invariants I1 ... I13
+    # and let the sparse encoder/PySR ranking decide which ones matter most.
+    selected: list[str] = field(default_factory=lambda: INVARIANT_NAMES.copy())
 
-    # These must be enabled when selecting invariants that use a or A.
-    enable_second_order: bool = False
-    enable_fourth_order: bool = False
+    # These are enabled by default because the automatic pool includes
+    # structural invariants that use a and A.
+    enable_second_order: bool = True
+    enable_fourth_order: bool = True
 
     # Optional transformation sign(I)*|I|^(1/degree) to make each invariant
     # first-degree homogeneous in stress, as suggested in the notes.
@@ -215,7 +218,7 @@ class SymbolicConfig:
     Set maxsize a bit larger than the final size you want. e.g., if you want a final equation of size 30,
     you might set this to 35, so that it has a bit of room to explore.
     """
-    maxdepth: int = None #8
+    maxdepth: int | None = None #8
     parsimony: float = 0.0 #1e-3 # Multiplicative factor for how much to punish complexity.  default = 0.0
     complexity_of_constants: int = 2
 
@@ -283,7 +286,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
         if key not in known:
             raise KeyError(f"Unknown config key [{section}].{key}")
 
-        if key in {"data_dir", "results_dir", "split_dir", "stop_file"}:
+        if key in {"data_dir", "results_dir", "split_dir", "stop_file", "output_directory"}:
             value = _resolve_project_path(value)
         elif key == "k_values":
             value = None if value == [] else [float(v) for v in value]
@@ -300,6 +303,8 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             "unary_operators",
         }:
             value = list(value)
+        elif key == "maxdepth" and int(value) < 0:
+            value = None
 
         setattr(section_obj, key, value)
 

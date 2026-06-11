@@ -35,6 +35,9 @@ def test_successful_training_keeps_only_best_checkpoint(tmp_path):
     config.data.random_state = 0
     config.augmentation.n_aug_per_sample = 1
     config.augmentation.random_state = 0
+    config.invariants.selected = ["I1", "I2", "I3"]
+    config.invariants.enable_second_order = False
+    config.invariants.enable_fourth_order = False
     config.encoder.enabled = True
     config.encoder.output_dim = 0
     config.model.hidden_dims = [4]
