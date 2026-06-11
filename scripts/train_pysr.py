@@ -21,7 +21,7 @@ def main() -> None:
         "--checkpoint",
         type=str,
         default=None,
-        help="Checkpoint path. Defaults to results/<run_id>/checkpoint_best.pt.",
+        help="Checkpoint path. Defaults to results/<run_id>/checkpoint_best.pt",
     )
     args = parser.parse_args()
 

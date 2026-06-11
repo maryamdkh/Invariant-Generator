@@ -33,17 +33,17 @@ surface_target = 1.0
 [invariants]
 # Von Mises can start with ["I1", "I2", "I3"].
 # Hill / rotated Hill generally need structural tensor invariants such as I11.
-selected = ["I1", "I2", "I3", "I11", "I5", "I12"] #["I1", "I2", "I3","I4", "I5", "I6","I7", "I8", "I9", "I10","I11","I12","I13"]
+selected = ["I1", "I2", "I3","I4", "I5", "I6","I7", "I8", "I9", "I10","I11","I12","I13"] #["I1", "I2", "I3", "I11", "I5", "I12"] 
 enable_second_order = true
 enable_fourth_order = true
-homogenize = true 
+homogenize = true ## STILL NEED TO BE VALIDATED
 init_scale = 0.05
 eps = 1e-12
 
 [encoder]
 enabled = true
 # Use 0 to keep the same dimension as the selected invariant pool.
-output_dim = 3
+output_dim = 4
 init = "identity" 
 
 [model]
@@ -59,7 +59,7 @@ lambda_encoder_l2 = 1e-2 #increase for sparsity of S (but be careful)
 eps = 1e-12
 
 [train]
-run_id = "hill_exp05"
+run_id = "rotatedhill"
 results_dir = "results"
 split_dir = "results/splits"
 use_saved_split = true
@@ -95,12 +95,57 @@ early_stopping_patience = 30
 early_stopping_min_delta = 1e-7
 
 [symbolic]
-# Post-training PySR symbolic regression over the most important pre-encoder
-# invariant columns, ranked by learned encoder S column norms.
-top_k = 3
-niterations = 1000
-binary_operators = ["+", "-", "*", "/"]
-unary_operators = []
+
+# Feature selection before symbolic regression
+top_k = 5
+
+# Saving / output
+output_subdir = "results/symbolic/rotatedhill"
+
+# Search
+niterations = 10000000
+timeout_hours = 24.0
+warm_start = true
+
+parallelism = "multithreading"
+numprocs = 4
+
+batching = true
+batch_size = 100
+
+populations = 24
+population_size = 50
+ncycles_per_iteration = 5000
+
+# Model selection / reproducibility
 model_selection = "best"
 random_state = 42
-output_subdir = "symbolic"
+
+# Loss -> IMPLEMENT THIS LATER
+elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
+
+# Operators
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "sqrt"]
+
+# Complexity / search space
+maxsize = 60
+maxdepth = -1   # None in Python if needed
+
+parsimony = 0.003
+complexity_of_constants = 2
+
+# Operator constraints -> IMPLEMENT THIS LATER
+# constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
+
+#nested_constraints = { -> IMPLEMENT THIS LATER
+#  square = { square = 1 },
+#  sqrt = { sqrt = 0 }
+#}
+
+# Numerical precision / display
+precision = 64
+progress = true
+
+# Early stopping
+early_stop_condition = "stop_if(loss, complexity) = loss < 1e-17"

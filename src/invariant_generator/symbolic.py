@@ -181,12 +181,35 @@ def train_symbolic_from_config(
     )
 
     pysr_model = PySRRegressor(
+        parallelism=config.symbolic.parallelism,
+        procs = config.symbolic.numprocs,
+        batching = config.symbolic.batching,
+        batch_size = config.symbolic.batch_size,
         niterations=config.symbolic.niterations,
+        timeout_in_seconds=int(config.symbolic.timeout_hours * 3600),
+        warm_start=config.symbolic.warm_start,
+        populations=config.symbolic.populations,
+        population_size=config.symbolic.population_size,
+        ncycles_per_iteration=config.symbolic.ncycles_per_iteration,
+        model_selection=config.symbolic.model_selection,
+        # elementwise_loss=config.symbolic.elementwise_loss,
         binary_operators=config.symbolic.binary_operators,
         unary_operators=config.symbolic.unary_operators,
-        model_selection=config.symbolic.model_selection,
-        random_state=config.symbolic.random_state,
+        maxsize=config.symbolic.maxsize,
+        maxdepth=config.symbolic.maxdepth,
+        parsimony=config.symbolic.parsimony,
+        complexity_of_constants=config.symbolic.complexity_of_constants,
+        # constraints=config.symbolic.constraints,
+        # nested_constraints=config.symbolic.nested_constraints,
+        precision=config.symbolic.precision,
+        progress=config.symbolic.progress,
+        output_directory=str(config.symbolic.output_directory),
+        run_id=config.symbolic.run_id,
+        early_stop_condition=config.symbolic.early_stop_condition,
+        random_state=config.symbolic.random_state
     )
+
+ 
     pysr_model.fit(X_train, data.y_train, variable_names=selection.names)
 
     train_prediction = np.asarray(pysr_model.predict(X_train), dtype=np.float64)

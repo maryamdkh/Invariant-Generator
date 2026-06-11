@@ -147,13 +147,103 @@ class TrainConfig:
 
 @dataclass(slots=True)
 class SymbolicConfig:
+
     top_k: int = 3
-    niterations: int = 1000
-    binary_operators: list[str] = field(default_factory=lambda: ["+", "-", "*", "/"])
-    unary_operators: list[str] = field(default_factory=list)
-    model_selection: str = "best"
     random_state: int = 42
     output_subdir: str = "symbolic"
+
+    # Saving / resuming
+    output_directory: Path = field(default_factory=lambda: PROJECT_ROOT / "results")
+    run_id: str = "rotatedhill_symbolic" #f"vonMises25_noise_{NOISE_SCALE}"
+
+    # Search
+    niterations: int = 10_000_000 # the number of outer iterations; how many times islands evolve + communicate
+    timeout_hours: float = 24.0
+    warm_start: bool = True
+    parallelism: str = "multithreading" #"multiprocessing" #"multithreading" 
+    numprocs: int = 4
+    batching: bool = True
+    batch_size: int = 100
+    """
+    If my dataset is more than 1000 points, I either subsample it (low-dimensional and not much noise) 
+    or set batching=True (high-dimensional or very noisy, so it needs to evaluate on all the data).
+    """
+
+
+    populations: int = 24 # the number of islands; Increase populations to 3*num_cores.
+    population_size: int = 50 # live search pool = populations × population_size
+    ncycles_per_iteration: int = 5000 # the number of generations considered per iteration;
+    """
+    Larger ncyclesperiteration = threads spend more time working before talking to the leader thread.
+    that means there's going to be less job on the main thread, no bottleneck, and more multithreading.
+    """
+
+    model_selection: str = "best"
+    elementwise_loss: str = "loss(prediction, target, weight) = weight * (prediction - target)^2" #Weighted MSE
+    
+    """
+    MSE:
+    "loss(prediction, target) = (prediction - target)^2"
+
+    Weighted MSE:
+    "loss(prediction, target, weight) = weight * (prediction - target)^2" 
+
+    Positivity-aware MSE:
+    "loss(prediction, target, weight) = weight * (prediction - target)^2 + 1.0 * ifelse(prediction < 0.0, prediction^2, 0.0)" 
+
+    """
+
+    """
+    what weights are and why use them?
+    When you augment by scaling the input stress as kX, the target also scales:
+    for your current first-degree homogeneous yield function,f′(kX)=k. 
+    So an absolute error of 0.02 is not equally important for all k.
+    For k = 0.5, error 0.02 is a 4% relative error.
+    For k = 2.0, error 0.02 is only a 1% relative error.
+    you should use a relative / weighted MSE
+    weight * (prediction - target)^2
+    where weight = 1 / target^2
+    """
+
+    binary_operators: list[str] = field(default_factory=lambda: ["+", "-", "*","/"])
+    unary_operators: list[str] = field(default_factory=lambda: ["square","sqrt"])
+
+    maxsize: int = 120
+
+    
+    """
+    Set maxsize a bit larger than the final size you want. e.g., if you want a final equation of size 30,
+    you might set this to 35, so that it has a bit of room to explore.
+    """
+    maxdepth: int = None #8
+    parsimony: float = 0.0 #1e-3 # Multiplicative factor for how much to punish complexity.  default = 0.0
+    complexity_of_constants: int = 2
+
+    """
+    NOTES:
+    Do not add constraint for the sqrt, it prevents PySR find the actual equation. 
+    """
+    constraints: dict = field(
+        default_factory=lambda: {
+            "square": 10,
+            "sqrt": 90, #
+            "*": (8, 8) #
+        }
+    )
+
+    nested_constraints: dict = field(
+        default_factory=lambda: {
+            "square": {"square": 1},
+            "sqrt": { #
+                "sqrt": 0,
+            },
+            }
+    )
+
+    precision: int = 64
+    progress: bool = True
+    early_stop_condition:str = "stop_if(loss, complexity) = loss < 1e-17" #(loss < 0.1) && (complexity < 10)
+
 
 
 @dataclass(slots=True)
