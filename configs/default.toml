@@ -121,8 +121,18 @@ ncycles_per_iteration = 5000
 model_selection = "best"
 random_state = 42
 
-# Loss -> IMPLEMENT THIS LATER
+# Loss
+# MSE:
+# elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
+#
+# Weighted relative MSE:
+# elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
+# weight_mode = "inverse_target_squared"
+#
+# Positivity-aware weighted MSE:
+# elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2 + 1.0 * ifelse(prediction < 0.0, prediction^2, 0.0)"
 elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
+weight_mode = "inverse_target_squared"
 
 # Operators
 binary_operators = ["+", "-", "*", "/"]
@@ -135,13 +145,9 @@ maxdepth = -1   # None in Python if needed
 parsimony = 0.003
 complexity_of_constants = 2
 
-# Operator constraints -> IMPLEMENT THIS LATER
-# constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
-
-#nested_constraints = { -> IMPLEMENT THIS LATER
-#  square = { square = 1 },
-#  sqrt = { sqrt = 0 }
-#}
+# Operator constraints
+constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
+nested_constraints = { square = { square = 1 }, sqrt = { sqrt = 0 } }
 
 # Numerical precision / display
 precision = 64

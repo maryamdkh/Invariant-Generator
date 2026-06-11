@@ -132,6 +132,28 @@ def _save_equations_csv(pysr_model: Any, equations_path: Path) -> None:
     equations_path.write_text(str(equations), encoding="utf-8")
 
 
+def pysr_sample_weights(target: np.ndarray, *, weight_mode: str, eps: float = 1e-12) -> np.ndarray | None:
+    target = np.asarray(target, dtype=np.float64)
+    weight_mode = weight_mode.lower()
+    if weight_mode in {"none", "off", ""}:
+        return None
+    if weight_mode == "inverse_target_squared":
+        return 1.0 / np.maximum(np.abs(target), eps) ** 2
+    raise ValueError(
+        "symbolic.weight_mode must be 'inverse_target_squared' or 'none', "
+        f"got {weight_mode!r}."
+    )
+
+
+def _pysr_fit_kwargs(config: Config, target: np.ndarray) -> dict[str, Any]:
+    if "weight" not in config.symbolic.elementwise_loss:
+        return {}
+    weights = pysr_sample_weights(target, weight_mode=config.symbolic.weight_mode)
+    if weights is None:
+        return {}
+    return {"weights": weights}
+
+
 def train_symbolic_from_config(
     config: Config,
     *,
@@ -167,6 +189,17 @@ def train_symbolic_from_config(
         config.invariants.selected,
         top_k=config.symbolic.top_k,
     )
+    print(
+        "[INFO] PySR invariant source: "
+        f"top {len(selection.names)} by encoder S column L2 norm"
+    )
+    print(
+        "[INFO] PySR selected invariants: "
+        + ", ".join(
+            f"{name}(score={score:.6g})"
+            for name, score in zip(selection.names, selection.scores)
+        )
+    )
     X_train = compute_selected_invariant_features(
         model,
         data.X_train,
@@ -192,15 +225,15 @@ def train_symbolic_from_config(
         population_size=config.symbolic.population_size,
         ncycles_per_iteration=config.symbolic.ncycles_per_iteration,
         model_selection=config.symbolic.model_selection,
-        # elementwise_loss=config.symbolic.elementwise_loss,
+        elementwise_loss=config.symbolic.elementwise_loss,
         binary_operators=config.symbolic.binary_operators,
         unary_operators=config.symbolic.unary_operators,
         maxsize=config.symbolic.maxsize,
         maxdepth=config.symbolic.maxdepth,
         parsimony=config.symbolic.parsimony,
         complexity_of_constants=config.symbolic.complexity_of_constants,
-        # constraints=config.symbolic.constraints,
-        # nested_constraints=config.symbolic.nested_constraints,
+        constraints=config.symbolic.constraints,
+        nested_constraints=config.symbolic.nested_constraints,
         precision=config.symbolic.precision,
         progress=config.symbolic.progress,
         output_directory=str(config.symbolic.output_directory),
@@ -210,7 +243,12 @@ def train_symbolic_from_config(
     )
 
  
-    pysr_model.fit(X_train, data.y_train, variable_names=selection.names)
+    pysr_model.fit(
+        X_train,
+        data.y_train,
+        variable_names=selection.names,
+        **_pysr_fit_kwargs(config, data.y_train),
+    )
 
     train_prediction = np.asarray(pysr_model.predict(X_train), dtype=np.float64)
     test_prediction = np.asarray(pysr_model.predict(X_test), dtype=np.float64)
@@ -246,6 +284,10 @@ def train_symbolic_from_config(
             "test": test_metrics,
             "model_selection": config.symbolic.model_selection,
             "niterations": config.symbolic.niterations,
+            "elementwise_loss": config.symbolic.elementwise_loss,
+            "weight_mode": config.symbolic.weight_mode,
+            "constraints": config.symbolic.constraints,
+            "nested_constraints": config.symbolic.nested_constraints,
         },
     )
 

@@ -183,6 +183,7 @@ class SymbolicConfig:
 
     model_selection: str = "best"
     elementwise_loss: str = "loss(prediction, target, weight) = weight * (prediction - target)^2" #Weighted MSE
+    weight_mode: str = "inverse_target_squared"
     
     """
     MSE:
@@ -280,6 +281,14 @@ def _resolve_project_path(value: str | Path) -> Path:
     return PROJECT_ROOT / path
 
 
+def _constraint_value_from_toml(value: Any) -> Any:
+    if isinstance(value, list):
+        return tuple(_constraint_value_from_toml(item) for item in value)
+    if isinstance(value, dict):
+        return {key: _constraint_value_from_toml(item) for key, item in value.items()}
+    return value
+
+
 def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str) -> None:
     known = getattr(section_obj, "__dataclass_fields__", {})
     for key, value in values.items():
@@ -305,6 +314,8 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             value = list(value)
         elif key == "maxdepth" and int(value) < 0:
             value = None
+        elif key in {"constraints", "nested_constraints"}:
+            value = _constraint_value_from_toml(value)
 
         setattr(section_obj, key, value)
 
