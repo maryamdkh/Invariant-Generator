@@ -93,3 +93,14 @@ lr_plateau_min_delta = 1e-6
 early_stopping_enabled = true
 early_stopping_patience = 30
 early_stopping_min_delta = 1e-7
+
+[symbolic]
+# Post-training PySR symbolic regression over the most important pre-encoder
+# invariant columns, ranked by learned encoder S column norms.
+top_k = 3
+niterations = 1000
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = []
+model_selection = "best"
+random_state = 42
+output_subdir = "symbolic"

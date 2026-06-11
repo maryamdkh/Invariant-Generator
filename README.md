@@ -15,6 +15,17 @@ Run training with:
 uv run python scripts/train.py --config configs/default.toml
 ```
 
+After training, run symbolic regression with PySR on the most important
+pre-encoder invariant columns selected from the learned encoder `S` weights:
+
+```bash
+uv run --extra symbolic python scripts/train_pysr.py --config configs/default.toml
+```
+
+This PySR stage uses invariant values as inputs, not raw stress components and
+not the encoded `S I` features. By default it fits the same homogeneous
+yield-surface targets used during training.
+
 The default loss follows the attached notes:
 
 ```text

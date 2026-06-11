@@ -146,6 +146,17 @@ class TrainConfig:
 
 
 @dataclass(slots=True)
+class SymbolicConfig:
+    top_k: int = 3
+    niterations: int = 1000
+    binary_operators: list[str] = field(default_factory=lambda: ["+", "-", "*", "/"])
+    unary_operators: list[str] = field(default_factory=list)
+    model_selection: str = "best"
+    random_state: int = 42
+    output_subdir: str = "symbolic"
+
+
+@dataclass(slots=True)
 class Config:
     data: DataConfig = field(default_factory=DataConfig)
     noise: NoiseConfig = field(default_factory=NoiseConfig)
@@ -155,6 +166,7 @@ class Config:
     model: ModelConfig = field(default_factory=ModelConfig)
     loss: LossConfig = field(default_factory=LossConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
+    symbolic: SymbolicConfig = field(default_factory=SymbolicConfig)
 
     @property
     def experiment_dir(self) -> Path:
@@ -189,7 +201,14 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             if len(value) != 2:
                 raise ValueError("[augmentation].k_range must contain exactly two values.")
             value = (float(value[0]), float(value[1]))
-        elif key in {"selected", "feature_names", "hidden_dims", "stop_keywords"}:
+        elif key in {
+            "selected",
+            "feature_names",
+            "hidden_dims",
+            "stop_keywords",
+            "binary_operators",
+            "unary_operators",
+        }:
             value = list(value)
 
         setattr(section_obj, key, value)
