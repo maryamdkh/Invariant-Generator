@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import pytest
 import torch
@@ -156,9 +158,13 @@ def test_train_symbolic_logs_selected_invariants_before_fit(tmp_path, capsys):
         patch("invariant_generator.symbolic._import_pysr_regressor", return_value=FakePySRRegressor),
         patch("invariant_generator.symbolic.prepare_training_data", return_value=prepared),
     ):
-        train_symbolic_from_config(config, checkpoint_path=checkpoint_path)
+        result = train_symbolic_from_config(config, checkpoint_path=checkpoint_path)
 
     captured = capsys.readouterr()
     assert "PySR invariant source: top 2 by encoder S column L2 norm" in captured.out
     assert "I2(score=3" in captured.out
     assert "I3(score=2" in captured.out
+    assert result.config_snapshot_path == result.output_dir / "config.json"
+    snapshot = json.loads(result.config_snapshot_path.read_text(encoding="utf-8"))
+    assert snapshot["symbolic"]["top_k"] == 2
+    assert snapshot["train"]["run_id"] == "run"

@@ -12,7 +12,7 @@ from invariant_generator.config import Config
 from invariant_generator.data import prepare_training_data
 from invariant_generator.evaluation import regression_metrics
 from invariant_generator.model import InvariantYieldModel
-from invariant_generator.utils import resolve_device, save_json
+from invariant_generator.utils import resolve_device, save_config_snapshot, save_json
 
 
 @dataclass(slots=True)
@@ -25,6 +25,7 @@ class InvariantSelection:
 @dataclass(slots=True)
 class SymbolicResult:
     output_dir: Path
+    config_snapshot_path: Path
     selected_invariants_path: Path
     equations_path: Path
     best_equation_path: Path
@@ -174,6 +175,9 @@ def train_symbolic_from_config(
         if checkpoint_path is not None
         else config.experiment_dir / "checkpoint_best.pt"
     )
+    output_dir = config.experiment_dir / config.symbolic.output_subdir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    config_snapshot_path = save_config_snapshot(config, output_dir)
 
     data = prepare_training_data(config)
     model = InvariantYieldModel.from_config(config).to(device)
@@ -255,9 +259,6 @@ def train_symbolic_from_config(
     train_metrics = regression_metrics(train_prediction, data.y_train)
     test_metrics = regression_metrics(test_prediction, data.y_test)
 
-    output_dir = config.experiment_dir / config.symbolic.output_subdir
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     selected_invariants_path = save_json(
         output_dir / "selected_invariants.json",
         {
@@ -293,6 +294,7 @@ def train_symbolic_from_config(
 
     return SymbolicResult(
         output_dir=output_dir,
+        config_snapshot_path=config_snapshot_path,
         selected_invariants_path=selected_invariants_path,
         equations_path=equations_path,
         best_equation_path=best_equation_path,

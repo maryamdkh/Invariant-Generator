@@ -34,6 +34,7 @@ def main() -> None:
     )
 
     print(f"[INFO] Output dir:          {result.output_dir}")
+    print(f"[INFO] Config snapshot:     {result.config_snapshot_path}")
     print(f"[INFO] Selected invariants: {', '.join(result.selected_invariants)}")
     print(f"[INFO] Best equation:       {result.best_equation}")
     print(f"[INFO] Metrics:             {result.metrics_path}")
