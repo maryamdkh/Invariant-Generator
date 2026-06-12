@@ -54,8 +54,8 @@ output_activation = "softplus"
 [loss]
 lambda_param = 1e-6
 lambda_structure = 1e-3
-lambda_encoder_l1_ratio = 1e-2 #increase for sparsity of S
-lambda_encoder_l2 = 1e-2 #increase for sparsity of S (but be careful)
+lambda_encoder_l1_ratio = 5e-2 #increase for sparsity of S
+lambda_encoder_l2 = 5e-2 #increase for sparsity of S (but be careful)
 eps = 1e-12
 
 [train]
@@ -65,7 +65,7 @@ split_dir = "results/splits"
 use_saved_split = true
 save_split_if_missing = true
 seed = 42
-epochs = 15000
+epochs = 20000
 # 0 means full-batch training, matching the dataset-sum L_data in the notes.
 batch_size = 0
 learning_rate = 1e-4
@@ -91,24 +91,24 @@ lr_plateau_min_delta = 1e-6
 # Stop training when test MSE has not improved enough for this many
 # evaluation events.
 early_stopping_enabled = true
-early_stopping_patience = 30
+early_stopping_patience = 40
 early_stopping_min_delta = 1e-7
 
 [symbolic]
 
 # Feature selection before symbolic regression
-top_k = 5
+top_k = 7
 
 # Saving / output
-output_subdir = "symbolic"
+output_subdir = "symbolic2"
 
 # Search
 niterations = 10000000
 timeout_hours = 24.0
 warm_start = true
 
-parallelism = "multithreading"
-numprocs = 4
+parallelism = "multiprocessing"
+numprocs = 8
 
 batching = true
 batch_size = 100
@@ -139,7 +139,7 @@ binary_operators = ["+", "-", "*", "/"]
 unary_operators = ["square", "sqrt"]
 
 # Complexity / search space
-maxsize = 60
+maxsize = 40
 maxdepth = -1   # None in Python if needed
 
 parsimony = 0.003
@@ -147,7 +147,7 @@ complexity_of_constants = 2
 
 # Operator constraints
 constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
-nested_constraints = { square = { square = 1 }, sqrt = { sqrt = 0 } }
+nested_constraints = { square = { square = 1 }, sqrt = { sqrt = 1 } }
 
 # Numerical precision / display
 precision = 64
