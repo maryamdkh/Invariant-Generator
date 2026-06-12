@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import torch
 from torch import nn
 
-from invariant_generator.config import Config
+from invariant_generator.config import Config, coerce_config_dataclasses
 from invariant_generator.invariants import InvariantPool
 
 
@@ -121,6 +121,7 @@ class InvariantYieldModel(nn.Module):
 
     @classmethod
     def from_config(cls, config: Config) -> "InvariantYieldModel":
+        coerce_config_dataclasses(config)
         A_psd = config.constraints.A_psd
         A_psd_mode = A_psd.mode.lower()
         A_psd_target = A_psd.target.lower()

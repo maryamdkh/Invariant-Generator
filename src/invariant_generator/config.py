@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, is_dataclass
 from pathlib import Path
 from typing import Any
 import tomllib
@@ -346,6 +346,45 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             value = _constraint_value_from_toml(value)
 
         setattr(section_obj, key, value)
+
+
+def coerce_config_dataclasses(config: Config) -> Config:
+    """
+    Normalize nested config sections that may have been restored as dicts.
+
+    Checkpoints store dataclasses as JSON-like dictionaries. Older notebook
+    helpers may restore only the top-level sections, leaving nested sections
+    such as constraints.A_psd as plain dicts. This mutates and returns config.
+    """
+
+    def _coerce(obj: Any, *, section: str) -> None:
+        if not is_dataclass(obj):
+            return
+        for dataclass_field in fields(obj):
+            name = dataclass_field.name
+            value = getattr(obj, name)
+            if isinstance(value, dict):
+                replacement = _default_nested_value(obj, name)
+                if replacement is not None and is_dataclass(replacement):
+                    _set_known_fields(
+                        replacement,
+                        value,
+                        section=f"{section}.{name}",
+                    )
+                    setattr(obj, name, replacement)
+                    _coerce(replacement, section=f"{section}.{name}")
+                continue
+            _coerce(value, section=f"{section}.{name}")
+
+    _coerce(config, section="config")
+    return config
+
+
+def _default_nested_value(parent: Any, name: str) -> Any | None:
+    """Return a fresh default nested dataclass value for parent.name."""
+    defaults = type(parent)()
+    value = getattr(defaults, name, None)
+    return value if is_dataclass(value) else None
 
 
 def load_config(path: str | Path | None = None) -> Config:
