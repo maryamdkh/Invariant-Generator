@@ -36,6 +36,29 @@ def test_select_top_invariants_by_encoder_column_norm_with_stable_ties():
     np.testing.assert_allclose(selection.scores, [3.0, 2.0, 2.0])
 
 
+def test_scaled_encoder_norm_can_change_invariant_ranking():
+    S = torch.tensor([[2.0, 1.0]])
+    raw = select_top_invariants_from_encoder(
+        S,
+        ["I1", "I2"],
+        top_k=1,
+        feature_selection="encoder_norm",
+        feature_stds=[0.1, 10.0],
+    )
+    scaled = select_top_invariants_from_encoder(
+        S,
+        ["I1", "I2"],
+        top_k=1,
+        feature_selection="scaled_encoder_norm",
+        feature_stds=[0.1, 10.0],
+    )
+
+    assert raw.names == ["I1"]
+    assert scaled.names == ["I2"]
+    np.testing.assert_allclose(scaled.raw_scores, [1.0])
+    np.testing.assert_allclose(scaled.scaled_scores, [10.0])
+
+
 def test_compute_selected_invariant_features_uses_pre_encoder_columns():
     config = Config()
     config.invariants.selected = ["I1", "I2", "I3"]
@@ -127,6 +150,7 @@ def test_train_symbolic_logs_selected_invariants_before_fit(tmp_path, capsys):
     config.encoder.enabled = True
     config.encoder.output_dim = 2
     config.symbolic.top_k = 2
+    config.symbolic.feature_selection = "encoder_norm"
     config.train.results_dir = tmp_path / "results"
     config.train.run_id = "run"
     config.train.device = "cpu"
@@ -161,10 +185,11 @@ def test_train_symbolic_logs_selected_invariants_before_fit(tmp_path, capsys):
         result = train_symbolic_from_config(config, checkpoint_path=checkpoint_path)
 
     captured = capsys.readouterr()
-    assert "PySR invariant source: top 2 by encoder S column L2 norm" in captured.out
+    assert "PySR invariant source: encoder_norm" in captured.out
     assert "I2(score=3" in captured.out
     assert "I3(score=2" in captured.out
     assert result.config_snapshot_path == result.output_dir / "config.json"
     snapshot = json.loads(result.config_snapshot_path.read_text(encoding="utf-8"))
     assert snapshot["symbolic"]["top_k"] == 2
+    assert snapshot["symbolic"]["feature_selection"] == "encoder_norm"
     assert snapshot["train"]["run_id"] == "run"

@@ -11,6 +11,12 @@ from tqdm.auto import trange
 
 from invariant_generator.config import Config
 from invariant_generator.data import PreparedData, prepare_training_data
+from invariant_generator.diagnostics import (
+    constraint_diagnostics,
+    encoder_score_diagnostics,
+    flatten_constraint_diagnostics,
+    invariant_feature_statistics,
+)
 from invariant_generator.evaluation import evaluate_model
 from invariant_generator.losses import YieldSurfaceLoss
 from invariant_generator.model import InvariantYieldModel
@@ -193,12 +199,14 @@ def _evaluate_loss_terms(
     param = regularization["param"]
     structure = regularization["structure"]
     encoder = regularization["encoder"]
+    constraint = regularization["constraint"]
     return {
-        "loss_total": data + param + structure + encoder,
+        "loss_total": data + param + structure + encoder + constraint,
         "loss_data": data,
         "loss_param": param,
         "loss_structure": structure,
         "loss_encoder": encoder,
+        "loss_constraint": constraint,
     }
 
 
@@ -213,7 +221,7 @@ def train_from_config(config: Config) -> TrainResult:
 
     data = prepare_training_data(config)
     model = InvariantYieldModel.from_config(config).to(device)
-    criterion = YieldSurfaceLoss(config.loss)
+    criterion = YieldSurfaceLoss(config.loss, config.constraints)
 
     # No optimizer weight decay is used here: all regularization should appear
     # explicitly in YieldSurfaceLoss so the optimized objective matches the notes.
@@ -270,6 +278,7 @@ def train_from_config(config: Config) -> TrainResult:
             "loss_param": 0.0,
             "loss_structure": 0.0,
             "loss_encoder": 0.0,
+            "loss_constraint": 0.0,
         }
         epoch_grad_terms = {
             "grad_norm_total": 0.0,
@@ -311,6 +320,7 @@ def train_from_config(config: Config) -> TrainResult:
             epoch_terms["loss_param"] += detached["param"]
             epoch_terms["loss_structure"] += detached["structure"]
             epoch_terms["loss_encoder"] += detached["encoder"]
+            epoch_terms["loss_constraint"] += detached["constraint"]
 
         if stop_reason is not None:
             break
@@ -352,6 +362,10 @@ def train_from_config(config: Config) -> TrainResult:
                 device=device,
                 batch_size=8192,
             )
+            current_constraint_diagnostics = constraint_diagnostics(
+                model,
+                config.constraints,
+            )
             row: dict[str, float | int | str] = {
                 "epoch": epoch,
                 **epoch_terms,
@@ -360,6 +374,7 @@ def train_from_config(config: Config) -> TrainResult:
                 **{f"test_{k}": v for k, v in test_metrics.items()},
                 **epoch_grad_terms,
                 **_encoder_diagnostics(model, config.invariants.selected),
+                **flatten_constraint_diagnostics(current_constraint_diagnostics),
             }
             row["learning_rate"] = _current_learning_rate(optimizer)
             history.append(row)
@@ -415,6 +430,7 @@ def train_from_config(config: Config) -> TrainResult:
                     f"param={train_loss_terms['loss_param']:.6g} "
                     f"structure={train_loss_terms['loss_structure']:.6g} "
                     f"encoder={train_loss_terms['loss_encoder']:.6g} "
+                    f"constraint={train_loss_terms['loss_constraint']:.6g} "
                     f"test_total={test_loss_terms['loss_total']:.6g} "
                     f"test_data={test_loss_terms['loss_data']:.6g} "
                     f"test_mse={test_metrics['mse']:.6g} "
@@ -460,6 +476,19 @@ def train_from_config(config: Config) -> TrainResult:
         device=device,
         batch_size=8192,
     )
+    final_constraint_diagnostics = constraint_diagnostics(model, config.constraints)
+    final_invariant_stats = invariant_feature_statistics(
+        model,
+        data.X_train,
+        config.invariants.selected,
+        device=device,
+        batch_size=8192,
+    )
+    final_encoder_scores = encoder_score_diagnostics(
+        model,
+        config.invariants.selected,
+        feature_std=final_invariant_stats["std"],
+    )
 
     finished_at = now_utc_iso()
     history_path = save_json(
@@ -482,6 +511,9 @@ def train_from_config(config: Config) -> TrainResult:
                 model,
                 config.invariants.selected,
             ),
+            "constraint_diagnostics": final_constraint_diagnostics,
+            "invariant_feature_statistics": final_invariant_stats,
+            "encoder_score_diagnostics": final_encoder_scores,
         },
     )
 

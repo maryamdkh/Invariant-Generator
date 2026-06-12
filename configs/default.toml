@@ -58,6 +58,15 @@ lambda_encoder_l1_ratio = 5e-2 #increase for sparsity of S
 lambda_encoder_l2 = 5e-2 #increase for sparsity of S (but be careful)
 eps = 1e-12
 
+[constraints.A_psd]
+enabled = false
+mode = "check"        # hard | penalty | check
+target = "fourth_order_A"
+basis = "mandel"
+min_eigenvalue = 0.0
+tolerance = 1e-8
+penalty_weight = 1.0
+
 [train]
 run_id = "rotatedhill"
 results_dir = "results"
@@ -98,6 +107,9 @@ early_stopping_min_delta = 1e-7
 
 # Feature selection before symbolic regression
 top_k = 7
+feature_selection = "scaled_encoder_norm" # encoder_norm | scaled_encoder_norm | manual
+selected_invariants = []                  # used only when feature_selection = "manual"
+target_transform = "identity"             # identity | square
 
 # Saving / output
 output_subdir = "symbolic2"

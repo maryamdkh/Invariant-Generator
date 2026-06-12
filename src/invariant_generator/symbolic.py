@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from importlib import import_module
 from pathlib import Path
 from typing import Any
@@ -10,6 +10,11 @@ import torch
 
 from invariant_generator.config import Config
 from invariant_generator.data import prepare_training_data
+from invariant_generator.diagnostics import (
+    constraint_diagnostics,
+    encoder_score_diagnostics,
+    invariant_feature_statistics,
+)
 from invariant_generator.evaluation import regression_metrics
 from invariant_generator.model import InvariantYieldModel
 from invariant_generator.utils import resolve_device, save_config_snapshot, save_json
@@ -20,6 +25,9 @@ class InvariantSelection:
     names: list[str]
     indices: list[int]
     scores: list[float]
+    raw_scores: list[float] = field(default_factory=list)
+    scaled_scores: list[float] = field(default_factory=list)
+    feature_selection: str = "encoder_norm"
 
 
 @dataclass(slots=True)
@@ -50,8 +58,10 @@ def select_top_invariants_from_encoder(
     invariant_names: list[str],
     *,
     top_k: int,
+    feature_selection: str = "encoder_norm",
+    feature_stds: np.ndarray | list[float] | None = None,
 ) -> InvariantSelection:
-    """Rank original invariant columns by encoder weight norm."""
+    """Rank original invariant columns by raw or scale-aware encoder score."""
     if top_k <= 0:
         raise ValueError("top_k must be positive.")
     if encoder_matrix.ndim != 2:
@@ -62,14 +72,36 @@ def select_top_invariants_from_encoder(
             f"Got {encoder_matrix.shape[1]} columns and {len(invariant_names)} names."
         )
 
-    scores_tensor = torch.linalg.vector_norm(
+    raw_scores_tensor = torch.linalg.vector_norm(
         encoder_matrix.detach().float().cpu(),
         ord=2,
         dim=0,
     )
-    scores = [float(score) for score in scores_tensor]
+    raw_scores_array = raw_scores_tensor.numpy().astype(np.float64)
+    if feature_stds is None:
+        std_array = np.ones_like(raw_scores_array)
+    else:
+        std_array = np.asarray(feature_stds, dtype=np.float64)
+        if std_array.shape != raw_scores_array.shape:
+            raise ValueError(
+                "feature_stds must match invariant_names. "
+                f"Got {std_array.shape} and {raw_scores_array.shape}."
+            )
+    scaled_scores_array = raw_scores_array * std_array
+
+    feature_selection = feature_selection.lower()
+    if feature_selection == "encoder_norm":
+        ranking_scores = raw_scores_array
+    elif feature_selection == "scaled_encoder_norm":
+        ranking_scores = scaled_scores_array
+    else:
+        raise ValueError(
+            "feature_selection must be 'encoder_norm' or 'scaled_encoder_norm' "
+            "when ranking from the encoder."
+        )
+
     ranked = sorted(
-        enumerate(scores),
+        enumerate(float(score) for score in ranking_scores),
         key=lambda item: (-item[1], item[0]),
     )
     selected = ranked[: min(top_k, len(ranked))]
@@ -78,6 +110,38 @@ def select_top_invariants_from_encoder(
         names=[invariant_names[idx] for idx, _ in selected],
         indices=[idx for idx, _ in selected],
         scores=[score for _, score in selected],
+        raw_scores=[float(raw_scores_array[idx]) for idx, _ in selected],
+        scaled_scores=[float(scaled_scores_array[idx]) for idx, _ in selected],
+        feature_selection=feature_selection,
+    )
+
+
+def select_manual_invariants(
+    invariant_names: list[str],
+    selected_names: list[str],
+    *,
+    raw_scores: list[float] | None = None,
+    scaled_scores: list[float] | None = None,
+) -> InvariantSelection:
+    """Select user-requested invariant columns in the requested order."""
+    if not selected_names:
+        raise ValueError("symbolic.selected_invariants must not be empty for manual selection.")
+
+    index_by_name = {name: idx for idx, name in enumerate(invariant_names)}
+    unknown = [name for name in selected_names if name not in index_by_name]
+    if unknown:
+        raise ValueError(f"Unknown symbolic.selected_invariants: {unknown}")
+
+    indices = [index_by_name[name] for name in selected_names]
+    raw = raw_scores if raw_scores is not None else [0.0] * len(invariant_names)
+    scaled = scaled_scores if scaled_scores is not None else [0.0] * len(invariant_names)
+    return InvariantSelection(
+        names=list(selected_names),
+        indices=indices,
+        scores=[float(scaled[idx]) for idx in indices],
+        raw_scores=[float(raw[idx]) for idx in indices],
+        scaled_scores=[float(scaled[idx]) for idx in indices],
+        feature_selection="manual",
     )
 
 
@@ -155,6 +219,20 @@ def _pysr_fit_kwargs(config: Config, target: np.ndarray) -> dict[str, Any]:
     return {"weights": weights}
 
 
+def transform_symbolic_target(target: np.ndarray, *, target_transform: str) -> np.ndarray:
+    """Apply the user-selected target transform for symbolic regression."""
+    target = np.asarray(target, dtype=np.float64)
+    target_transform = target_transform.lower()
+    if target_transform in {"identity", "none", ""}:
+        return target
+    if target_transform == "square":
+        return target**2
+    raise ValueError(
+        "symbolic.target_transform must be 'identity' or 'square', "
+        f"got {target_transform!r}."
+    )
+
+
 def train_symbolic_from_config(
     config: Config,
     *,
@@ -162,7 +240,13 @@ def train_symbolic_from_config(
     config_path: str | Path | None = None,
 ) -> SymbolicResult:
     """Run post-training PySR on top-ranked invariant features."""
-    if not config.encoder.enabled:
+    feature_selection = config.symbolic.feature_selection.lower()
+    if feature_selection not in {"encoder_norm", "scaled_encoder_norm", "manual"}:
+        raise ValueError(
+            "symbolic.feature_selection must be 'encoder_norm', "
+            "'scaled_encoder_norm', or 'manual'."
+        )
+    if feature_selection != "manual" and not config.encoder.enabled:
         raise ValueError(
             "PySR invariant ranking requires encoder.enabled=true because "
             "selected invariants are ranked from the learned S matrix."
@@ -184,18 +268,41 @@ def train_symbolic_from_config(
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint["model_state_dict"])
 
+    invariant_stats = invariant_feature_statistics(
+        model,
+        data.X_train,
+        config.invariants.selected,
+        device=device,
+    )
+    feature_stds = np.asarray(invariant_stats["std"], dtype=np.float64)
     S = model.encoder_matrix()
-    if S is None:
+    encoder_scores = encoder_score_diagnostics(
+        model,
+        config.invariants.selected,
+        feature_std=feature_stds,
+    )
+    if S is None and feature_selection != "manual":
         raise ValueError("Loaded model does not have an encoder matrix S.")
 
-    selection = select_top_invariants_from_encoder(
-        S,
-        config.invariants.selected,
-        top_k=config.symbolic.top_k,
-    )
+    if feature_selection == "manual":
+        selection = select_manual_invariants(
+            config.invariants.selected,
+            config.symbolic.selected_invariants,
+            raw_scores=encoder_scores.get("raw_l2") if encoder_scores else None,
+            scaled_scores=encoder_scores.get("scaled_l2") if encoder_scores else None,
+        )
+    else:
+        assert S is not None
+        selection = select_top_invariants_from_encoder(
+            S,
+            config.invariants.selected,
+            top_k=config.symbolic.top_k,
+            feature_selection=feature_selection,
+            feature_stds=feature_stds,
+        )
     print(
         "[INFO] PySR invariant source: "
-        f"top {len(selection.names)} by encoder S column L2 norm"
+        f"{selection.feature_selection}"
     )
     print(
         "[INFO] PySR selected invariants: "
@@ -215,6 +322,14 @@ def train_symbolic_from_config(
         data.X_test,
         selection.indices,
         device=device,
+    )
+    y_train = transform_symbolic_target(
+        data.y_train,
+        target_transform=config.symbolic.target_transform,
+    )
+    y_test = transform_symbolic_target(
+        data.y_test,
+        target_transform=config.symbolic.target_transform,
     )
 
     pysr_model = PySRRegressor(
@@ -249,15 +364,15 @@ def train_symbolic_from_config(
  
     pysr_model.fit(
         X_train,
-        data.y_train,
+        y_train,
         variable_names=selection.names,
-        **_pysr_fit_kwargs(config, data.y_train),
+        **_pysr_fit_kwargs(config, y_train),
     )
 
     train_prediction = np.asarray(pysr_model.predict(X_train), dtype=np.float64)
     test_prediction = np.asarray(pysr_model.predict(X_test), dtype=np.float64)
-    train_metrics = regression_metrics(train_prediction, data.y_train)
-    test_metrics = regression_metrics(test_prediction, data.y_test)
+    train_metrics = regression_metrics(train_prediction, y_train)
+    test_metrics = regression_metrics(test_prediction, y_test)
 
     selected_invariants_path = save_json(
         output_dir / "selected_invariants.json",
@@ -265,7 +380,13 @@ def train_symbolic_from_config(
             "selected_invariants": selection.names,
             "selected_indices": selection.indices,
             "selected_scores": selection.scores,
+            "selected_raw_scores": selection.raw_scores,
+            "selected_scaled_scores": selection.scaled_scores,
+            "feature_selection": selection.feature_selection,
             "all_invariants": config.invariants.selected,
+            "invariant_feature_statistics": invariant_stats,
+            "encoder_score_diagnostics": encoder_scores,
+            "constraint_diagnostics": constraint_diagnostics(model, config.constraints),
             "checkpoint": str(checkpoint_path),
             "config": None if config_path is None else str(config_path),
         },
@@ -287,8 +408,10 @@ def train_symbolic_from_config(
             "niterations": config.symbolic.niterations,
             "elementwise_loss": config.symbolic.elementwise_loss,
             "weight_mode": config.symbolic.weight_mode,
+            "target_transform": config.symbolic.target_transform,
             "constraints": config.symbolic.constraints,
             "nested_constraints": config.symbolic.nested_constraints,
+            "constraint_diagnostics": constraint_diagnostics(model, config.constraints),
         },
     )
 

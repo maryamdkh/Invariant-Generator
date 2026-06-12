@@ -12,8 +12,8 @@ yield-surface value.
 1. **Configure an experiment**
    - Experiment settings live in `configs/default.toml`.
    - The config controls dataset location, stress format, augmentation,
-     selected invariants, encoder settings, MLP size, loss weights, and training
-     behavior.
+     selected invariants, encoder settings, MLP size, loss weights, optional
+     physics constraints, symbolic-regression settings, and training behavior.
 
 2. **Load and prepare stress data**
    - Data is loaded from an HDF/H5 file, usually from the `stress` dataset key.
@@ -35,6 +35,12 @@ yield-surface value.
    - `I11` through `I13` use a learnable fourth-order structural tensor `A`.
    - If `homogenize = true`, higher-degree invariants are transformed with a
      signed root so each selected feature scales linearly with stress.
+   - Optional constraints can be applied to structural tensors without changing
+     which invariants are selected. The implemented example is a PSD constraint
+     on the fourth-order tensor `A`, checked in a shear-aware Mandel basis.
+     In `hard` mode, `A` is parameterized from a PSD Mandel matrix `L L^T`;
+     in `penalty` mode, negative eigenvalues add a loss term; in `check` mode,
+     eigenvalues are reported but training is unchanged.
 
 4. **Optionally encode invariants**
    - A linear encoder `S` can map the selected invariant vector to a smaller
@@ -52,12 +58,13 @@ yield-surface value.
    - Training is launched with:
      `uv run python scripts/train.py --config configs/default.toml`.
    - The loss follows:
-     `L = L_data + L_param + L_structure + L_enc`.
+     `L = L_data + L_param + L_structure + L_enc + L_constraint`.
    - `L_data` is the sum of squared errors against the homogeneous scaling
      target.
    - `L_param` is L2 regularization on the neural regressor parameters.
    - `L_structure` keeps learned structural tensors near unit norm.
    - `L_enc` encourages sparse, controlled-size encoder weights.
+   - `L_constraint` is zero unless an enabled constraint uses penalty mode.
 
 7. **Save results and evaluate**
    - Training writes results under `results/<run_id>/`.
@@ -68,18 +75,30 @@ yield-surface value.
    - Evaluation is run with `scripts/evaluate.py`, which reloads the config and
      checkpoint, computes regression metrics on the prepared test set, and saves
      `evaluation.json` plus test predictions.
+   - Training and evaluation also save configured constraint diagnostics,
+     invariant feature statistics, and raw/scale-adjusted encoder scores. For
+     the PSD `A` constraint, diagnostics include Mandel eigenvalues, minimum
+     eigenvalue, tolerance, and pass/fail status.
 
 8. **Fit an interpretable PySR equation**
    - After neural training, `scripts/train_pysr.py` loads the best checkpoint and
-     ranks the original selected invariants by the learned encoder `S` column
-     norms.
-   - It keeps the top invariant columns, computes their pre-encoder invariant
-     values from stress inputs, and fits PySR to the same homogeneous
-     yield-surface targets.
+     selects original pre-encoder invariant columns according to
+     `[symbolic].feature_selection`.
+   - The default automatic ranking is scale-aware:
+     `score_j = ||S[:, j]||_2 * std(I_j)`, using invariant standard deviations
+     computed on the prepared training data. Raw encoder scores are still saved
+     for comparison.
+   - `feature_selection = "encoder_norm"` keeps the older raw column-norm
+     ranking, while `feature_selection = "manual"` uses
+     `[symbolic].selected_invariants` exactly as provided by the user.
+   - PySR target values use `[symbolic].target_transform`, currently
+     `identity` or `square`. This is user-controlled and is not changed by
+     physics constraints.
    - The PySR inputs are invariant values, not raw stress components and not the
      encoded `S I` features.
    - Outputs are saved under `results/<run_id>/symbolic/`, including selected
-     invariants, the equation table, best equation text, and train/test metrics.
+     invariants, selection scores, diagnostics, the equation table, best equation
+     text, and train/test metrics.
 
 ## Main Code Map
 
@@ -88,6 +107,10 @@ yield-surface value.
   splitting, noise, and homogeneous augmentation.
 - `src/invariant_generator/invariants.py`: tensor conversion and invariant
   generation, including learnable structural tensors.
+- `src/invariant_generator/constraints.py`: Mandel-basis tensor/matrix mapping,
+  PSD parameterization, eigenvalue checks, and penalty utilities.
+- `src/invariant_generator/diagnostics.py`: constraint diagnostics, invariant
+  feature statistics, and encoder score summaries.
 - `src/invariant_generator/model.py`: invariant pool, optional sparse encoder,
   and MLP regressor assembled into the full model.
 - `src/invariant_generator/losses.py`: structured objective matching the notes.
@@ -99,4 +122,5 @@ yield-surface value.
 - `scripts/train.py` and `scripts/evaluate.py`: CLI entry points.
 - `scripts/train_pysr.py`: CLI entry point for post-training PySR.
 - `tests/`: checks for data preparation, invariant behavior, loss terms, and
-  training artifact behavior.
+  training artifact behavior, constraint behavior, Mandel mapping, and symbolic
+  feature selection.

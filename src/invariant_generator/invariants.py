@@ -5,6 +5,11 @@ from collections.abc import Iterable
 import torch
 from torch import nn
 
+from invariant_generator.constraints import (
+    mandel_matrix_to_fourth_order,
+    psd_matrix_from_factor,
+)
+
 
 BASIC_INVARIANTS = {"I1", "I2", "I3"}
 SECOND_ORDER_INVARIANTS = {"I4", "I5", "I6", "I7", "I8", "I9", "I10"}
@@ -140,11 +145,17 @@ class InvariantPool(nn.Module):
         homogenize: bool = False,
         init_scale: float = 0.05,
         eps: float = 1e-12,
+        fourth_order_psd_mode: str = "off",
+        fourth_order_psd_min_eigenvalue: float = 0.0,
     ) -> None:
         super().__init__()
         self.selected = _validate_invariant_names(selected)
         self.homogenize = bool(homogenize)
         self.eps = float(eps)
+        self.fourth_order_psd_mode = fourth_order_psd_mode.lower()
+        self.fourth_order_psd_min_eigenvalue = float(fourth_order_psd_min_eigenvalue)
+        if self.fourth_order_psd_mode not in {"off", "hard"}:
+            raise ValueError("fourth_order_psd_mode must be 'off' or 'hard'.")
 
         needs_second = bool(set(self.selected) & SECOND_ORDER_INVARIANTS)
         needs_fourth = bool(set(self.selected) & FOURTH_ORDER_INVARIANTS)
@@ -165,7 +176,12 @@ class InvariantPool(nn.Module):
             self.register_parameter("raw_a", None)
 
         if enable_fourth_order:
-            self.raw_A = nn.Parameter(self._unit_random((3, 3, 3, 3), init_scale))
+            raw_shape = (
+                (6, 6)
+                if self.fourth_order_psd_mode == "hard"
+                else (3, 3, 3, 3)
+            )
+            self.raw_A = nn.Parameter(self._unit_random(raw_shape, init_scale))
         else:
             self.register_parameter("raw_A", None)
 
@@ -194,6 +210,12 @@ class InvariantPool(nn.Module):
     def effective_fourth_order_tensor(self) -> torch.Tensor:
         if self.raw_A is None:
             raise RuntimeError("Fourth-order structure tensor is not enabled.")
+        if self.fourth_order_psd_mode == "hard":
+            mandel = psd_matrix_from_factor(
+                self.raw_A,
+                min_eigenvalue=self.fourth_order_psd_min_eigenvalue,
+            )
+            return mandel_matrix_to_fourth_order(mandel)
         return _symmetrize_fourth_order(self.raw_A)
 
     def structural_norms(self) -> dict[str, torch.Tensor]:

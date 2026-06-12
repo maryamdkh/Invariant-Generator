@@ -5,7 +5,8 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
-from invariant_generator.config import LossConfig
+from invariant_generator.config import ConstraintsConfig, LossConfig
+from invariant_generator.constraints import fourth_order_to_mandel_matrix, psd_penalty
 from invariant_generator.model import InvariantYieldModel
 
 
@@ -16,6 +17,7 @@ class LossBreakdown:
     param: torch.Tensor
     structure: torch.Tensor
     encoder: torch.Tensor
+    constraint: torch.Tensor
 
     def detached(self) -> dict[str, float]:
         return {
@@ -24,6 +26,7 @@ class LossBreakdown:
             "param": float(self.param.detach().cpu()),
             "structure": float(self.structure.detach().cpu()),
             "encoder": float(self.encoder.detach().cpu()),
+            "constraint": float(self.constraint.detach().cpu()),
         }
 
 
@@ -42,9 +45,14 @@ class YieldSurfaceLoss(nn.Module):
     L_param is standard neural-network L2 regularization on the MLP weights.
     """
 
-    def __init__(self, config: LossConfig) -> None:
+    def __init__(
+        self,
+        config: LossConfig,
+        constraints: ConstraintsConfig | None = None,
+    ) -> None:
         super().__init__()
         self.config = config
+        self.constraints = constraints
 
     def forward(
         self,
@@ -80,11 +88,23 @@ class YieldSurfaceLoss(nn.Module):
                 + self.config.lambda_encoder_l2 * l2
             )
 
-        total = data + param + structure + encoder
+        constraint = zero
+        if self.constraints is not None:
+            A_psd = self.constraints.A_psd
+            if A_psd.enabled and A_psd.mode.lower() == "penalty":
+                A = model.invariant_pool.effective_fourth_order_tensor()
+                mandel = fourth_order_to_mandel_matrix(A)
+                constraint = float(A_psd.penalty_weight) * psd_penalty(
+                    mandel,
+                    min_eigenvalue=A_psd.min_eigenvalue,
+                )
+
+        total = data + param + structure + encoder + constraint
         return LossBreakdown(
             total=total,
             data=data,
             param=param,
             structure=structure,
             encoder=encoder,
+            constraint=constraint,
         )

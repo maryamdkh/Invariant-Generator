@@ -105,6 +105,22 @@ class LossConfig:
 
 
 @dataclass(slots=True)
+class APsdConstraintConfig:
+    enabled: bool = False
+    mode: str = "check"
+    target: str = "fourth_order_A"
+    basis: str = "mandel"
+    min_eigenvalue: float = 0.0
+    tolerance: float = 1e-8
+    penalty_weight: float = 1.0
+
+
+@dataclass(slots=True)
+class ConstraintsConfig:
+    A_psd: APsdConstraintConfig = field(default_factory=APsdConstraintConfig)
+
+
+@dataclass(slots=True)
 class TrainConfig:
     run_id: str = "debug_invariant_generator"
     results_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "results")
@@ -152,6 +168,9 @@ class TrainConfig:
 class SymbolicConfig:
 
     top_k: int = 3
+    feature_selection: str = "scaled_encoder_norm"
+    selected_invariants: list[str] = field(default_factory=list)
+    target_transform: str = "identity"
     random_state: int = 42
     output_subdir: str = "symbolic"
 
@@ -259,6 +278,7 @@ class Config:
     encoder: EncoderConfig = field(default_factory=EncoderConfig)
     model: ModelConfig = field(default_factory=ModelConfig)
     loss: LossConfig = field(default_factory=LossConfig)
+    constraints: ConstraintsConfig = field(default_factory=ConstraintsConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
     symbolic: SymbolicConfig = field(default_factory=SymbolicConfig)
 
@@ -295,6 +315,13 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
         if key not in known:
             raise KeyError(f"Unknown config key [{section}].{key}")
 
+        current_value = getattr(section_obj, key)
+        if hasattr(current_value, "__dataclass_fields__"):
+            if not isinstance(value, dict):
+                raise TypeError(f"Config key [{section}].{key} must be a table.")
+            _set_known_fields(current_value, value, section=f"{section}.{key}")
+            continue
+
         if key in {"data_dir", "results_dir", "split_dir", "stop_file", "output_directory"}:
             value = _resolve_project_path(value)
         elif key == "k_values":
@@ -310,6 +337,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             "stop_keywords",
             "binary_operators",
             "unary_operators",
+            "selected_invariants",
         }:
             value = list(value)
         elif key == "maxdepth" and int(value) < 0:

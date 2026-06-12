@@ -7,6 +7,11 @@ import torch
 
 from invariant_generator.config import load_config
 from invariant_generator.data import prepare_training_data
+from invariant_generator.diagnostics import (
+    constraint_diagnostics,
+    encoder_score_diagnostics,
+    invariant_feature_statistics,
+)
 from invariant_generator.evaluation import evaluate_model, predict_numpy
 from invariant_generator.model import InvariantYieldModel
 from invariant_generator.utils import resolve_device, save_json
@@ -54,12 +59,26 @@ def main() -> None:
         device=device,
         batch_size=8192,
     )
+    invariant_stats = invariant_feature_statistics(
+        model,
+        data.X_train,
+        config.invariants.selected,
+        device=device,
+        batch_size=8192,
+    )
 
     output_path = save_json(
         config.experiment_dir / "evaluation.json",
         {
             "checkpoint": str(checkpoint_path),
             "metrics": metrics,
+            "constraint_diagnostics": constraint_diagnostics(model, config.constraints),
+            "invariant_feature_statistics": invariant_stats,
+            "encoder_score_diagnostics": encoder_score_diagnostics(
+                model,
+                config.invariants.selected,
+                feature_std=invariant_stats["std"],
+            ),
         },
     )
     predictions_path = config.experiment_dir / "predictions_test.pt"

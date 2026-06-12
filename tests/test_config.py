@@ -14,10 +14,15 @@ def test_default_toml_can_omit_selected_invariants():
 
     assert config.invariants.selected == INVARIANT_NAMES
     assert config.symbolic.maxdepth is None
-    assert config.symbolic.output_subdir == "symbolic"
+    assert config.symbolic.output_subdir == "symbolic2"
+    assert config.symbolic.feature_selection == "scaled_encoder_norm"
+    assert config.symbolic.selected_invariants == []
+    assert config.symbolic.target_transform == "identity"
+    assert config.constraints.A_psd.enabled is False
+    assert config.constraints.A_psd.mode == "check"
     assert config.symbolic.constraints["*"] == (8, 8)
     assert config.symbolic.nested_constraints == {
         "square": {"square": 1},
-        "sqrt": {"sqrt": 0},
+        "sqrt": {"sqrt": 1},
     }
     assert config.symbolic.weight_mode == "inverse_target_squared"

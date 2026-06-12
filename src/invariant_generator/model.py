@@ -121,6 +121,24 @@ class InvariantYieldModel(nn.Module):
 
     @classmethod
     def from_config(cls, config: Config) -> "InvariantYieldModel":
+        A_psd = config.constraints.A_psd
+        A_psd_mode = A_psd.mode.lower()
+        A_psd_target = A_psd.target.lower()
+        A_psd_basis = A_psd.basis.lower()
+        if A_psd.enabled:
+            if A_psd_target != "fourth_order_a":
+                raise ValueError("constraints.A_psd.target must be 'fourth_order_A'.")
+            if A_psd_basis != "mandel":
+                raise ValueError("constraints.A_psd.basis must be 'mandel'.")
+            if A_psd_mode not in {"hard", "penalty", "check"}:
+                raise ValueError(
+                    "constraints.A_psd.mode must be 'hard', 'penalty', or 'check'."
+                )
+            if not config.invariants.enable_fourth_order:
+                raise ValueError(
+                    "constraints.A_psd requires invariants.enable_fourth_order=true."
+                )
+
         invariant_pool = InvariantPool(
             config.invariants.selected,
             enable_second_order=config.invariants.enable_second_order,
@@ -128,6 +146,10 @@ class InvariantYieldModel(nn.Module):
             homogenize=config.invariants.homogenize,
             init_scale=config.invariants.init_scale,
             eps=config.invariants.eps,
+            fourth_order_psd_mode="hard"
+            if A_psd.enabled and A_psd_mode == "hard"
+            else "off",
+            fourth_order_psd_min_eigenvalue=A_psd.min_eigenvalue,
         )
 
         invariant_dim = invariant_pool.output_dim
