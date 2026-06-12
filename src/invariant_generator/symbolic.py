@@ -15,7 +15,7 @@ from invariant_generator.diagnostics import (
     encoder_score_diagnostics,
     invariant_feature_statistics,
 )
-from invariant_generator.evaluation import regression_metrics
+from invariant_generator.evaluation import predict_numpy, regression_metrics
 from invariant_generator.model import InvariantYieldModel
 from invariant_generator.utils import resolve_device, save_config_snapshot, save_json
 
@@ -145,6 +145,26 @@ def select_manual_invariants(
     )
 
 
+def _validate_feature_space(feature_space: str) -> str:
+    feature_space = feature_space.lower()
+    if feature_space not in {"raw_invariants", "normalized_invariants"}:
+        raise ValueError(
+            "symbolic.feature_space must be 'raw_invariants' or "
+            f"'normalized_invariants', got {feature_space!r}."
+        )
+    return feature_space
+
+
+def _validate_target_source(target_source: str) -> str:
+    target_source = target_source.lower()
+    if target_source not in {"data", "model"}:
+        raise ValueError(
+            "symbolic.target_source must be 'data' or 'model', "
+            f"got {target_source!r}."
+        )
+    return target_source
+
+
 @torch.no_grad()
 def compute_selected_invariant_features(
     model: InvariantYieldModel,
@@ -153,10 +173,12 @@ def compute_selected_invariant_features(
     *,
     device: torch.device,
     batch_size: int = 8192,
+    feature_space: str = "raw_invariants",
 ) -> np.ndarray:
-    """Compute selected pre-encoder invariant columns for stress samples."""
+    """Compute selected invariant columns in the requested PySR feature space."""
     if not selected_indices:
         raise ValueError("selected_indices must not be empty.")
+    feature_space = _validate_feature_space(feature_space)
 
     model.eval()
     X_tensor = torch.as_tensor(X, dtype=torch.float32)
@@ -167,10 +189,130 @@ def compute_selected_invariant_features(
     outputs: list[np.ndarray] = []
     for start in range(0, X_tensor.shape[0], batch_size):
         batch = X_tensor[start : start + batch_size].to(device)
-        features = model.invariant_pool(batch).index_select(dim=1, index=index_tensor)
+        if feature_space == "raw_invariants":
+            features = model.raw_invariant_features(batch)
+        else:
+            features = model.normalized_invariant_features(batch)
+        features = features.index_select(dim=1, index=index_tensor)
         outputs.append(features.detach().cpu().numpy())
 
     return np.concatenate(outputs, axis=0)
+
+
+def compute_symbolic_target(
+    model: InvariantYieldModel,
+    X: np.ndarray,
+    y_data: np.ndarray,
+    *,
+    target_source: str,
+    target_transform: str,
+    device: torch.device,
+    batch_size: int = 8192,
+) -> np.ndarray:
+    """Return the target vector used by PySR for data fitting or distillation."""
+    target_source = _validate_target_source(target_source)
+    if target_source == "data":
+        target = np.asarray(y_data, dtype=np.float64)
+    else:
+        target = predict_numpy(model, X, device=device, batch_size=batch_size)
+    return transform_symbolic_target(target, target_transform=target_transform)
+
+
+def _feature_statistics(values: np.ndarray, names: list[str]) -> dict[str, list[float] | list[str]]:
+    values = np.asarray(values, dtype=np.float64)
+    return {
+        "names": list(names),
+        "mean": values.mean(axis=0).tolist(),
+        "std": values.std(axis=0).tolist(),
+        "min": values.min(axis=0).tolist(),
+        "max": values.max(axis=0).tolist(),
+    }
+
+
+def _feature_correlation(values: np.ndarray) -> list[list[float]]:
+    values = np.asarray(values, dtype=np.float64)
+    n_features = values.shape[1]
+    if n_features == 1:
+        return [[1.0]]
+    feature_std = values.std(axis=0)
+    if values.shape[0] < 2 or np.any(feature_std == 0.0):
+        return np.eye(n_features, dtype=np.float64).tolist()
+    corr = np.corrcoef(values, rowvar=False)
+    corr = np.nan_to_num(corr, nan=0.0, posinf=0.0, neginf=0.0)
+    return corr.tolist()
+
+
+def _add_intercept(values: np.ndarray) -> np.ndarray:
+    values = np.asarray(values, dtype=np.float64)
+    return np.column_stack([np.ones(values.shape[0], dtype=np.float64), values])
+
+
+def _polynomial_degree2_features(values: np.ndarray) -> np.ndarray:
+    values = np.asarray(values, dtype=np.float64)
+    columns = [values]
+    products = []
+    for i in range(values.shape[1]):
+        for j in range(i, values.shape[1]):
+            products.append(values[:, i] * values[:, j])
+    if products:
+        columns.append(np.column_stack(products))
+    return np.column_stack(columns)
+
+
+def _least_squares_prediction(
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_eval: np.ndarray,
+    *,
+    ridge_alpha: float = 0.0,
+) -> np.ndarray:
+    A_train = _add_intercept(X_train)
+    A_eval = _add_intercept(X_eval)
+    if ridge_alpha > 0.0:
+        penalty = np.eye(A_train.shape[1], dtype=np.float64) * float(ridge_alpha)
+        penalty[0, 0] = 0.0
+        coeffs = np.linalg.solve(A_train.T @ A_train + penalty, A_train.T @ y_train)
+    else:
+        coeffs, *_ = np.linalg.lstsq(A_train, y_train, rcond=None)
+    return A_eval @ coeffs
+
+
+def _baseline_report_for_target(
+    X_train: np.ndarray,
+    X_test: np.ndarray,
+    y_train: np.ndarray,
+    y_test: np.ndarray,
+) -> dict[str, dict[str, dict[str, float]]]:
+    constant_train = np.full_like(y_train, float(np.mean(y_train)), dtype=np.float64)
+    constant_test = np.full_like(y_test, float(np.mean(y_train)), dtype=np.float64)
+    linear_train = _least_squares_prediction(X_train, y_train, X_train)
+    linear_test = _least_squares_prediction(X_train, y_train, X_test)
+    ridge_train = _least_squares_prediction(X_train, y_train, X_train, ridge_alpha=1e-6)
+    ridge_test = _least_squares_prediction(X_train, y_train, X_test, ridge_alpha=1e-6)
+
+    poly_train_features = _polynomial_degree2_features(X_train)
+    poly_test_features = _polynomial_degree2_features(X_test)
+    polynomial_train = _least_squares_prediction(poly_train_features, y_train, poly_train_features)
+    polynomial_test = _least_squares_prediction(poly_train_features, y_train, poly_test_features)
+
+    return {
+        "constant": {
+            "train": regression_metrics(constant_train, y_train),
+            "test": regression_metrics(constant_test, y_test),
+        },
+        "linear": {
+            "train": regression_metrics(linear_train, y_train),
+            "test": regression_metrics(linear_test, y_test),
+        },
+        "ridge_alpha_1e-6": {
+            "train": regression_metrics(ridge_train, y_train),
+            "test": regression_metrics(ridge_test, y_test),
+        },
+        "polynomial_degree2": {
+            "train": regression_metrics(polynomial_train, y_train),
+            "test": regression_metrics(polynomial_test, y_test),
+        },
+    }
 
 
 def _best_equation_text(pysr_model: Any) -> str:
@@ -241,6 +383,8 @@ def train_symbolic_from_config(
 ) -> SymbolicResult:
     """Run post-training PySR on top-ranked invariant features."""
     feature_selection = config.symbolic.feature_selection.lower()
+    feature_space = _validate_feature_space(config.symbolic.feature_space)
+    target_source = _validate_target_source(config.symbolic.target_source)
     if feature_selection not in {"encoder_norm", "scaled_encoder_norm", "manual"}:
         raise ValueError(
             "symbolic.feature_selection must be 'encoder_norm', "
@@ -318,25 +462,105 @@ def train_symbolic_from_config(
             for name, score in zip(selection.names, selection.scores)
         )
     )
+    print(f"[INFO] PySR feature space:     {feature_space}")
+    print(f"[INFO] PySR target source:     {target_source}")
     X_train = compute_selected_invariant_features(
         model,
         data.X_train,
         selection.indices,
         device=device,
+        feature_space=feature_space,
     )
     X_test = compute_selected_invariant_features(
         model,
         data.X_test,
         selection.indices,
         device=device,
+        feature_space=feature_space,
     )
-    y_train = transform_symbolic_target(
+    y_train_data = transform_symbolic_target(
         data.y_train,
         target_transform=config.symbolic.target_transform,
     )
-    y_test = transform_symbolic_target(
+    y_test_data = transform_symbolic_target(
         data.y_test,
         target_transform=config.symbolic.target_transform,
+    )
+    y_train_model = compute_symbolic_target(
+        model,
+        data.X_train,
+        data.y_train,
+        target_source="model",
+        target_transform=config.symbolic.target_transform,
+        device=device,
+    )
+    y_test_model = compute_symbolic_target(
+        model,
+        data.X_test,
+        data.y_test,
+        target_source="model",
+        target_transform=config.symbolic.target_transform,
+        device=device,
+    )
+    y_train = y_train_data if target_source == "data" else y_train_model
+    y_test = y_test_data if target_source == "data" else y_test_model
+
+    preflight_path = save_json(
+        output_dir / "preflight_diagnostics.json",
+        {
+            "selected_invariants": selection.names,
+            "feature_space": feature_space,
+            "target_source": target_source,
+            "target_transform": config.symbolic.target_transform,
+            "feature_statistics": {
+                "train": _feature_statistics(X_train, selection.names),
+                "test": _feature_statistics(X_test, selection.names),
+            },
+            "feature_correlation": {
+                "train": _feature_correlation(X_train),
+                "test": _feature_correlation(X_test),
+            },
+            "target_statistics": {
+                "data_train": {
+                    "mean": float(np.mean(y_train_data)),
+                    "std": float(np.std(y_train_data)),
+                    "min": float(np.min(y_train_data)),
+                    "max": float(np.max(y_train_data)),
+                },
+                "data_test": {
+                    "mean": float(np.mean(y_test_data)),
+                    "std": float(np.std(y_test_data)),
+                    "min": float(np.min(y_test_data)),
+                    "max": float(np.max(y_test_data)),
+                },
+                "model_train": {
+                    "mean": float(np.mean(y_train_model)),
+                    "std": float(np.std(y_train_model)),
+                    "min": float(np.min(y_train_model)),
+                    "max": float(np.max(y_train_model)),
+                },
+                "model_test": {
+                    "mean": float(np.mean(y_test_model)),
+                    "std": float(np.std(y_test_model)),
+                    "min": float(np.min(y_test_model)),
+                    "max": float(np.max(y_test_model)),
+                },
+            },
+            "baseline_metrics": {
+                "data_target": _baseline_report_for_target(
+                    X_train,
+                    X_test,
+                    y_train_data,
+                    y_test_data,
+                ),
+                "model_target": _baseline_report_for_target(
+                    X_train,
+                    X_test,
+                    y_train_model,
+                    y_test_model,
+                ),
+            },
+        },
     )
 
     pysr_model = PySRRegressor(
@@ -390,6 +614,8 @@ def train_symbolic_from_config(
             "selected_raw_scores": selection.raw_scores,
             "selected_scaled_scores": selection.scaled_scores,
             "feature_selection": selection.feature_selection,
+            "feature_space": feature_space,
+            "target_source": target_source,
             "all_invariants": config.invariants.selected,
             "invariant_feature_statistics": invariant_stats,
             "encoder_input_feature_statistics": encoder_input_stats,
@@ -413,11 +639,22 @@ def train_symbolic_from_config(
         {
             "train": train_metrics,
             "test": test_metrics,
+            "target_source": target_source,
+            "feature_space": feature_space,
+            "target_transform": config.symbolic.target_transform,
+            "against_data_target": {
+                "train": regression_metrics(train_prediction, y_train_data),
+                "test": regression_metrics(test_prediction, y_test_data),
+            },
+            "against_model_target": {
+                "train": regression_metrics(train_prediction, y_train_model),
+                "test": regression_metrics(test_prediction, y_test_model),
+            },
             "model_selection": config.symbolic.model_selection,
             "niterations": config.symbolic.niterations,
             "elementwise_loss": config.symbolic.elementwise_loss,
             "weight_mode": config.symbolic.weight_mode,
-            "target_transform": config.symbolic.target_transform,
+            "preflight_diagnostics": str(preflight_path),
             "constraints": config.symbolic.constraints,
             "nested_constraints": config.symbolic.nested_constraints,
             "constraint_diagnostics": constraint_diagnostics(model, config.constraints),

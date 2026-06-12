@@ -10,8 +10,10 @@ from invariant_generator.data import PreparedData
 from invariant_generator.model import InvariantYieldModel
 from invariant_generator.symbolic import (
     _import_pysr_regressor,
+    _baseline_report_for_target,
     _pysr_fit_kwargs,
     compute_selected_invariant_features,
+    compute_symbolic_target,
     pysr_sample_weights,
     select_top_invariants_from_encoder,
     train_symbolic_from_config,
@@ -96,6 +98,58 @@ def test_compute_selected_invariant_features_uses_pre_encoder_columns():
         all_invariants = model.invariant_pool(torch.as_tensor(X, dtype=torch.float32))
     np.testing.assert_allclose(selected, all_invariants[:, [0, 2]].numpy())
     assert selected.shape == (2, 2)
+
+
+def test_compute_selected_invariant_features_can_use_normalized_columns():
+    config = Config()
+    config.invariants.selected = ["I1", "I2"]
+    config.invariants.enable_second_order = False
+    config.invariants.enable_fourth_order = False
+    config.normalization.enabled = True
+    model = InvariantYieldModel.from_config(config)
+    assert model.normalizer is not None
+    model.normalizer.set_statistics(
+        torch.tensor([3.0, 20.0]),
+        torch.tensor([2.0, 5.0]),
+    )
+
+    X = np.array([[1.0, 2.0, 3.0, 0.0, 0.0, 0.0]], dtype=np.float64)
+    selected = compute_selected_invariant_features(
+        model,
+        X,
+        [0, 1],
+        device=torch.device("cpu"),
+        feature_space="normalized_invariants",
+    )
+
+    with torch.no_grad():
+        expected = model.normalized_invariant_features(
+            torch.as_tensor(X, dtype=torch.float32)
+        )
+    np.testing.assert_allclose(selected, expected.numpy())
+
+
+def test_compute_symbolic_target_model_source_uses_model_predictions(monkeypatch):
+    config = Config()
+    model = InvariantYieldModel.from_config(config)
+    X = np.ones((3, 6), dtype=np.float64)
+    y_data = np.array([10.0, 20.0, 30.0], dtype=np.float64)
+
+    def fake_predict_numpy(_model, _X, *, device, batch_size):
+        return np.array([1.0, 2.0, 3.0], dtype=np.float64)
+
+    monkeypatch.setattr("invariant_generator.symbolic.predict_numpy", fake_predict_numpy)
+
+    target = compute_symbolic_target(
+        model,
+        X,
+        y_data,
+        target_source="model",
+        target_transform="identity",
+        device=torch.device("cpu"),
+    )
+
+    np.testing.assert_allclose(target, [1.0, 2.0, 3.0])
 
 
 def test_missing_pysr_dependency_message_is_actionable(monkeypatch):
@@ -192,4 +246,24 @@ def test_train_symbolic_logs_selected_invariants_before_fit(tmp_path, capsys):
     snapshot = json.loads(result.config_snapshot_path.read_text(encoding="utf-8"))
     assert snapshot["symbolic"]["top_k"] == 2
     assert snapshot["symbolic"]["feature_selection"] == "encoder_norm"
+    assert snapshot["symbolic"]["target_source"] == "data"
+    assert snapshot["symbolic"]["feature_space"] == "raw_invariants"
     assert snapshot["train"]["run_id"] == "run"
+    assert (result.output_dir / "preflight_diagnostics.json").exists()
+    metrics = json.loads(result.metrics_path.read_text(encoding="utf-8"))
+    assert metrics["target_source"] == "data"
+    assert metrics["feature_space"] == "raw_invariants"
+    assert set(metrics["against_data_target"]) == {"train", "test"}
+    assert set(metrics["against_model_target"]) == {"train", "test"}
+
+
+def test_preflight_linear_baseline_recovers_simple_symbolic_relation():
+    X_train = np.array([[0.0], [1.0], [2.0], [3.0]], dtype=np.float64)
+    X_test = np.array([[4.0], [5.0]], dtype=np.float64)
+    y_train = 2.0 * X_train[:, 0]
+    y_test = 2.0 * X_test[:, 0]
+
+    report = _baseline_report_for_target(X_train, X_test, y_train, y_test)
+
+    assert report["linear"]["train"]["mse"] < 1e-24
+    assert report["linear"]["test"]["mse"] < 1e-24

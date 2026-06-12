@@ -26,6 +26,8 @@ def test_default_toml_can_omit_selected_invariants():
     assert config.symbolic.feature_selection == "scaled_encoder_norm"
     assert config.symbolic.selected_invariants == []
     assert config.symbolic.target_transform == "identity"
+    assert config.symbolic.target_source == "data"
+    assert config.symbolic.feature_space == "raw_invariants"
     assert config.normalization.enabled is True
     assert config.constraints.A_psd.enabled is True
     assert config.constraints.A_psd.mode == "hard"

@@ -1,12 +1,12 @@
-# Editable experiment configuration.
-# Paths are resolved relative to the project root unless they are absolute.
+# Diagnostic PySR configuration for the pruned rotated-Hill refit run.
+# This intentionally tests I11 alone; use it as a sanity check, not the main run.
 
 [data]
 data_dir = "data"
 dataset_name = "rotatedhill"
 dataset_key = "stress"
 stress_format = "voigt_3d"
-feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"] # feature names
+feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
 test_size = 0.1
 random_state = 42
 shuffle = true
@@ -20,7 +20,6 @@ relative_to_feature_std = true
 [augmentation]
 enabled = true
 include_original = true
-# Evaluate the held-out split on the same homogeneous scaling law as training.
 augment_test = true
 k_values = []
 n_aug_per_sample = 5
@@ -31,20 +30,17 @@ homogeneity_degree = 1.0
 surface_target = 1.0
 
 [invariants]
-# The Python config automatically uses the full candidate pool I1 ... I13.
-# The sparse encoder and post-training PySR ranking decide which invariants
-# matter most for this yield surface.
+selected = ["I5", "I9", "I11", "I1", "I4"]
 enable_second_order = true
 enable_fourth_order = true
-homogenize = true ## STILL NEED TO BE VALIDATED
+homogenize = true
 init_scale = 0.05
 eps = 1e-12
 
 [encoder]
 enabled = true
-# Use 0 to keep the same dimension as the selected invariant pool.
 output_dim = 0
-init = "identity" 
+init = "identity"
 
 [normalization]
 enabled = true
@@ -66,7 +62,7 @@ eps = 1e-12
 
 [constraints.A_psd]
 enabled = true
-mode = "hard"        # hard | penalty | check
+mode = "hard"
 target = "fourth_order_A"
 basis = "mandel"
 min_eigenvalue = 0.0
@@ -74,55 +70,40 @@ tolerance = 1e-8
 penalty_weight = 1.0
 
 [train]
-run_id = "rotatedhill_psd_standardized_2"
+run_id = "rotated_hill_prune"
 results_dir = "results"
 split_dir = "results/splits"
 use_saved_split = true
 save_split_if_missing = true
 seed = 42
 epochs = 50000
-# 0 means full-batch training, matching the dataset-sum L_data in the notes.
 batch_size = 0
 learning_rate = 1e-4
 grad_clip_norm = 10.0
 device = "auto"
 log_every = 50
-# Positive values overwrite checkpoint_latest.pt at this interval for crash
-# recovery. A successful run removes it, leaving checkpoint_best.pt.
 save_every = 100
-
-# To stop gracefully, write one of these words into STOP_TRAINING.txt.
 stop_file = "STOP_TRAINING.txt"
 stop_keywords = ["stop", "quit", "exit", "halt"]
-
-# Reduce learning rate when test MSE plateaus. Patience counts evaluation
-# events, i.e. epochs where log/save triggers test evaluation.
 lr_plateau_enabled = true
 lr_plateau_factor = 0.5
 lr_plateau_patience = 20
 lr_plateau_min_lr = 1e-7
 lr_plateau_min_delta = 1e-6
-
-# Stop training when test MSE has not improved enough for this many
-# evaluation events.
 early_stopping_enabled = true
 early_stopping_patience = 100
 early_stopping_min_delta = 1e-7
 
 [symbolic]
+top_k = 1
+feature_selection = "manual"
+selected_invariants = ["I11"]
+target_transform = "identity"
+target_source = "data"
+feature_space = "raw_invariants"
 
-# Feature selection before symbolic regression
-top_k = 7
-feature_selection = "scaled_encoder_norm" # encoder_norm | scaled_encoder_norm | manual
-selected_invariants = []                  # used only when feature_selection = "manual"
-target_transform = "identity"             # identity | square
-target_source = "data"                    # data | model
-feature_space = "raw_invariants"          # raw_invariants | normalized_invariants
+output_subdir = "symbolic_i11_sanity"
 
-# Saving / output
-output_subdir = "symbolic2"
-
-# Search
 niterations = 10000000
 timeout_hours = 24.0
 warm_start = true
@@ -137,41 +118,24 @@ populations = 24
 population_size = 50
 ncycles_per_iteration = 5000
 
-# Model selection / reproducibility
 model_selection = "best"
 random_state = 42
 
-# Loss
-# MSE:
-# elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
-#
-# Weighted relative MSE:
-# elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
-# weight_mode = "inverse_target_squared"
-#
-# Positivity-aware weighted MSE:
-# elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2 + 1.0 * ifelse(prediction < 0.0, prediction^2, 0.0)"
 elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
 weight_mode = "inverse_target_squared"
 
-# Operators
 binary_operators = ["+", "-", "*", "/"]
 unary_operators = ["square", "sqrt"]
 
-# Complexity / search space
 maxsize = 40
-maxdepth = -1   # None in Python if needed
+maxdepth = -1
 
 parsimony = 0.003
 complexity_of_constants = 2
 
-# Operator constraints
 constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
 nested_constraints = { square = { square = 1 }, sqrt = { sqrt = 1 } }
 
-# Numerical precision / display
 precision = 64
 progress = true
-
-# Early stopping
 early_stop_condition = "stop_if(loss, complexity) = loss < 1e-17"

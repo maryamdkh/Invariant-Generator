@@ -179,6 +179,8 @@ class SymbolicConfig:
     feature_selection: str = "scaled_encoder_norm"
     selected_invariants: list[str] = field(default_factory=list)
     target_transform: str = "identity"
+    target_source: str = "data"
+    feature_space: str = "raw_invariants"
     random_state: int = 42
     output_subdir: str = "symbolic"
 
