@@ -39,8 +39,9 @@ class YieldSurfaceLoss(nn.Module):
     with:
         L_data      = sum_i [f_hat(k_i*sigma_i) - k_i]^2
         L_structure = lambda_structure * ((||a|| - 1)^2 + (||A|| - 1)^2)
-        L_enc       = lambda_enc,1 * ||S||_1 / ||S||_2
+    L_enc       = lambda_enc,1 * ||S||_1 / ||S||_2
                     + lambda_enc,2 * ||S||_2
+                    + lambda_enc,col * sum_j ||S[:, j]||_2
 
     L_param is standard neural-network L2 regularization on the MLP weights.
     """
@@ -83,9 +84,11 @@ class YieldSurfaceLoss(nn.Module):
             flat = S.reshape(-1)
             l1 = torch.linalg.vector_norm(flat, ord=1)
             l2 = torch.linalg.vector_norm(flat, ord=2).clamp_min(self.config.eps)
+            column_l2 = torch.linalg.vector_norm(S, ord=2, dim=0).sum()
             encoder = (
                 self.config.lambda_encoder_l1_ratio * (l1 / l2)
                 + self.config.lambda_encoder_l2 * l2
+                + self.config.lambda_encoder_column_l2 * column_l2
             )
 
         constraint = zero

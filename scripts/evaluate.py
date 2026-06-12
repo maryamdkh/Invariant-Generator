@@ -66,6 +66,14 @@ def main() -> None:
         device=device,
         batch_size=8192,
     )
+    encoder_input_stats = invariant_feature_statistics(
+        model,
+        data.X_train,
+        config.invariants.selected,
+        device=device,
+        batch_size=8192,
+        normalized=True,
+    )
 
     output_path = save_json(
         config.experiment_dir / "evaluation.json",
@@ -74,11 +82,13 @@ def main() -> None:
             "metrics": metrics,
             "constraint_diagnostics": constraint_diagnostics(model, config.constraints),
             "invariant_feature_statistics": invariant_stats,
+            "encoder_input_feature_statistics": encoder_input_stats,
             "encoder_score_diagnostics": encoder_score_diagnostics(
                 model,
                 config.invariants.selected,
-                feature_std=invariant_stats["std"],
+                feature_std=encoder_input_stats["std"],
             ),
+            "invariant_normalization": model.invariant_normalization_state(),
         },
     )
     predictions_path = config.experiment_dir / "predictions_test.pt"

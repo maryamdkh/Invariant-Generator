@@ -26,8 +26,11 @@ def test_default_toml_can_omit_selected_invariants():
     assert config.symbolic.feature_selection == "scaled_encoder_norm"
     assert config.symbolic.selected_invariants == []
     assert config.symbolic.target_transform == "identity"
-    assert config.constraints.A_psd.enabled is False
-    assert config.constraints.A_psd.mode == "check"
+    assert config.normalization.enabled is True
+    assert config.constraints.A_psd.enabled is True
+    assert config.constraints.A_psd.mode == "hard"
+    assert config.encoder.output_dim == 0
+    assert config.train.run_id == "rotatedhill_psd_standardized"
     assert config.symbolic.constraints["*"] == (8, 8)
     assert config.symbolic.nested_constraints == {
         "square": {"square": 1},

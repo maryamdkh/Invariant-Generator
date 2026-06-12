@@ -57,8 +57,9 @@ def invariant_feature_statistics(
     *,
     device: torch.device,
     batch_size: int = 8192,
+    normalized: bool = False,
 ) -> dict[str, object]:
-    """Compute pre-encoder invariant feature statistics."""
+    """Compute raw or normalized invariant feature statistics."""
     model.eval()
     X_tensor = torch.as_tensor(X, dtype=torch.float32)
     if batch_size <= 0:
@@ -67,12 +68,17 @@ def invariant_feature_statistics(
     outputs: list[np.ndarray] = []
     for start in range(0, X_tensor.shape[0], batch_size):
         batch = X_tensor[start : start + batch_size].to(device)
-        features = model.invariant_pool(batch)
+        if normalized:
+            features = model.normalized_invariant_features(batch)
+        else:
+            features = model.raw_invariant_features(batch)
         outputs.append(features.detach().cpu().numpy())
 
     values = np.concatenate(outputs, axis=0)
     return {
         "names": list(invariant_names),
+        "encoder_input": bool(normalized),
+        "normalized": bool(normalized and model.normalizer is not None),
         "mean": [float(value) for value in values.mean(axis=0)],
         "std": [float(value) for value in values.std(axis=0, ddof=0)],
         "min": [float(value) for value in values.min(axis=0)],

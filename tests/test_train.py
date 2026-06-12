@@ -40,6 +40,7 @@ def test_successful_training_keeps_only_best_checkpoint(tmp_path):
     config.invariants.enable_fourth_order = False
     config.encoder.enabled = True
     config.encoder.output_dim = 0
+    config.normalization.enabled = True
     config.model.hidden_dims = [4]
     config.train.results_dir = tmp_path / "results"
     config.train.split_dir = tmp_path / "splits"
@@ -63,6 +64,8 @@ def test_successful_training_keeps_only_best_checkpoint(tmp_path):
     assert payload["parameter_counts"]["trainable"] > 0
     assert payload["final_train_loss"]["loss_total"] >= 0.0
     assert payload["final_test_loss"]["loss_data"] >= 0.0
+    assert payload["invariant_normalization"] is not None
+    assert payload["encoder_input_feature_statistics"]["normalized"] is True
 
     last_row = payload["history"][-1]
     for key in [
@@ -80,3 +83,4 @@ def test_successful_training_keeps_only_best_checkpoint(tmp_path):
 
     checkpoint = torch.load(result.best_checkpoint, map_location="cpu")
     assert checkpoint["parameter_counts"] == payload["parameter_counts"]
+    assert checkpoint["invariant_normalization"] is not None

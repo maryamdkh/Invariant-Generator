@@ -49,6 +49,23 @@ basis = "mandel"
 Constraints do not select invariants or change PySR operators; they only enforce
 or report the configured physical property.
 
+The default rotated-hill config enables a recovery-oriented setup: hard PSD for
+`A`, full-width identity encoder initialization, and invariant standardization
+before the encoder. This avoids the old `output_dim = 4` identity encoder bias
+toward `I1` through `I4`.
+
+To prune a broad run and refit from scratch on the top-ranked invariants:
+
+```bash
+uv run python scripts/prune_refit.py --config configs/default.toml --top-k 5
+```
+
+To compare rotated-hill sanity variants:
+
+```bash
+uv run python scripts/rotatedhill_benchmark.py --config configs/default.toml
+```
+
 The default loss follows the attached notes:
 
 ```text

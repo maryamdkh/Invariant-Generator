@@ -84,6 +84,13 @@ class EncoderConfig:
 
 
 @dataclass(slots=True)
+class InvariantNormalizationConfig:
+    enabled: bool = False
+    eps: float = 1e-8
+    batch_size: int = 8192
+
+
+@dataclass(slots=True)
 class ModelConfig:
     hidden_dims: list[int] = field(default_factory=lambda: [64, 64])
     activation: str = "silu"
@@ -101,6 +108,7 @@ class LossConfig:
     lambda_structure: float = 1e-3
     lambda_encoder_l1_ratio: float = 1e-4
     lambda_encoder_l2: float = 1e-4
+    lambda_encoder_column_l2: float = 0.0
     eps: float = 1e-12
 
 
@@ -276,6 +284,9 @@ class Config:
     augmentation: AugmentationConfig = field(default_factory=AugmentationConfig)
     invariants: InvariantConfig = field(default_factory=InvariantConfig)
     encoder: EncoderConfig = field(default_factory=EncoderConfig)
+    normalization: InvariantNormalizationConfig = field(
+        default_factory=InvariantNormalizationConfig
+    )
     model: ModelConfig = field(default_factory=ModelConfig)
     loss: LossConfig = field(default_factory=LossConfig)
     constraints: ConstraintsConfig = field(default_factory=ConstraintsConfig)

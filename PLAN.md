@@ -43,10 +43,20 @@ yield-surface value.
      eigenvalues are reported but training is unchanged.
 
 4. **Optionally encode invariants**
+   - If `[normalization].enabled = true`, the prepared training set is passed
+     through the initial invariant pool once before optimization to compute
+     per-invariant mean and standard deviation. These statistics are stored as
+     non-trainable model buffers and standardize invariant features before the
+     encoder/regressor.
    - A linear encoder `S` can map the selected invariant vector to a smaller
      feature vector.
    - The encoder is intended to learn sparse combinations of invariants.
-   - Sparsity is encouraged by the encoder loss term, not by hard constraints.
+   - For discovery runs, use `encoder.output_dim = 0` with identity
+     initialization to avoid privileging early invariant columns. If a smaller
+     encoder is needed, use random initialization.
+   - Sparsity is encouraged by the encoder loss term. The column-wise penalty
+     `sum_j ||S[:, j]||_2` directly encourages dropping whole invariant
+     columns.
 
 5. **Predict the yield-surface value**
    - The final model is:
@@ -63,7 +73,8 @@ yield-surface value.
      target.
    - `L_param` is L2 regularization on the neural regressor parameters.
    - `L_structure` keeps learned structural tensors near unit norm.
-   - `L_enc` encourages sparse, controlled-size encoder weights.
+   - `L_enc` encourages sparse, controlled-size encoder weights, including the
+     optional column-wise invariant-selection penalty.
    - `L_constraint` is zero unless an enabled constraint uses penalty mode.
 
 7. **Save results and evaluate**
@@ -79,15 +90,18 @@ yield-surface value.
      invariant feature statistics, and raw/scale-adjusted encoder scores. For
      the PSD `A` constraint, diagnostics include Mandel eigenvalues, minimum
      eigenvalue, tolerance, and pass/fail status.
+   - Checkpoint payloads include invariant-normalization statistics when
+     normalization is enabled.
 
 8. **Fit an interpretable PySR equation**
    - After neural training, `scripts/train_pysr.py` loads the best checkpoint and
      selects original pre-encoder invariant columns according to
      `[symbolic].feature_selection`.
-   - The default automatic ranking is scale-aware:
-     `score_j = ||S[:, j]||_2 * std(I_j)`, using invariant standard deviations
-     computed on the prepared training data. Raw encoder scores are still saved
-     for comparison.
+   - The default automatic ranking is scale-aware on the actual encoder input:
+     `score_j = ||S[:, j]||_2 * std(z_j)`, where `z_j` is the feature seen by
+     the encoder. If invariant normalization is enabled, `std(z_j)` should be
+     close to one, so raw encoder column norms are directly comparable. Raw
+     invariant statistics are still saved for interpretation.
    - `feature_selection = "encoder_norm"` keeps the older raw column-norm
      ranking, while `feature_selection = "manual"` uses
      `[symbolic].selected_invariants` exactly as provided by the user.
@@ -121,6 +135,10 @@ yield-surface value.
   PySR symbolic regression.
 - `scripts/train.py` and `scripts/evaluate.py`: CLI entry points.
 - `scripts/train_pysr.py`: CLI entry point for post-training PySR.
+- `scripts/prune_refit.py`: select top-ranked invariants from a trained
+  encoder and refit a reduced model from scratch.
+- `scripts/rotatedhill_benchmark.py`: run rotated-hill sanity variants for
+  unconstrained, PSD-only, and PSD-plus-standardized settings.
 - `tests/`: checks for data preparation, invariant behavior, loss terms, and
   training artifact behavior, constraint behavior, Mandel mapping, and symbolic
   feature selection.

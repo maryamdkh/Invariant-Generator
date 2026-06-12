@@ -60,6 +60,36 @@ class SparseInvariantEncoder(nn.Module):
         return self.linear(invariants)
 
 
+class InvariantStandardizer(nn.Module):
+    """Non-trainable affine standardization for invariant features."""
+
+    def __init__(self, input_dim: int, *, eps: float = 1e-8) -> None:
+        super().__init__()
+        if input_dim <= 0:
+            raise ValueError("input_dim must be positive.")
+        self.eps = float(eps)
+        self.register_buffer("mean", torch.zeros(input_dim, dtype=torch.float32))
+        self.register_buffer("std", torch.ones(input_dim, dtype=torch.float32))
+
+    def set_statistics(self, mean: torch.Tensor, std: torch.Tensor) -> None:
+        if mean.shape != self.mean.shape or std.shape != self.std.shape:
+            raise ValueError(
+                "normalization statistics must match invariant dimension. "
+                f"Got mean={tuple(mean.shape)}, std={tuple(std.shape)}, "
+                f"expected={tuple(self.mean.shape)}."
+            )
+        with torch.no_grad():
+            self.mean.copy_(mean.detach().to(dtype=self.mean.dtype, device=self.mean.device))
+            self.std.copy_(
+                std.detach()
+                .to(dtype=self.std.dtype, device=self.std.device)
+                .clamp_min(self.eps)
+            )
+
+    def forward(self, invariants: torch.Tensor) -> torch.Tensor:
+        return (invariants - self.mean) / self.std
+
+
 class MLPRegressor(nn.Module):
     """Small feed-forward network used after invariant generation."""
 
@@ -113,9 +143,11 @@ class InvariantYieldModel(nn.Module):
         regressor: MLPRegressor,
         *,
         encoder: SparseInvariantEncoder | None = None,
+        normalizer: InvariantStandardizer | None = None,
     ) -> None:
         super().__init__()
         self.invariant_pool = invariant_pool
+        self.normalizer = normalizer
         self.encoder = encoder
         self.regressor = regressor
 
@@ -154,8 +186,15 @@ class InvariantYieldModel(nn.Module):
         )
 
         invariant_dim = invariant_pool.output_dim
+        normalizer: InvariantStandardizer | None = None
         encoder: SparseInvariantEncoder | None = None
         regressor_input_dim = invariant_dim
+
+        if config.normalization.enabled:
+            normalizer = InvariantStandardizer(
+                invariant_dim,
+                eps=config.normalization.eps,
+            )
 
         if config.encoder.enabled:
             output_dim = config.encoder.output_dim or invariant_dim
@@ -173,10 +212,19 @@ class InvariantYieldModel(nn.Module):
             output_activation=config.model.output_activation,
         )
 
-        return cls(invariant_pool, regressor, encoder=encoder)
+        return cls(invariant_pool, regressor, encoder=encoder, normalizer=normalizer)
+
+    def raw_invariant_features(self, stress: torch.Tensor) -> torch.Tensor:
+        return self.invariant_pool(stress)
+
+    def normalized_invariant_features(self, stress: torch.Tensor) -> torch.Tensor:
+        features = self.raw_invariant_features(stress)
+        if self.normalizer is not None:
+            features = self.normalizer(features)
+        return features
 
     def invariant_features(self, stress: torch.Tensor) -> torch.Tensor:
-        features = self.invariant_pool(stress)
+        features = self.normalized_invariant_features(stress)
         if self.encoder is not None:
             features = self.encoder(features)
         return features
@@ -209,6 +257,14 @@ class InvariantYieldModel(nn.Module):
             ),
             "encoder_total": self._parameter_count(self.encoder, trainable_only=False),
             "encoder_trainable": self._parameter_count(self.encoder, trainable_only=True),
+            "normalizer_total": self._parameter_count(
+                self.normalizer,
+                trainable_only=False,
+            ),
+            "normalizer_trainable": self._parameter_count(
+                self.normalizer,
+                trainable_only=True,
+            ),
             "regressor_total": self._parameter_count(self.regressor, trainable_only=False),
             "regressor_trainable": self._parameter_count(
                 self.regressor,
@@ -224,6 +280,15 @@ class InvariantYieldModel(nn.Module):
         if self.encoder is None:
             return None
         return self.encoder.weight
+
+    def invariant_normalization_state(self) -> dict[str, list[float]] | None:
+        if self.normalizer is None:
+            return None
+        return {
+            "mean": [float(value) for value in self.normalizer.mean.detach().cpu()],
+            "std": [float(value) for value in self.normalizer.std.detach().cpu()],
+            "eps": self.normalizer.eps,
+        }
 
     def neural_parameter_l2(self) -> torch.Tensor:
         """

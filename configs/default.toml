@@ -43,8 +43,13 @@ eps = 1e-12
 [encoder]
 enabled = true
 # Use 0 to keep the same dimension as the selected invariant pool.
-output_dim = 4
+output_dim = 0
 init = "identity" 
+
+[normalization]
+enabled = true
+eps = 1e-8
+batch_size = 8192
 
 [model]
 hidden_dims = [64, 64]
@@ -54,13 +59,14 @@ output_activation = "softplus"
 [loss]
 lambda_param = 1e-6
 lambda_structure = 1e-3
-lambda_encoder_l1_ratio = 5e-2 #increase for sparsity of S
-lambda_encoder_l2 = 5e-2 #increase for sparsity of S (but be careful)
+lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l2 = 0.0
+lambda_encoder_column_l2 = 5e-2
 eps = 1e-12
 
 [constraints.A_psd]
-enabled = false
-mode = "check"        # hard | penalty | check
+enabled = true
+mode = "hard"        # hard | penalty | check
 target = "fourth_order_A"
 basis = "mandel"
 min_eigenvalue = 0.0
@@ -68,7 +74,7 @@ tolerance = 1e-8
 penalty_weight = 1.0
 
 [train]
-run_id = "rotatedhill"
+run_id = "rotatedhill_psd_standardized"
 results_dir = "results"
 split_dir = "results/splits"
 use_saved_split = true

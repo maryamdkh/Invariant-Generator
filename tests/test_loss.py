@@ -18,6 +18,7 @@ def test_pdf_loss_terms_match_formula():
     config.loss.lambda_structure = 0.25
     config.loss.lambda_encoder_l1_ratio = 0.5
     config.loss.lambda_encoder_l2 = 0.75
+    config.loss.lambda_encoder_column_l2 = 0.25
 
     model = InvariantYieldModel.from_config(config)
     criterion = YieldSurfaceLoss(config.loss)
@@ -38,9 +39,11 @@ def test_pdf_loss_terms_match_formula():
     flat = S.reshape(-1)
     l1 = torch.linalg.vector_norm(flat, ord=1)
     l2 = torch.linalg.vector_norm(flat, ord=2).clamp_min(config.loss.eps)
+    column_l2 = torch.linalg.vector_norm(S, ord=2, dim=0).sum()
     expected_encoder = (
         config.loss.lambda_encoder_l1_ratio * (l1 / l2)
         + config.loss.lambda_encoder_l2 * l2
+        + config.loss.lambda_encoder_column_l2 * column_l2
     )
 
     torch.testing.assert_close(loss.data, expected_data)

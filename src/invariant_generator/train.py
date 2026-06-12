@@ -74,6 +74,7 @@ def _save_checkpoint(
         "metrics": metrics,
         "config": to_jsonable(config),
         "parameter_counts": model.parameter_counts(),
+        "invariant_normalization": model.invariant_normalization_state(),
         "stop_reason": stop_reason,
     }
     if scheduler is not None:
@@ -169,6 +170,33 @@ def _encoder_diagnostics(
 
 
 @torch.no_grad()
+def _fit_invariant_normalizer(
+    model: InvariantYieldModel,
+    X: np.ndarray,
+    *,
+    device: torch.device,
+    batch_size: int,
+) -> None:
+    if model.normalizer is None:
+        return
+
+    model.eval()
+    X_tensor = torch.as_tensor(X, dtype=torch.float32)
+    if batch_size <= 0:
+        batch_size = X_tensor.shape[0]
+
+    outputs: list[torch.Tensor] = []
+    for start in range(0, X_tensor.shape[0], batch_size):
+        batch = X_tensor[start : start + batch_size].to(device)
+        outputs.append(model.raw_invariant_features(batch).detach().cpu())
+
+    values = torch.cat(outputs, dim=0)
+    mean = values.mean(dim=0)
+    std = values.std(dim=0, unbiased=False).clamp_min(model.normalizer.eps)
+    model.normalizer.set_statistics(mean.to(device), std.to(device))
+
+
+@torch.no_grad()
 def _evaluate_loss_terms(
     model: InvariantYieldModel,
     criterion: YieldSurfaceLoss,
@@ -221,6 +249,12 @@ def train_from_config(config: Config) -> TrainResult:
 
     data = prepare_training_data(config)
     model = InvariantYieldModel.from_config(config).to(device)
+    _fit_invariant_normalizer(
+        model,
+        data.X_train,
+        device=device,
+        batch_size=config.normalization.batch_size,
+    )
     criterion = YieldSurfaceLoss(config.loss, config.constraints)
 
     # No optimizer weight decay is used here: all regularization should appear
@@ -484,10 +518,18 @@ def train_from_config(config: Config) -> TrainResult:
         device=device,
         batch_size=8192,
     )
+    final_encoder_input_stats = invariant_feature_statistics(
+        model,
+        data.X_train,
+        config.invariants.selected,
+        device=device,
+        batch_size=8192,
+        normalized=True,
+    )
     final_encoder_scores = encoder_score_diagnostics(
         model,
         config.invariants.selected,
-        feature_std=final_invariant_stats["std"],
+        feature_std=final_encoder_input_stats["std"],
     )
 
     finished_at = now_utc_iso()
@@ -513,7 +555,9 @@ def train_from_config(config: Config) -> TrainResult:
             ),
             "constraint_diagnostics": final_constraint_diagnostics,
             "invariant_feature_statistics": final_invariant_stats,
+            "encoder_input_feature_statistics": final_encoder_input_stats,
             "encoder_score_diagnostics": final_encoder_scores,
+            "invariant_normalization": model.invariant_normalization_state(),
         },
     )
 

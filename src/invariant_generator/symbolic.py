@@ -274,7 +274,14 @@ def train_symbolic_from_config(
         config.invariants.selected,
         device=device,
     )
-    feature_stds = np.asarray(invariant_stats["std"], dtype=np.float64)
+    encoder_input_stats = invariant_feature_statistics(
+        model,
+        data.X_train,
+        config.invariants.selected,
+        device=device,
+        normalized=True,
+    )
+    feature_stds = np.asarray(encoder_input_stats["std"], dtype=np.float64)
     S = model.encoder_matrix()
     encoder_scores = encoder_score_diagnostics(
         model,
@@ -385,7 +392,9 @@ def train_symbolic_from_config(
             "feature_selection": selection.feature_selection,
             "all_invariants": config.invariants.selected,
             "invariant_feature_statistics": invariant_stats,
+            "encoder_input_feature_statistics": encoder_input_stats,
             "encoder_score_diagnostics": encoder_scores,
+            "invariant_normalization": model.invariant_normalization_state(),
             "constraint_diagnostics": constraint_diagnostics(model, config.constraints),
             "checkpoint": str(checkpoint_path),
             "config": None if config_path is None else str(config_path),
