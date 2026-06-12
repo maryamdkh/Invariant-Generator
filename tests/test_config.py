@@ -30,7 +30,14 @@ def test_default_toml_can_omit_selected_invariants():
     assert config.constraints.A_psd.enabled is True
     assert config.constraints.A_psd.mode == "hard"
     assert config.encoder.output_dim == 0
-    assert config.train.run_id == "rotatedhill_psd_standardized"
+    assert config.train.run_id == "rotatedhill_psd_standardized_2"
+    assert config.loss.lambda_encoder_l1_ratio == 1e-3
+    assert config.loss.lambda_encoder_l2 == 0.0
+    assert config.loss.lambda_encoder_column_l2 == 0.25
+    assert config.train.lr_plateau_factor == 0.5
+    assert config.train.lr_plateau_patience == 20
+    assert config.train.lr_plateau_min_lr == 1e-7
+    assert config.train.early_stopping_patience == 100
     assert config.symbolic.constraints["*"] == (8, 8)
     assert config.symbolic.nested_constraints == {
         "square": {"square": 1},

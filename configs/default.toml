@@ -59,9 +59,9 @@ output_activation = "softplus"
 [loss]
 lambda_param = 1e-6
 lambda_structure = 1e-3
-lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l1_ratio = 1e-3
 lambda_encoder_l2 = 0.0
-lambda_encoder_column_l2 = 5e-2
+lambda_encoder_column_l2 = 0.25
 eps = 1e-12
 
 [constraints.A_psd]
@@ -98,15 +98,15 @@ stop_keywords = ["stop", "quit", "exit", "halt"]
 # Reduce learning rate when test MSE plateaus. Patience counts evaluation
 # events, i.e. epochs where log/save triggers test evaluation.
 lr_plateau_enabled = true
-lr_plateau_factor = 0.7
-lr_plateau_patience = 10
-lr_plateau_min_lr = 1e-6
+lr_plateau_factor = 0.5
+lr_plateau_patience = 20
+lr_plateau_min_lr = 1e-7
 lr_plateau_min_delta = 1e-6
 
 # Stop training when test MSE has not improved enough for this many
 # evaluation events.
 early_stopping_enabled = true
-early_stopping_patience = 40
+early_stopping_patience = 100
 early_stopping_min_delta = 1e-7
 
 [symbolic]
