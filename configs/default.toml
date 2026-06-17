@@ -52,14 +52,14 @@ eps = 1e-8
 batch_size = 8192
 
 [model]
-hidden_dims = [64, 64]
+hidden_dims = [2]#[64, 64]
 activation = "silu"
 output_activation = "softplus"
 
 [loss]
 lambda_param = 1e-6
 lambda_structure = 1e-3
-lambda_encoder_l1_ratio = 1e-3
+lambda_encoder_l1_ratio = 1e-2
 lambda_encoder_l2 = 0.0
 lambda_encoder_column_l2 = 0.25
 eps = 1e-12
@@ -74,7 +74,7 @@ tolerance = 1e-8
 penalty_weight = 1.0
 
 [train]
-run_id = "rotatedhill_psd_standardized_2"
+run_id = "rotatedhill_exp02"
 results_dir = "results"
 split_dir = "results/splits"
 use_saved_split = true
@@ -99,8 +99,8 @@ stop_keywords = ["stop", "quit", "exit", "halt"]
 # events, i.e. epochs where log/save triggers test evaluation.
 lr_plateau_enabled = true
 lr_plateau_factor = 0.5
-lr_plateau_patience = 20
-lr_plateau_min_lr = 1e-7
+lr_plateau_patience = 30
+lr_plateau_min_lr = 5e-6
 lr_plateau_min_delta = 1e-6
 
 # Stop training when test MSE has not improved enough for this many
