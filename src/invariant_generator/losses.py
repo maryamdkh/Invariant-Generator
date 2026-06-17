@@ -40,6 +40,7 @@ class YieldSurfaceLoss(nn.Module):
         L_data      = sum_i [f_hat(k_i*sigma_i) - k_i]^2
         L_structure = lambda_structure * ((||a|| - 1)^2 + (||A|| - 1)^2)
     L_enc       = lambda_enc,1 * ||S||_1 / ||S||_2
+                    + lambda_enc,l1 * ||S||_1
                     + lambda_enc,2 * ||S||_2
                     + lambda_enc,col * sum_j ||S[:, j]||_2
 
@@ -87,6 +88,7 @@ class YieldSurfaceLoss(nn.Module):
             column_l2 = torch.linalg.vector_norm(S, ord=2, dim=0).sum()
             encoder = (
                 self.config.lambda_encoder_l1_ratio * (l1 / l2)
+                + self.config.lambda_encoder_l1 * l1
                 + self.config.lambda_encoder_l2 * l2
                 + self.config.lambda_encoder_column_l2 * column_l2
             )

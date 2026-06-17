@@ -4,6 +4,7 @@ from collections.abc import Sequence
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from invariant_generator.config import Config, coerce_config_dataclasses
 from invariant_generator.invariants import InvariantPool
@@ -38,11 +39,40 @@ class SparseInvariantEncoder(nn.Module):
             raise ValueError("input_dim and output_dim must be positive.")
 
         self.linear = nn.Linear(input_dim, output_dim, bias=False)
+        self.register_parameter("gate_logits", None)
         self.reset_parameters(init=init)
 
     @property
     def weight(self) -> torch.Tensor:
+        if self.gate_logits is not None:
+            return self.linear.weight * torch.sigmoid(self.gate_logits)
         return self.linear.weight
+
+    @property
+    def raw_weight(self) -> torch.Tensor:
+        return self.linear.weight
+
+    @property
+    def gates(self) -> torch.Tensor | None:
+        if self.gate_logits is None:
+            return None
+        return torch.sigmoid(self.gate_logits)
+
+    def enable_gates(self, *, init_probability: float = 0.95) -> None:
+        probability = float(init_probability)
+        if not 0.0 < probability < 1.0:
+            raise ValueError("init_probability must be in (0, 1).")
+        value = torch.logit(
+            self.linear.weight.detach().new_full(self.linear.weight.shape, probability)
+        )
+        self.gate_logits = nn.Parameter(value)
+
+    def collapse_gates(self) -> None:
+        if self.gate_logits is None:
+            return
+        with torch.no_grad():
+            self.linear.weight.mul_(torch.sigmoid(self.gate_logits))
+        self.register_parameter("gate_logits", None)
 
     def reset_parameters(self, *, init: str) -> None:
         init = init.lower()
@@ -57,7 +87,7 @@ class SparseInvariantEncoder(nn.Module):
                 raise ValueError("encoder init must be 'identity' or 'random'.")
 
     def forward(self, invariants: torch.Tensor) -> torch.Tensor:
-        return self.linear(invariants)
+        return F.linear(invariants, self.weight)
 
 
 class InvariantStandardizer(nn.Module):
@@ -280,6 +310,16 @@ class InvariantYieldModel(nn.Module):
         if self.encoder is None:
             return None
         return self.encoder.weight
+
+    def raw_encoder_matrix(self) -> torch.Tensor | None:
+        if self.encoder is None:
+            return None
+        return self.encoder.raw_weight
+
+    def encoder_gates(self) -> torch.Tensor | None:
+        if self.encoder is None:
+            return None
+        return self.encoder.gates
 
     def invariant_normalization_state(self) -> dict[str, list[float]] | None:
         if self.normalizer is None:

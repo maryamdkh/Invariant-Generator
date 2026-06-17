@@ -107,6 +107,7 @@ class LossConfig:
     lambda_param: float = 0.0
     lambda_structure: float = 1e-3
     lambda_encoder_l1_ratio: float = 1e-4
+    lambda_encoder_l1: float = 0.0
     lambda_encoder_l2: float = 1e-4
     lambda_encoder_column_l2: float = 0.0
     eps: float = 1e-12
@@ -170,6 +171,41 @@ class TrainConfig:
     early_stopping_enabled: bool = True
     early_stopping_patience: int = 20
     early_stopping_min_delta: float = 1e-6
+
+
+@dataclass(slots=True)
+class AdaptiveSweepConfig:
+    enabled: bool = True
+    search_direction: str = "forward"
+    metric: str = "rmse"
+    mse_threshold: float = 1e-6
+    rmse_threshold: float = 1e-3
+    max_loss_delta: float | None = None
+    max_relative_loss_delta: float | None = None
+    max_generalization_gap: float | None = None
+    n_min: int = 1
+    n_max: int = 0
+    stop_on_first_success: bool = True
+    patience: int = 0
+    run_id_prefix: str = "adaptive_rotatedhill"
+    summary_name: str = "adaptive_stage1_summary.json"
+
+
+@dataclass(slots=True)
+class SparsificationConfig:
+    enabled: bool = True
+    method: str = "lasso"
+    lambda_encoder_l1: float = 1e-3
+    lambda_gate: float = 1e-3
+    gate_init_probability: float = 0.95
+    threshold: float = 1e-3
+    epochs: int = 1000
+    learning_rate: float = 1e-4
+    batch_size: int = 0
+    masked_refit_epochs: int = 1000
+    masked_refit_learning_rate: float = 1e-4
+    run_id: str = "adaptive_rotatedhill_sparse"
+    summary_name: str = "adaptive_stage2_sparsify.json"
 
 
 @dataclass(slots=True)
@@ -293,6 +329,8 @@ class Config:
     loss: LossConfig = field(default_factory=LossConfig)
     constraints: ConstraintsConfig = field(default_factory=ConstraintsConfig)
     train: TrainConfig = field(default_factory=TrainConfig)
+    adaptive: AdaptiveSweepConfig = field(default_factory=AdaptiveSweepConfig)
+    sparsification: SparsificationConfig = field(default_factory=SparsificationConfig)
     symbolic: SymbolicConfig = field(default_factory=SymbolicConfig)
 
     @property
@@ -343,6 +381,10 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             if len(value) != 2:
                 raise ValueError("[augmentation].k_range must contain exactly two values.")
             value = (float(value[0]), float(value[1]))
+        elif key == "max_generalization_gap" and value is not None:
+            value = float(value)
+        elif key in {"max_loss_delta", "max_relative_loss_delta"} and value is not None:
+            value = float(value)
         elif key in {
             "selected",
             "feature_names",

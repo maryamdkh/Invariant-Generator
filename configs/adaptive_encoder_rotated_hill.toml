@@ -1,0 +1,166 @@
+# Adaptive encoder experiment configuration.
+# This is intentionally separate from configs/default.toml and the prune/refit flow.
+
+[data]
+data_dir = "data"
+dataset_name = "rotatedhill"
+dataset_key = "stress"
+stress_format = "voigt_3d"
+feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
+test_size = 0.1
+random_state = 42
+shuffle = true
+
+[noise]
+enabled = false
+scale = 0.02
+random_state = 42
+relative_to_feature_std = true
+
+[augmentation]
+enabled = true
+include_original = true
+augment_test = true
+k_values = []
+n_aug_per_sample = 5
+k_range = [0.5, 1.75]
+random_state = 42
+shuffle = true
+homogeneity_degree = 1.0
+surface_target = 1.0
+
+[invariants]
+selected = ["I1", "I2", "I3", "I4", "I5", "I6", "I7", "I8", "I9", "I10", "I11", "I12", "I13"]
+enable_second_order = true
+enable_fourth_order = true
+homogenize = true
+init_scale = 0.05
+eps = 1e-12
+
+[encoder]
+enabled = true
+output_dim = 1
+init = "random"
+
+[normalization]
+enabled = true
+eps = 1e-8
+batch_size = 8192
+
+[model]
+hidden_dims = [64, 64]
+activation = "silu"
+output_activation = "softplus"
+
+[loss]
+lambda_param = 1e-6
+lambda_structure = 1e-3
+lambda_encoder_l1_ratio = 1e-3
+lambda_encoder_l1 = 0.0
+lambda_encoder_l2 = 0.0
+lambda_encoder_column_l2 = 0.0
+eps = 1e-12
+
+[constraints.A_psd]
+enabled = true
+mode = "hard"
+target = "fourth_order_A"
+basis = "mandel"
+min_eigenvalue = 0.0
+tolerance = 1e-8
+penalty_weight = 1.0
+
+[train]
+run_id = "adaptive_rotatedhill_base"
+results_dir = "results"
+split_dir = "results/splits"
+use_saved_split = true
+save_split_if_missing = true
+seed = 42
+epochs = 50000
+batch_size = 0
+learning_rate = 1e-4
+grad_clip_norm = 10.0
+device = "auto"
+log_every = 50
+save_every = 100
+stop_file = "STOP_TRAINING.txt"
+stop_keywords = ["stop", "quit", "exit", "halt"]
+lr_plateau_enabled = true
+lr_plateau_factor = 0.5
+lr_plateau_patience = 20
+lr_plateau_min_lr = 1e-7
+lr_plateau_min_delta = 1e-6
+early_stopping_enabled = true
+early_stopping_patience = 100
+early_stopping_min_delta = 1e-7
+
+[adaptive]
+enabled = true
+search_direction = "forward" # forward | backward
+metric = "rmse"       # rmse | mse
+rmse_threshold = 1e-3
+mse_threshold = 1e-6
+# Used by backward selection: smaller n is accepted if its train/test metric is
+# within the max-dim reference metric plus these tolerances.
+max_loss_delta = 1e-4
+max_relative_loss_delta = 0.05
+max_generalization_gap = 1e-3
+n_min = 1
+n_max = 0             # 0 means number of selected invariants
+stop_on_first_success = true
+patience = 0          # consecutive failed n values tolerated before stopping
+run_id_prefix = "adaptive_rotatedhill"
+summary_name = "adaptive_stage1_summary.json"
+
+[sparsification]
+enabled = true
+method = "lasso"      # lasso | gated
+lambda_encoder_l1 = 1e-3
+lambda_gate = 1e-3
+gate_init_probability = 0.95
+threshold = 1e-3
+epochs = 5000
+learning_rate = 1e-4
+batch_size = 0
+masked_refit_epochs = 5000
+masked_refit_learning_rate = 1e-4
+run_id = "adaptive_rotatedhill_sparse"
+summary_name = "adaptive_stage2_sparsify.json"
+
+[symbolic]
+top_k = 0
+feature_selection = "manual"
+selected_invariants = []
+target_transform = "identity"
+target_source = "data"
+feature_space = "encoded_invariants"
+random_state = 42
+output_subdir = "symbolic_encoded"
+output_directory = "results"
+run_id = "adaptive_rotatedhill_pysr"
+
+niterations = 10000000
+timeout_hours = 24.0
+warm_start = true
+parallelism = "multiprocessing"
+numprocs = 8
+batching = true
+batch_size = 100
+populations = 24
+population_size = 50
+ncycles_per_iteration = 5000
+model_selection = "best"
+elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
+weight_mode = "inverse_target_squared"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "sqrt"]
+maxsize = 40
+maxdepth = -1
+parsimony = 0.003
+complexity_of_constants = 2
+constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
+nested_constraints = { square = { square = 1 }, sqrt = { sqrt = 1 } }
+precision = 64
+progress = true
+early_stop_condition = "stop_if(loss, complexity) = loss < 1e-17"
