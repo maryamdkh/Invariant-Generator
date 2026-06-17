@@ -103,6 +103,9 @@ Outputs:
 - `results/adaptive_rotatedhill/adaptive_stage1_summary.json`
 - `results/adaptive_rotatedhill/adaptive_stage1_<metric>_vs_n.png`
 - per-dimension runs such as `results/adaptive_rotatedhill_n01/`
+- each per-dimension run saves its full training log at
+  `results/adaptive_rotatedhill_nXX/history.json`, and the Stage 1 summary
+  links those paths for notebook plotting
 
 ## Stage 2: Sparsify Terms Inside S
 
@@ -120,6 +123,8 @@ Outputs:
 
 - `results/adaptive_rotatedhill_sparse/adaptive_stage2_sparsify.json`
 - `results/adaptive_rotatedhill_sparse/adaptive_stage2_mask.json`
+- `results/adaptive_rotatedhill_sparse/adaptive_stage2_sparse_history.json`
+- `results/adaptive_rotatedhill_sparse/adaptive_stage2_refit_history.json`
 - `results/adaptive_rotatedhill_sparse/checkpoint_best.pt`
 
 The Stage 2 summary includes:

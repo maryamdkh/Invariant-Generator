@@ -20,6 +20,7 @@ class AdaptiveRunSummary:
     run_id: str
     experiment_dir: Path
     checkpoint: Path
+    history_path: Path
     train_metrics: dict[str, float]
     test_metrics: dict[str, float]
     selected: bool
@@ -243,6 +244,7 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
             run_id=run_config.train.run_id,
             experiment_dir=train_result.experiment_dir,
             checkpoint=train_result.best_checkpoint,
+            history_path=train_result.history_path,
             train_metrics=train_metrics,
             test_metrics=test_metrics,
             selected=selected,
@@ -295,6 +297,7 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
                     "run_id": run.run_id,
                     "experiment_dir": str(run.experiment_dir),
                     "checkpoint": str(run.checkpoint),
+                    "history_path": str(run.history_path),
                     "train_metrics": run.train_metrics,
                     "test_metrics": run.test_metrics,
                     "selected": run.selected,

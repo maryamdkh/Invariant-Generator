@@ -204,6 +204,7 @@ class SparsificationConfig:
     batch_size: int = 0
     masked_refit_epochs: int = 1000
     masked_refit_learning_rate: float = 1e-4
+    save_training_logs: bool = True
     run_id: str = "adaptive_rotatedhill_sparse"
     summary_name: str = "adaptive_stage2_sparsify.json"
 

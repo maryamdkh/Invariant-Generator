@@ -23,6 +23,8 @@ class SparsifyResult:
     checkpoint_path: Path
     summary_path: Path
     mask_path: Path
+    sparse_history_path: Path | None
+    refit_history_path: Path | None
 
 
 def _make_loader(X: np.ndarray, y: np.ndarray, *, batch_size: int, shuffle: bool) -> DataLoader:
@@ -260,6 +262,25 @@ def sparsify_encoder_from_checkpoint(
             "active_counts": mask.sum(axis=1).astype(int).tolist(),
         },
     )
+    sparse_history_path = None
+    refit_history_path = None
+    if sparse_config.sparsification.save_training_logs:
+        sparse_history_path = save_json(
+            experiment_dir / "adaptive_stage2_sparse_history.json",
+            {
+                "stage": "sparsity_training",
+                "method": method,
+                "history": sparse_history,
+            },
+        )
+        refit_history_path = save_json(
+            experiment_dir / "adaptive_stage2_refit_history.json",
+            {
+                "stage": "masked_refit",
+                "method": "masked_refit",
+                "history": refit_history,
+            },
+        )
     summary_path = save_json(
         experiment_dir / sparse_config.sparsification.summary_name,
         {
@@ -276,6 +297,8 @@ def sparsify_encoder_from_checkpoint(
             "test_metrics": test_metrics,
             "sparse_history": sparse_history,
             "refit_history": refit_history,
+            "sparse_history_path": None if sparse_history_path is None else str(sparse_history_path),
+            "refit_history_path": None if refit_history_path is None else str(refit_history_path),
             "formulas": formula_report,
             "checkpoint": str(checkpoint_out),
             "mask_path": str(mask_path),
@@ -286,4 +309,6 @@ def sparsify_encoder_from_checkpoint(
         checkpoint_path=checkpoint_out,
         summary_path=summary_path,
         mask_path=mask_path,
+        sparse_history_path=sparse_history_path,
+        refit_history_path=refit_history_path,
     )
