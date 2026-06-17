@@ -53,13 +53,13 @@ activation = "silu"
 output_activation = "softplus"
 
 [loss]
-lambda_param = 1e-6
-lambda_structure = 1e-3
-lambda_encoder_l1_ratio = 1e-3
-lambda_encoder_l1 = 0.0
-lambda_encoder_l2 = 0.0
-lambda_encoder_column_l2 = 0.0
-eps = 1e-12
+lambda_param = 1e-6                # L2 regularization on the final neural regressor weights.
+lambda_structure = 1e-3            # Keeps trainable structural tensors a and A near unit norm.
+lambda_encoder_l1_ratio = 1e-3     # Scale-invariant sparsity pressure on S through ||S||_1 / ||S||_2.
+lambda_encoder_l1 = 0.0            # Direct elementwise L1 sparsity pressure on S; usually set in [sparsification].
+lambda_encoder_l2 = 0.0            # Controls the total magnitude of S through ||S||_2.
+lambda_encoder_column_l2 = 0.0     # Encourages dropping whole input invariant columns of S.
+eps = 1e-12                        # Small stabilizer to avoid division by zero in encoder penalties.
 
 [constraints.A_psd]
 enabled = true
@@ -103,9 +103,9 @@ rmse_threshold = 1e-3
 mse_threshold = 1e-6
 # Used by backward selection: smaller n is accepted if its train/test metric is
 # within the max-dim reference metric plus these tolerances.
-max_loss_delta = 1e-4
-max_relative_loss_delta = 0.05
-max_generalization_gap = 1e-3
+max_loss_delta = 1e-4           # Backward mode: allowed absolute train/test metric increase vs the max-dim reference.
+max_relative_loss_delta = 0.05  # Backward mode: allowed relative metric increase vs the max-dim reference.
+max_generalization_gap = 1e-3   # Maximum allowed gap between train and test metric for accepting an n.
 n_min = 1
 n_max = 0             # 0 means number of selected invariants
 stop_on_first_success = true
