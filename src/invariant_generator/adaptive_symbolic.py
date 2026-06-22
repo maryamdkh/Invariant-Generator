@@ -84,7 +84,7 @@ def train_encoded_symbolic_from_config(
 
     data = prepare_training_data(config)
     model = InvariantYieldModel.from_config(config).to(device)
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model_state_dict"], strict=False)
 
     X_train = compute_encoded_invariant_features(

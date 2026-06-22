@@ -14,7 +14,13 @@ from invariant_generator.evaluation import evaluate_model
 from invariant_generator.formulas import encoder_formula_report
 from invariant_generator.losses import YieldSurfaceLoss
 from invariant_generator.model import InvariantYieldModel
-from invariant_generator.utils import resolve_device, save_config_snapshot, save_json, seed_everything
+from invariant_generator.utils import (
+    resolve_device,
+    save_config_snapshot,
+    save_json,
+    seed_everything,
+    to_jsonable,
+)
 
 
 @dataclass(slots=True)
@@ -157,7 +163,7 @@ def _train_sparse_epochs(
 def load_model_for_checkpoint(config: Config, checkpoint_path: str | Path) -> InvariantYieldModel:
     device = resolve_device(config.train.device)
     model = InvariantYieldModel.from_config(config).to(device)
-    checkpoint = torch.load(Path(checkpoint_path), map_location=device)
+    checkpoint = torch.load(Path(checkpoint_path), map_location=device, weights_only=False)
     model.load_state_dict(checkpoint["model_state_dict"], strict=False)
     return model
 
@@ -246,7 +252,7 @@ def sparsify_encoder_from_checkpoint(
     torch.save(
         {
             "model_state_dict": model.state_dict(),
-            "config": sparse_config,
+            "config": to_jsonable(sparse_config),
             "metrics": test_metrics,
             "parameter_counts": model.parameter_counts(),
             "invariant_normalization": model.invariant_normalization_state(),
