@@ -55,12 +55,11 @@ uv run --extra symbolic python scripts/adaptive_encoder_pipeline.py \
 
 ## Stage 1: Adaptive Dimension Sweep
 
-The script trains independent full models across encoder output dimensions. The
-direction is configurable:
+The script trains independent full models while adding one encoder output at a
+time:
 
 ```text
-forward:  n = n_min, ..., n_max
-backward: n = n_max, ..., n_min
+n = n_min, n_min + 1, ..., n_max
 ```
 
 Each run uses the same invariant pool, structural tensors, normalization, and
@@ -68,35 +67,22 @@ MLP settings. When `n` is smaller than the invariant-pool dimension, encoder
 initialization is switched to random initialization to avoid identity bias
 toward the first invariant columns.
 
-In forward mode, the selected `n` is the first run whose train and test metric
-both pass the configured absolute threshold:
+The selected `n` is the first run whose train and test metric both pass the
+configured absolute threshold:
 
 ```toml
 [adaptive]
-search_direction = "forward"
 metric = "rmse" # or "mse"
 rmse_threshold = 1e-3
 mse_threshold = 1e-6
 max_generalization_gap = 1e-3
-```
-
-In backward mode, the largest `n` is trained first as the reference. The sweep
-then tries smaller dimensions and keeps the smallest `n` whose loss remains
-within the allowed delta from that max-dim reference:
-
-```toml
-[adaptive]
-search_direction = "backward"
-metric = "rmse" # or "mse"
-max_loss_delta = 1e-4
-max_relative_loss_delta = 0.05
 patience = 2
 ```
 
-`patience` is the number of consecutive failing smaller dimensions tolerated
-before stopping. This is useful because independent neural trainings are not
-perfectly monotonic: one dimension can fail while the next lower dimension may
-still train well.
+`patience` is the number of additional consecutive dimensions that must also
+pass before confirming the first passing `n`. For example, `patience = 2`
+selects `n` only after `n`, `n + 1`, and `n + 2` all pass. Use `patience = 0`
+to select the first passing dimension immediately.
 
 Outputs:
 

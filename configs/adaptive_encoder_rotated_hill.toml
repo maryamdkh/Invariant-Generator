@@ -97,19 +97,14 @@ early_stopping_min_delta = 1e-7
 
 [adaptive]
 enabled = true
-search_direction = "forward" # forward | backward
 metric = "rmse"       # rmse | mse
 rmse_threshold = 1e-3
 mse_threshold = 1e-6
-# Used by backward selection: smaller n is accepted if its train/test metric is
-# within the max-dim reference metric plus these tolerances.
-max_loss_delta = 1e-4           # Backward mode: allowed absolute train/test metric increase vs the max-dim reference.
-max_relative_loss_delta = 0.05  # Backward mode: allowed relative metric increase vs the max-dim reference.
 max_generalization_gap = 1e-3   # Maximum allowed gap between train and test metric for accepting an n.
 n_min = 1
 n_max = 0             # 0 means number of selected invariants
 stop_on_first_success = true
-patience = 0          # consecutive failed n values tolerated before stopping
+patience = 0          # Additional consecutive passing dimensions required to confirm the first passing n.
 run_id_prefix = "adaptive_rotatedhill"
 summary_name = "adaptive_stage1_summary.json"
 

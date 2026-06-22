@@ -176,12 +176,9 @@ class TrainConfig:
 @dataclass(slots=True)
 class AdaptiveSweepConfig:
     enabled: bool = True
-    search_direction: str = "forward"
     metric: str = "rmse"
     mse_threshold: float = 1e-6
     rmse_threshold: float = 1e-3
-    max_loss_delta: float | None = None
-    max_relative_loss_delta: float | None = None
     max_generalization_gap: float | None = None
     n_min: int = 1
     n_max: int = 0
@@ -383,8 +380,6 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
                 raise ValueError("[augmentation].k_range must contain exactly two values.")
             value = (float(value[0]), float(value[1]))
         elif key == "max_generalization_gap" and value is not None:
-            value = float(value)
-        elif key in {"max_loss_delta", "max_relative_loss_delta"} and value is not None:
             value = float(value)
         elif key in {
             "selected",

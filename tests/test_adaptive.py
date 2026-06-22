@@ -5,7 +5,6 @@ import torch
 
 from invariant_generator.adaptive import (
     adaptive_metric_threshold,
-    adaptive_metric_within_reference,
     adaptive_run_passes,
     run_adaptive_sweep,
 )
@@ -45,24 +44,6 @@ def test_adaptive_stop_logic_supports_mse_and_rmse():
         threshold=1e-3,
         max_generalization_gap=1e-4,
     )
-
-    assert adaptive_metric_within_reference(
-        {"rmse": 0.11},
-        {"rmse": 0.12},
-        reference_train_metrics={"rmse": 0.1},
-        reference_test_metrics={"rmse": 0.1},
-        metric="rmse",
-        max_loss_delta=0.02,
-    )
-    assert not adaptive_metric_within_reference(
-        {"rmse": 0.11},
-        {"rmse": 0.13},
-        reference_train_metrics={"rmse": 0.1},
-        reference_test_metrics={"rmse": 0.1},
-        metric="rmse",
-        max_loss_delta=0.02,
-    )
-
 
 def test_stage1_selects_smallest_successful_n(tmp_path, monkeypatch):
     config = Config()
@@ -109,67 +90,20 @@ def test_stage1_selects_smallest_successful_n(tmp_path, monkeypatch):
     assert result.summary_path.exists()
 
 
-def test_backward_stage1_selects_smallest_n_within_reference_loss(tmp_path, monkeypatch):
+def test_forward_stage1_patience_requires_consecutive_passing_dimensions(
+    tmp_path,
+    monkeypatch,
+):
     config = Config()
-    config.invariants.selected = ["I1", "I2", "I3", "I4"]
+    config.invariants.selected = ["I1", "I2", "I3", "I4", "I5"]
     config.invariants.enable_second_order = True
     config.invariants.enable_fourth_order = False
     config.train.results_dir = tmp_path / "results"
-    config.adaptive.run_id_prefix = "backward_test"
-    config.adaptive.search_direction = "backward"
+    config.adaptive.run_id_prefix = "forward_patience_test"
     config.adaptive.metric = "rmse"
     config.adaptive.n_min = 1
-    config.adaptive.n_max = 4
-    config.adaptive.max_loss_delta = 0.02
-    config.adaptive.max_relative_loss_delta = None
-    config.adaptive.patience = 0
-
-    def fake_train_from_config(run_config):
-        exp = run_config.experiment_dir
-        exp.mkdir(parents=True, exist_ok=True)
-        checkpoint = exp / "checkpoint_best.pt"
-        checkpoint.write_text("fake", encoding="utf-8")
-        return TrainResult(
-            experiment_dir=exp,
-            best_checkpoint=checkpoint,
-            recovery_checkpoint=exp / "checkpoint_latest.pt",
-            history_path=exp / "history.json",
-            best_epoch=1,
-            best_test_mse=0.0,
-        )
-
-    def fake_evaluate(run_config, _checkpoint):
-        n = run_config.encoder.output_dim
-        value = {4: 0.10, 3: 0.11, 2: 0.119, 1: 0.14}[n]
-        return {"rmse": value, "mse": value**2}, {"rmse": value, "mse": value**2}
-
-    monkeypatch.setattr("invariant_generator.adaptive.train_from_config", fake_train_from_config)
-    monkeypatch.setattr(
-        "invariant_generator.adaptive.evaluate_checkpoint_on_train_and_test",
-        fake_evaluate,
-    )
-
-    result = run_adaptive_sweep(config)
-
-    assert [run.n for run in result.runs] == [4, 3, 2, 1]
-    assert [run.selected for run in result.runs] == [True, True, True, False]
-    assert result.selected_n == 2
-    assert result.selected_checkpoint == tmp_path / "results" / "backward_test_n02" / "checkpoint_best.pt"
-
-
-def test_backward_stage1_patience_continues_after_a_failed_dimension(tmp_path, monkeypatch):
-    config = Config()
-    config.invariants.selected = ["I1", "I2", "I3", "I4"]
-    config.invariants.enable_second_order = True
-    config.invariants.enable_fourth_order = False
-    config.train.results_dir = tmp_path / "results"
-    config.adaptive.run_id_prefix = "backward_patience_test"
-    config.adaptive.search_direction = "backward"
-    config.adaptive.metric = "rmse"
-    config.adaptive.n_min = 1
-    config.adaptive.n_max = 4
-    config.adaptive.max_loss_delta = 0.02
-    config.adaptive.max_relative_loss_delta = None
+    config.adaptive.n_max = 5
+    config.adaptive.rmse_threshold = 0.2
     config.adaptive.patience = 1
 
     def fake_train_from_config(run_config):
@@ -188,7 +122,7 @@ def test_backward_stage1_patience_continues_after_a_failed_dimension(tmp_path, m
 
     def fake_evaluate(run_config, _checkpoint):
         n = run_config.encoder.output_dim
-        value = {4: 0.10, 3: 0.13, 2: 0.115, 1: 0.16}[n]
+        value = {1: 0.4, 2: 0.1, 3: 0.3, 4: 0.15, 5: 0.12}[n]
         return {"rmse": value, "mse": value**2}, {"rmse": value, "mse": value**2}
 
     monkeypatch.setattr("invariant_generator.adaptive.train_from_config", fake_train_from_config)
@@ -199,9 +133,12 @@ def test_backward_stage1_patience_continues_after_a_failed_dimension(tmp_path, m
 
     result = run_adaptive_sweep(config)
 
-    assert [run.n for run in result.runs] == [4, 3, 2, 1]
-    assert [run.selected for run in result.runs] == [True, False, True, False]
-    assert result.selected_n == 2
+    assert [run.n for run in result.runs] == [1, 2, 3, 4, 5]
+    assert [run.selected for run in result.runs] == [False, False, False, True, False]
+    assert result.selected_n == 4
+    assert result.selected_checkpoint == (
+        tmp_path / "results" / "forward_patience_test_n04" / "checkpoint_best.pt"
+    )
 
 
 def test_lasso_mask_bookkeeping_and_fixed_mask_zero_preservation():
@@ -308,7 +245,6 @@ def test_formula_rendering_with_and_without_normalization():
 
 def test_adaptive_config_loads_new_sections():
     config = load_config(Path("configs") / "adaptive_encoder_rotated_hill.toml")
-    assert config.adaptive.search_direction == "forward"
     assert config.adaptive.metric == "rmse"
     assert config.adaptive.patience == 0
     assert config.sparsification.method in {"lasso", "gated"}

@@ -63,44 +63,6 @@ def adaptive_run_passes(
     return True
 
 
-def adaptive_metric_within_reference(
-    train_metrics: dict[str, float],
-    test_metrics: dict[str, float],
-    *,
-    reference_train_metrics: dict[str, float],
-    reference_test_metrics: dict[str, float],
-    metric: str,
-    max_loss_delta: float | None = None,
-    max_relative_loss_delta: float | None = None,
-    max_generalization_gap: float | None = None,
-) -> bool:
-    if metric not in train_metrics or metric not in test_metrics:
-        raise KeyError(f"Metric {metric!r} is missing from train/test metrics.")
-
-    train_value = float(train_metrics[metric])
-    test_value = float(test_metrics[metric])
-    ref_train = float(reference_train_metrics[metric])
-    ref_test = float(reference_test_metrics[metric])
-
-    allowed_train = ref_train
-    allowed_test = ref_test
-    if max_loss_delta is not None:
-        allowed_train += float(max_loss_delta)
-        allowed_test += float(max_loss_delta)
-    if max_relative_loss_delta is not None:
-        allowed_train += abs(ref_train) * float(max_relative_loss_delta)
-        allowed_test += abs(ref_test) * float(max_relative_loss_delta)
-    if max_loss_delta is None and max_relative_loss_delta is None:
-        allowed_train += 0.0
-        allowed_test += 0.0
-
-    if train_value > allowed_train or test_value > allowed_test:
-        return False
-    if max_generalization_gap is not None and abs(test_value - train_value) > max_generalization_gap:
-        return False
-    return True
-
-
 def adaptive_n_bounds(config: Config) -> tuple[int, int]:
     input_dim = len(config.invariants.selected)
     n_min = max(1, int(config.adaptive.n_min))
@@ -113,12 +75,7 @@ def adaptive_n_bounds(config: Config) -> tuple[int, int]:
 
 def adaptive_n_values(config: Config) -> list[int]:
     n_min, n_max = adaptive_n_bounds(config)
-    direction = config.adaptive.search_direction.lower()
-    if direction == "forward":
-        return list(range(n_min, n_max + 1))
-    if direction == "backward":
-        return list(range(n_max, n_min - 1, -1))
-    raise ValueError("adaptive.search_direction must be 'forward' or 'backward'.")
+    return list(range(n_min, n_max + 1))
 
 
 def config_for_adaptive_n(config: Config, n: int) -> Config:
@@ -193,19 +150,14 @@ def _save_stage1_plot(summary_dir: Path, runs: list[AdaptiveRunSummary], metric:
 
 def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
     metric, threshold = adaptive_metric_threshold(config)
-    direction = config.adaptive.search_direction.lower()
-    if direction not in {"forward", "backward"}:
-        raise ValueError("adaptive.search_direction must be 'forward' or 'backward'.")
     summary_dir = config.train.results_dir / config.adaptive.run_id_prefix
     summary_dir.mkdir(parents=True, exist_ok=True)
 
     runs: list[AdaptiveRunSummary] = []
     selected_n: int | None = None
     selected_checkpoint: Path | None = None
-    reference_train_metrics: dict[str, float] | None = None
-    reference_test_metrics: dict[str, float] | None = None
-    reference_n: int | None = None
-    consecutive_failures = 0
+    passing_streak: list[AdaptiveRunSummary] = []
+    confirmation_count = max(0, int(config.adaptive.patience)) + 1
 
     for n in adaptive_n_values(config):
         run_config = config_for_adaptive_n(config, n)
@@ -214,31 +166,13 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
             run_config,
             train_result.best_checkpoint,
         )
-        if direction == "forward":
-            selected = adaptive_run_passes(
-                train_metrics,
-                test_metrics,
-                metric=metric,
-                threshold=threshold,
-                max_generalization_gap=config.adaptive.max_generalization_gap,
-            )
-        else:
-            if reference_train_metrics is None or reference_test_metrics is None:
-                reference_train_metrics = train_metrics
-                reference_test_metrics = test_metrics
-                reference_n = n
-                selected = True
-            else:
-                selected = adaptive_metric_within_reference(
-                    train_metrics,
-                    test_metrics,
-                    reference_train_metrics=reference_train_metrics,
-                    reference_test_metrics=reference_test_metrics,
-                    metric=metric,
-                    max_loss_delta=config.adaptive.max_loss_delta,
-                    max_relative_loss_delta=config.adaptive.max_relative_loss_delta,
-                    max_generalization_gap=config.adaptive.max_generalization_gap,
-                )
+        passes = adaptive_run_passes(
+            train_metrics,
+            test_metrics,
+            metric=metric,
+            threshold=threshold,
+            max_generalization_gap=config.adaptive.max_generalization_gap,
+        )
         run_summary = AdaptiveRunSummary(
             n=n,
             run_id=run_config.train.run_id,
@@ -247,48 +181,30 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
             history_path=train_result.history_path,
             train_metrics=train_metrics,
             test_metrics=test_metrics,
-            selected=selected,
+            selected=False,
         )
         runs.append(run_summary)
-        if direction == "forward":
-            if selected and selected_n is None:
-                selected_n = n
-                selected_checkpoint = train_result.best_checkpoint
-                if config.adaptive.stop_on_first_success and config.adaptive.patience <= 0:
-                    break
-            if selected:
-                consecutive_failures = 0
-            elif selected_n is not None:
-                consecutive_failures += 1
-                if (
-                    config.adaptive.stop_on_first_success
-                    and consecutive_failures > config.adaptive.patience
-                ):
-                    break
+        if passes:
+            passing_streak.append(run_summary)
         else:
-            if selected:
-                selected_n = n
-                selected_checkpoint = train_result.best_checkpoint
-                consecutive_failures = 0
-            else:
-                consecutive_failures += 1
-                if consecutive_failures > config.adaptive.patience:
-                    break
+            passing_streak.clear()
+
+        if len(passing_streak) >= confirmation_count and selected_n is None:
+            chosen = passing_streak[0]
+            chosen.selected = True
+            selected_n = chosen.n
+            selected_checkpoint = chosen.checkpoint
+            if config.adaptive.stop_on_first_success:
+                break
 
     plot_path = _save_stage1_plot(summary_dir, runs, metric)
     summary_path = save_json(
         summary_dir / config.adaptive.summary_name,
         {
-            "search_direction": direction,
             "metric": metric,
             "threshold": threshold,
-            "max_loss_delta": config.adaptive.max_loss_delta,
-            "max_relative_loss_delta": config.adaptive.max_relative_loss_delta,
             "max_generalization_gap": config.adaptive.max_generalization_gap,
             "patience": config.adaptive.patience,
-            "reference_n": reference_n,
-            "reference_train_metrics": reference_train_metrics,
-            "reference_test_metrics": reference_test_metrics,
             "selected_n": selected_n,
             "selected_checkpoint": None if selected_checkpoint is None else str(selected_checkpoint),
             "runs": [
