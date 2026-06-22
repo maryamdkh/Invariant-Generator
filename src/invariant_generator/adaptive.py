@@ -78,6 +78,18 @@ def adaptive_n_values(config: Config) -> list[int]:
     return list(range(n_min, n_max + 1))
 
 
+def adaptive_results_dir(config: Config) -> Path:
+    return config.train.results_dir / config.adaptive.results_subdir
+
+
+def adaptive_stage1_dir(config: Config) -> Path:
+    return adaptive_results_dir(config) / config.adaptive.stage1_subdir
+
+
+def adaptive_sparsification_run_id(config: Config) -> str:
+    return str(Path(config.adaptive.results_subdir) / config.sparsification.run_id)
+
+
 def config_for_adaptive_n(config: Config, n: int) -> Config:
     run_config = deepcopy(config)
     input_dim = len(run_config.invariants.selected)
@@ -85,7 +97,11 @@ def config_for_adaptive_n(config: Config, n: int) -> Config:
     run_config.encoder.output_dim = int(n)
     if n < input_dim and run_config.encoder.init == "identity":
         run_config.encoder.init = "random"
-    run_config.train.run_id = f"{run_config.adaptive.run_id_prefix}_n{n:02d}"
+    run_config.train.run_id = str(
+        Path(run_config.adaptive.results_subdir)
+        / run_config.adaptive.stage1_subdir
+        / f"{run_config.adaptive.run_id_prefix}{n:02d}"
+    )
     return run_config
 
 
@@ -150,7 +166,7 @@ def _save_stage1_plot(summary_dir: Path, runs: list[AdaptiveRunSummary], metric:
 
 def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
     metric, threshold = adaptive_metric_threshold(config)
-    summary_dir = config.train.results_dir / config.adaptive.run_id_prefix
+    summary_dir = adaptive_stage1_dir(config)
     summary_dir.mkdir(parents=True, exist_ok=True)
 
     runs: list[AdaptiveRunSummary] = []

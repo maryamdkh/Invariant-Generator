@@ -3,7 +3,11 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from invariant_generator.adaptive import config_for_adaptive_n, run_adaptive_sweep
+from invariant_generator.adaptive import (
+    adaptive_sparsification_run_id,
+    config_for_adaptive_n,
+    run_adaptive_sweep,
+)
 from invariant_generator.adaptive_symbolic import train_encoded_symbolic_from_config
 from invariant_generator.config import load_config
 from invariant_generator.sparsify import sparsify_encoder_from_checkpoint
@@ -75,7 +79,7 @@ def main() -> None:
 
     if args.stage in {"all", "stage3"}:
         symbolic_config = config_for_adaptive_n(config, selected_n)
-        symbolic_config.train.run_id = symbolic_config.sparsification.run_id
+        symbolic_config.train.run_id = adaptive_sparsification_run_id(symbolic_config)
         result = train_encoded_symbolic_from_config(
             symbolic_config,
             checkpoint_path=sparse_checkpoint,

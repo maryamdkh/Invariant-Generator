@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import torch
 
+from invariant_generator.adaptive import adaptive_results_dir
 from invariant_generator.config import Config
 from invariant_generator.data import prepare_training_data
 from invariant_generator.evaluation import regression_metrics
@@ -78,7 +79,7 @@ def train_encoded_symbolic_from_config(
         if checkpoint_path is not None
         else config.experiment_dir / "checkpoint_best.pt"
     )
-    output_dir = config.experiment_dir / config.symbolic.output_subdir
+    output_dir = adaptive_results_dir(config) / config.symbolic.output_subdir
     output_dir.mkdir(parents=True, exist_ok=True)
     config_snapshot_path = save_config_snapshot(config, output_dir)
 
@@ -169,7 +170,7 @@ def train_encoded_symbolic_from_config(
         nested_constraints=config.symbolic.nested_constraints,
         precision=config.symbolic.precision,
         progress=config.symbolic.progress,
-        output_directory=str(config.symbolic.output_directory),
+        output_directory=str(output_dir),
         run_id=config.symbolic.run_id,
         early_stop_condition=config.symbolic.early_stop_condition,
         random_state=config.symbolic.random_state,

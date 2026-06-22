@@ -40,7 +40,7 @@ uv run python scripts/adaptive_encoder_pipeline.py \
   --config configs/adaptive_encoder_rotated_hill.toml \
   --stage stage2 \
   --selected-n 3 \
-  --checkpoint results/adaptive_rotatedhill_n03/checkpoint_best.pt
+  --checkpoint results/adaptive_rotatedhill/stage1/n03/checkpoint_best.pt
 ```
 
 Run Stage 3 from a sparse checkpoint:
@@ -50,7 +50,7 @@ uv run --extra symbolic python scripts/adaptive_encoder_pipeline.py \
   --config configs/adaptive_encoder_rotated_hill.toml \
   --stage stage3 \
   --selected-n 3 \
-  --checkpoint results/adaptive_rotatedhill_sparse/checkpoint_best.pt
+  --checkpoint results/adaptive_rotatedhill/stage2_sparse/checkpoint_best.pt
 ```
 
 ## Stage 1: Adaptive Dimension Sweep
@@ -86,11 +86,11 @@ to select the first passing dimension immediately.
 
 Outputs:
 
-- `results/adaptive_rotatedhill/adaptive_stage1_summary.json`
-- `results/adaptive_rotatedhill/adaptive_stage1_<metric>_vs_n.png`
-- per-dimension runs such as `results/adaptive_rotatedhill_n01/`
+- `results/adaptive_rotatedhill/stage1/adaptive_stage1_summary.json`
+- `results/adaptive_rotatedhill/stage1/adaptive_stage1_<metric>_vs_n.png`
+- per-dimension runs such as `results/adaptive_rotatedhill/stage1/n01/`
 - each per-dimension run saves its full training log at
-  `results/adaptive_rotatedhill_nXX/history.json`, and the Stage 1 summary
+  `results/adaptive_rotatedhill/stage1/nXX/history.json`, and the Stage 1 summary
   links those paths for notebook plotting
 
 ## Stage 2: Sparsify Terms Inside S
@@ -105,13 +105,27 @@ output dimension fixed. It supports two sparsification methods:
 After sparsity training, small entries are thresholded and a masked refit keeps
 those entries exactly zero while other trainable parameters adapt.
 
+For direct control over formula size, set:
+
+```toml
+[sparsification]
+lambda_encoder_l1 = 1e-2
+threshold = 1e-3
+max_active_terms_per_row = 4
+```
+
+The cap is applied after thresholding and keeps the strongest coefficients in
+each encoded invariant row. Set it to `0` to disable the cap. To explore the
+accuracy/sparsity tradeoff, rerun Stage 2 and Stage 3 with caps such as `4`,
+`3`, and `2`; Stage 1 does not need to be rerun.
+
 Outputs:
 
-- `results/adaptive_rotatedhill_sparse/adaptive_stage2_sparsify.json`
-- `results/adaptive_rotatedhill_sparse/adaptive_stage2_mask.json`
-- `results/adaptive_rotatedhill_sparse/adaptive_stage2_sparse_history.json`
-- `results/adaptive_rotatedhill_sparse/adaptive_stage2_refit_history.json`
-- `results/adaptive_rotatedhill_sparse/checkpoint_best.pt`
+- `results/adaptive_rotatedhill/stage2_sparse/adaptive_stage2_sparsify.json`
+- `results/adaptive_rotatedhill/stage2_sparse/adaptive_stage2_mask.json`
+- `results/adaptive_rotatedhill/stage2_sparse/adaptive_stage2_sparse_history.json`
+- `results/adaptive_rotatedhill/stage2_sparse/adaptive_stage2_refit_history.json`
+- `results/adaptive_rotatedhill/stage2_sparse/checkpoint_best.pt`
 
 The Stage 2 summary includes:
 
@@ -136,10 +150,10 @@ equation remains interpretable.
 
 Outputs:
 
-- `results/adaptive_rotatedhill_sparse/symbolic_encoded/encoded_invariant_formulas.json`
-- `results/adaptive_rotatedhill_sparse/symbolic_encoded/equations.csv`
-- `results/adaptive_rotatedhill_sparse/symbolic_encoded/best_equation.txt`
-- `results/adaptive_rotatedhill_sparse/symbolic_encoded/metrics.json`
+- `results/adaptive_rotatedhill/stage3_pysr/encoded_invariant_formulas.json`
+- `results/adaptive_rotatedhill/stage3_pysr/equations.csv`
+- `results/adaptive_rotatedhill/stage3_pysr/best_equation.txt`
+- `results/adaptive_rotatedhill/stage3_pysr/metrics.json`
 
 ## Notebook
 

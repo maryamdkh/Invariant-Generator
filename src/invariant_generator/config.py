@@ -176,6 +176,8 @@ class TrainConfig:
 @dataclass(slots=True)
 class AdaptiveSweepConfig:
     enabled: bool = True
+    results_subdir: str = "adaptive_rotatedhill"
+    stage1_subdir: str = "stage1"
     metric: str = "rmse"
     mse_threshold: float = 1e-6
     rmse_threshold: float = 1e-3
@@ -184,7 +186,7 @@ class AdaptiveSweepConfig:
     n_max: int = 0
     stop_on_first_success: bool = True
     patience: int = 0
-    run_id_prefix: str = "adaptive_rotatedhill"
+    run_id_prefix: str = "n"
     summary_name: str = "adaptive_stage1_summary.json"
 
 
@@ -196,13 +198,14 @@ class SparsificationConfig:
     lambda_gate: float = 1e-3
     gate_init_probability: float = 0.95
     threshold: float = 1e-3
+    max_active_terms_per_row: int = 0
     epochs: int = 1000
     learning_rate: float = 1e-4
     batch_size: int = 0
     masked_refit_epochs: int = 1000
     masked_refit_learning_rate: float = 1e-4
     save_training_logs: bool = True
-    run_id: str = "adaptive_rotatedhill_sparse"
+    run_id: str = "stage2_sparse"
     summary_name: str = "adaptive_stage2_sparsify.json"
 
 

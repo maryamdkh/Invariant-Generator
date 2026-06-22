@@ -51,7 +51,8 @@ def test_stage1_selects_smallest_successful_n(tmp_path, monkeypatch):
     config.invariants.enable_second_order = False
     config.invariants.enable_fourth_order = False
     config.train.results_dir = tmp_path / "results"
-    config.adaptive.run_id_prefix = "adaptive_test"
+    config.adaptive.results_subdir = "adaptive_test"
+    config.adaptive.run_id_prefix = "n"
     config.adaptive.n_min = 1
     config.adaptive.n_max = 3
     config.adaptive.metric = "rmse"
@@ -85,7 +86,9 @@ def test_stage1_selects_smallest_successful_n(tmp_path, monkeypatch):
     result = run_adaptive_sweep(config)
 
     assert result.selected_n == 2
-    assert result.selected_checkpoint == tmp_path / "results" / "adaptive_test_n02" / "checkpoint_best.pt"
+    assert result.selected_checkpoint == (
+        tmp_path / "results" / "adaptive_test" / "stage1" / "n02" / "checkpoint_best.pt"
+    )
     assert [run.n for run in result.runs] == [1, 2]
     assert result.summary_path.exists()
 
@@ -99,7 +102,8 @@ def test_forward_stage1_patience_requires_consecutive_passing_dimensions(
     config.invariants.enable_second_order = True
     config.invariants.enable_fourth_order = False
     config.train.results_dir = tmp_path / "results"
-    config.adaptive.run_id_prefix = "forward_patience_test"
+    config.adaptive.results_subdir = "forward_patience_test"
+    config.adaptive.run_id_prefix = "n"
     config.adaptive.metric = "rmse"
     config.adaptive.n_min = 1
     config.adaptive.n_max = 5
@@ -137,7 +141,12 @@ def test_forward_stage1_patience_requires_consecutive_passing_dimensions(
     assert [run.selected for run in result.runs] == [False, False, False, True, False]
     assert result.selected_n == 4
     assert result.selected_checkpoint == (
-        tmp_path / "results" / "forward_patience_test_n04" / "checkpoint_best.pt"
+        tmp_path
+        / "results"
+        / "forward_patience_test"
+        / "stage1"
+        / "n04"
+        / "checkpoint_best.pt"
     )
 
 
@@ -158,6 +167,13 @@ def test_lasso_mask_bookkeeping_and_fixed_mask_zero_preservation():
         model.encoder.raw_weight.fill_(1.0)
     apply_encoder_mask(model, mask)
     np.testing.assert_allclose(model.encoder_matrix().detach().numpy(), mask.astype(float))
+
+    capped = threshold_encoder_mask(
+        np.array([[0.1, -0.8, 0.3, 0.6]], dtype=float),
+        threshold=0.0,
+        max_active_terms_per_row=2,
+    )
+    np.testing.assert_array_equal(capped, [[0, 1, 0, 1]])
 
 
 def test_gated_encoder_effective_weights_and_thresholded_masks():
@@ -245,7 +261,12 @@ def test_formula_rendering_with_and_without_normalization():
 
 def test_adaptive_config_loads_new_sections():
     config = load_config(Path("configs") / "adaptive_encoder_rotated_hill.toml")
+    assert config.adaptive.results_subdir == "adaptive_rotatedhill"
+    assert config.adaptive.stage1_subdir == "stage1"
     assert config.adaptive.metric == "rmse"
     assert config.adaptive.patience == 0
     assert config.sparsification.method in {"lasso", "gated"}
+    assert config.sparsification.run_id == "stage2_sparse"
+    assert config.sparsification.max_active_terms_per_row == 4
+    assert config.symbolic.output_subdir == "stage3_pysr"
     assert config.symbolic.feature_space == "encoded_invariants"

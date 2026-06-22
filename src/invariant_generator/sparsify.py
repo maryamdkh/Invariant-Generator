@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+from invariant_generator.adaptive import adaptive_sparsification_run_id
 from invariant_generator.config import Config
 from invariant_generator.data import prepare_training_data
 from invariant_generator.evaluation import evaluate_model
@@ -72,13 +73,29 @@ def apply_encoder_mask(model: InvariantYieldModel, mask: torch.Tensor | np.ndarr
     model.encoder.raw_weight.mul_(mask_tensor)
 
 
-def threshold_encoder_mask(S: torch.Tensor | np.ndarray, *, threshold: float) -> np.ndarray:
+def threshold_encoder_mask(
+    S: torch.Tensor | np.ndarray,
+    *,
+    threshold: float,
+    max_active_terms_per_row: int = 0,
+) -> np.ndarray:
     values = np.asarray(S.detach().cpu().numpy() if isinstance(S, torch.Tensor) else S)
     mask = np.abs(values) > float(threshold)
+    max_active = int(max_active_terms_per_row)
+    if max_active < 0:
+        raise ValueError("max_active_terms_per_row must be >= 0.")
+
     for row_idx in range(mask.shape[0]):
         if not np.any(mask[row_idx]):
             strongest = int(np.argmax(np.abs(values[row_idx])))
             mask[row_idx, strongest] = True
+        if max_active > 0 and int(mask[row_idx].sum()) > max_active:
+            active_indices = np.flatnonzero(mask[row_idx])
+            ranked = active_indices[
+                np.argsort(np.abs(values[row_idx, active_indices]))[::-1]
+            ]
+            mask[row_idx] = False
+            mask[row_idx, ranked[:max_active]] = True
     return mask
 
 
@@ -175,7 +192,7 @@ def sparsify_encoder_from_checkpoint(
     run_id: str | None = None,
 ) -> SparsifyResult:
     sparse_config = deepcopy(config)
-    sparse_config.train.run_id = run_id or sparse_config.sparsification.run_id
+    sparse_config.train.run_id = run_id or adaptive_sparsification_run_id(sparse_config)
     seed_everything(sparse_config.train.seed)
     device = resolve_device(sparse_config.train.device)
     data = prepare_training_data(sparse_config)
@@ -210,7 +227,11 @@ def sparsify_encoder_from_checkpoint(
         model.encoder.collapse_gates()
 
     dense_S = model.encoder_matrix().detach().float().cpu().numpy()
-    mask = threshold_encoder_mask(dense_S, threshold=sparse_config.sparsification.threshold)
+    mask = threshold_encoder_mask(
+        dense_S,
+        threshold=sparse_config.sparsification.threshold,
+        max_active_terms_per_row=sparse_config.sparsification.max_active_terms_per_row,
+    )
     apply_encoder_mask(model, mask)
     sparse_S_before_refit = model.encoder_matrix().detach().float().cpu().numpy()
 
@@ -264,6 +285,7 @@ def sparsify_encoder_from_checkpoint(
         experiment_dir / "adaptive_stage2_mask.json",
         {
             "threshold": sparse_config.sparsification.threshold,
+            "max_active_terms_per_row": sparse_config.sparsification.max_active_terms_per_row,
             "mask": mask.astype(int).tolist(),
             "active_counts": mask.sum(axis=1).astype(int).tolist(),
         },
@@ -293,6 +315,7 @@ def sparsify_encoder_from_checkpoint(
             "source_checkpoint": str(checkpoint_path),
             "method": method,
             "threshold": sparse_config.sparsification.threshold,
+            "max_active_terms_per_row": sparse_config.sparsification.max_active_terms_per_row,
             "source_S": source_S.tolist(),
             "trained_dense_S": dense_S.tolist(),
             "sparse_S_before_refit": sparse_S_before_refit.tolist(),
