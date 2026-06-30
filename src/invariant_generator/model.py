@@ -91,15 +91,40 @@ class SparseInvariantEncoder(nn.Module):
 
 
 class InvariantStandardizer(nn.Module):
-    """Non-trainable affine standardization for invariant features."""
+    """Non-trainable normalization for invariant features."""
 
-    def __init__(self, input_dim: int, *, eps: float = 1e-8) -> None:
+    VALID_MODES = {"standard", "scale_only"}
+
+    def __init__(
+        self,
+        input_dim: int,
+        *,
+        mode: str = "standard",
+        eps: float = 1e-8,
+    ) -> None:
         super().__init__()
         if input_dim <= 0:
             raise ValueError("input_dim must be positive.")
+        mode = mode.lower()
+        if mode not in self.VALID_MODES:
+            raise ValueError(
+                "normalization mode must be 'standard' or 'scale_only' "
+                f"when normalization is enabled, got {mode!r}."
+            )
+        self.mode = mode
         self.eps = float(eps)
         self.register_buffer("mean", torch.zeros(input_dim, dtype=torch.float32))
         self.register_buffer("std", torch.ones(input_dim, dtype=torch.float32))
+
+    @property
+    def center(self) -> bool:
+        return self.mode == "standard"
+
+    @property
+    def effective_mean(self) -> torch.Tensor:
+        if self.center:
+            return self.mean
+        return torch.zeros_like(self.mean)
 
     def set_statistics(self, mean: torch.Tensor, std: torch.Tensor) -> None:
         if mean.shape != self.mean.shape or std.shape != self.std.shape:
@@ -117,7 +142,7 @@ class InvariantStandardizer(nn.Module):
             )
 
     def forward(self, invariants: torch.Tensor) -> torch.Tensor:
-        return (invariants - self.mean) / self.std
+        return (invariants - self.effective_mean) / self.std
 
 
 class MLPRegressor(nn.Module):
@@ -220,9 +245,17 @@ class InvariantYieldModel(nn.Module):
         encoder: SparseInvariantEncoder | None = None
         regressor_input_dim = invariant_dim
 
-        if config.normalization.enabled:
+        normalization_mode = config.normalization.mode.lower()
+        if normalization_mode not in {"standard", "scale_only", "none"}:
+            raise ValueError(
+                "normalization.mode must be 'standard', 'scale_only', or 'none', "
+                f"got {config.normalization.mode!r}."
+            )
+
+        if config.normalization.enabled and normalization_mode != "none":
             normalizer = InvariantStandardizer(
                 invariant_dim,
+                mode=normalization_mode,
                 eps=config.normalization.eps,
             )
 
@@ -321,10 +354,11 @@ class InvariantYieldModel(nn.Module):
             return None
         return self.encoder.gates
 
-    def invariant_normalization_state(self) -> dict[str, list[float]] | None:
+    def invariant_normalization_state(self) -> dict[str, object] | None:
         if self.normalizer is None:
             return None
         return {
+            "mode": self.normalizer.mode,
             "mean": [float(value) for value in self.normalizer.mean.detach().cpu()],
             "std": [float(value) for value in self.normalizer.std.detach().cpu()],
             "eps": self.normalizer.eps,

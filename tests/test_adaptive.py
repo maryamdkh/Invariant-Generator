@@ -254,6 +254,24 @@ def test_formula_rendering_with_and_without_normalization():
     assert formula["normalized_formula"] == "J1 = 2*z_I1 + 4*z_I2"
     assert formula["raw_formula"] == "J1 = -9 + I1 + 0.8*I2"
 
+    config.normalization.mode = "scale_only"
+    scale_only_model = InvariantYieldModel.from_config(config)
+    assert scale_only_model.encoder is not None
+    assert scale_only_model.normalizer is not None
+    with torch.no_grad():
+        scale_only_model.encoder.raw_weight.copy_(torch.tensor(S, dtype=torch.float32))
+        scale_only_model.normalizer.set_statistics(
+            torch.tensor([1.0, 10.0]),
+            torch.tensor([2.0, 5.0]),
+        )
+
+    scale_only_report = encoder_formula_report(
+        scale_only_model,
+        ["I1", "I2"],
+        threshold=1e-12,
+    )
+    assert scale_only_report["formulas"][0]["raw_formula"] == "J1 = I1 + 0.8*I2"
+
     no_norm_intercept, no_norm_beta = encoder_to_raw_coefficients(S)
     np.testing.assert_allclose(no_norm_intercept, [0.0])
     np.testing.assert_allclose(no_norm_beta, S)

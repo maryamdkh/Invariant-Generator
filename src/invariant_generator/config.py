@@ -86,6 +86,10 @@ class EncoderConfig:
 @dataclass(slots=True)
 class InvariantNormalizationConfig:
     enabled: bool = False
+    # standard: (I - mean) / std
+    # scale_only: I / std, preserving first-degree homogeneity
+    # none: disable normalization even when enabled=true
+    mode: str = "standard"
     eps: float = 1e-8
     batch_size: int = 8192
 

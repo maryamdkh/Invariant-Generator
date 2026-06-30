@@ -72,7 +72,9 @@ def encoder_formula_report(
     mean = None
     std = None
     if normalizer is not None:
-        mean = normalizer.mean.detach().float().cpu().numpy().astype(np.float64)
+        mean = (
+            normalizer.effective_mean.detach().float().cpu().numpy().astype(np.float64)
+        )
         std = normalizer.std.detach().float().cpu().numpy().astype(np.float64)
 
     intercept, raw_coefficients = encoder_to_raw_coefficients(S_np, mean=mean, std=std)
@@ -114,7 +116,11 @@ def encoder_formula_report(
         if normalizer is None
         else {
             "mean": [float(value) for value in mean],
+            "observed_mean": [
+                float(value) for value in normalizer.mean.detach().float().cpu().numpy()
+            ],
             "std": [float(value) for value in std],
+            "mode": normalizer.mode,
         },
         "S": S_np.tolist(),
         "raw_intercept": intercept.tolist(),

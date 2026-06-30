@@ -44,6 +44,7 @@ init = "random"
 
 [normalization]
 enabled = true
+mode = "scale_only" # standard | scale_only | none. scale_only preserves J(k*sigma)=kJ(sigma).
 eps = 1e-8
 batch_size = 8192
 
@@ -55,7 +56,7 @@ output_activation = "softplus"
 [loss]
 lambda_param = 1e-6                # L2 regularization on the final neural regressor weights.
 lambda_structure = 1e-3            # Keeps trainable structural tensors a and A near unit norm.
-lambda_encoder_l1_ratio = 1e-3     # Scale-invariant sparsity pressure on S through ||S||_1 / ||S||_2.
+lambda_encoder_l1_ratio = 0     # Scale-invariant sparsity pressure on S through ||S||_1 / ||S||_2.
 lambda_encoder_l1 = 0.0            # Direct elementwise L1 sparsity pressure on S; usually set in [sparsification].
 lambda_encoder_l2 = 0.0            # Controls the total magnitude of S through ||S||_2.
 lambda_encoder_column_l2 = 0.0     # Encourages dropping whole input invariant columns of S.

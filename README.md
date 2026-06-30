@@ -54,6 +54,18 @@ The default rotated-hill config enables a recovery-oriented setup: hard PSD for
 before the encoder. This avoids the old `output_dim = 4` identity encoder bias
 toward `I1` through `I4`.
 
+Normalization supports three modes:
+
+```toml
+[normalization]
+enabled = true
+mode = "standard"   # (I - mean) / std
+```
+
+Use `mode = "scale_only"` for `I / std` when the encoded invariants `J` should
+remain first-degree homogeneous in stress. Use `mode = "none"` or
+`enabled = false` to disable invariant normalization.
+
 To prune a broad run and refit from scratch on the top-ranked invariants:
 
 ```bash

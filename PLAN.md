@@ -45,8 +45,12 @@ yield-surface value.
 4. **Optionally encode invariants**
    - If `[normalization].enabled = true`, the prepared training set is passed
      through the initial invariant pool once before optimization to compute
-     per-invariant mean and standard deviation. These statistics are stored as
-     non-trainable model buffers and standardize invariant features before the
+     per-invariant mean and standard deviation. With
+     `[normalization].mode = "standard"`, the encoder sees `(I - mean) / std`.
+     With `mode = "scale_only"`, the encoder sees `I / std`, preserving
+     first-degree homogeneous encoder outputs when the invariant pool is also
+     homogenized. These statistics are stored as
+     non-trainable model buffers and normalize invariant features before the
      encoder/regressor.
    - A linear encoder `S` can map the selected invariant vector to a smaller
      feature vector.
