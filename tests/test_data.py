@@ -17,6 +17,16 @@ def test_plane_stress_data_embeds_to_six_components():
     np.testing.assert_allclose(X6, [[1.0, 2.0, 0.0, 0.0, 0.0, 3.0]])
 
 
+def test_mandel_3d_data_converts_shear_components_to_voigt():
+    sqrt2 = np.sqrt(2.0)
+    X_mandel = np.array([[1.0, 2.0, 3.0, sqrt2 * 4.0, sqrt2 * 5.0, sqrt2 * 6.0]])
+
+    X6, names = canonicalize_stress_features(X_mandel, stress_format="mandel_3d")
+
+    assert names == ["s11", "s22", "s33", "s23", "s13", "s12"]
+    np.testing.assert_allclose(X6, [[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]])
+
+
 def test_homogeneous_augmentation_targets_follow_scaling_law():
     X = np.ones((2, 6), dtype=np.float64)
     X_aug, y_aug = augment_homogeneous_surface_data(

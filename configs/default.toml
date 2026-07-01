@@ -5,7 +5,7 @@
 data_dir = "data"
 dataset_name = "rotatedhill"
 dataset_key = "stress"
-stress_format = "voigt_3d"
+stress_format = "mandel_3d"
 feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"] # feature names
 test_size = 0.1
 random_state = 42

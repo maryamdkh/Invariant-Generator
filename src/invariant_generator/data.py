@@ -77,6 +77,8 @@ def canonicalize_stress_features(
     The invariant layer expects:
         [s11, s22, s33, s23, s13, s12]
 
+    Use stress_format="mandel_3d" for inputs ordered as
+    [s11, s22, s33, sqrt(2)*s23, sqrt(2)*s13, sqrt(2)*s12].
     Old 2D plane-stress datasets can be embedded by setting
     stress_format="plane_stress_2d"; they must be ordered as [s11, s22, s12].
     """
@@ -90,8 +92,19 @@ def canonicalize_stress_features(
                 "stress_format='voigt_3d' requires 6 columns ordered as "
                 "[s11, s22, s33, s23, s13, s12]. "
                 f"Got shape {X.shape}."
-            )
+        )
         return X.copy(), STRESS_NAMES.copy()
+
+    if stress_format == "mandel_3d":
+        if X.shape[1] != 6:
+            raise ValueError(
+                "stress_format='mandel_3d' requires 6 columns ordered as "
+                "[s11, s22, s33, sqrt(2)*s23, sqrt(2)*s13, sqrt(2)*s12]. "
+                f"Got shape {X.shape}."
+            )
+        X6 = X.copy()
+        X6[:, 3:] = X6[:, 3:] / np.sqrt(2.0)
+        return X6, STRESS_NAMES.copy()
 
     if stress_format == "plane_stress_2d":
         if X.shape[1] != 3:
@@ -107,7 +120,7 @@ def canonicalize_stress_features(
         return X6, STRESS_NAMES.copy()
 
     raise ValueError(
-        "stress_format must be either 'voigt_3d' or 'plane_stress_2d', "
+        "stress_format must be 'voigt_3d', 'mandel_3d', or 'plane_stress_2d', "
         f"got {stress_format!r}."
     )
 

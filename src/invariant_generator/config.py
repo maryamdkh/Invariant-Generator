@@ -18,7 +18,8 @@ class DataConfig:
     dataset_key: str = "stress"
 
     # Default order: [s11, s22, s33, s23, s13, s12].
-    # Set stress_format="plane_stress_2d" only for old 3-column datasets
+    # Set stress_format="mandel_3d" for 6-column datasets with sqrt(2)-scaled
+    # shear components. Set "plane_stress_2d" only for old 3-column datasets
     # ordered as [s11, s22, s12].
     stress_format: str = "voigt_3d"
     feature_names: list[str] = field(default_factory=lambda: STRESS_NAMES.copy())
