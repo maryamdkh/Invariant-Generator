@@ -5,7 +5,7 @@
 data_dir = "data"
 dataset_name = "rotatedhill"
 dataset_key = "stress"
-stress_format = "mandel_3d"
+stress_format = "mandel_3d" # this one has been changed
 feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
 test_size = 0.1
 random_state = 42
@@ -98,12 +98,12 @@ early_stopping_min_delta = 1e-7
 
 [adaptive]
 enabled = true
-results_subdir = "adaptive_rotatedhill_exp03" # Parent directory under [train].results_dir for all adaptive stages.
+results_subdir = "adaptive_rotatedhill_exp02" # Parent directory under [train].results_dir for all adaptive stages.
 stage1_subdir = "stage1"
 metric = "rmse"       # rmse | mse
 rmse_threshold = 1e-2
 mse_threshold = 1e-6
-max_generalization_gap = 1e-2   # Maximum allowed gap between train and test metric for accepting an n.
+max_generalization_gap = 1e-2  # Maximum allowed gap between train and test metric for accepting an n.
 n_min = 1
 n_max = 4             # 0 means number of selected invariants
 stop_on_first_success = true
@@ -115,12 +115,10 @@ summary_name = "adaptive_stage1_summary.json"
 enabled = true
 method = "gated"      # lasso | gated
 lambda_encoder_l1 = 1e-1 # Increase for stronger elementwise sparsity pressure before hard masking.
-lambda_gate = 5e-2
+lambda_gate = 3e-2
 gate_init_probability = 0.95
-threshold = 0.1      # Applied to normalized S weights, not the displayed raw-invariant coefficients.
-max_active_terms_per_row = 1 # Used when adaptive_max_active_terms=false.
-adaptive_max_active_terms = true
-max_active_terms_candidates = [1, 2, 3, 4] # Additive Stage 2 sweep: select the first cap that passes validation.
+threshold = 2e-2      # Applied to normalized S weights, not the displayed raw-invariant coefficients.
+max_active_terms_per_row = 3 # 0 disables the cap; positive values keep only the strongest terms in each J row.
 epochs = 10000
 learning_rate = 5e-5
 batch_size = 0
