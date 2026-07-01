@@ -98,14 +98,14 @@ early_stopping_min_delta = 1e-7
 
 [adaptive]
 enabled = true
-results_subdir = "adaptive_rotatedhill" # Parent directory under [train].results_dir for all adaptive stages.
+results_subdir = "adaptive_rotatedhill_exp03" # Parent directory under [train].results_dir for all adaptive stages.
 stage1_subdir = "stage1"
 metric = "rmse"       # rmse | mse
-rmse_threshold = 1e-3
+rmse_threshold = 1e-2
 mse_threshold = 1e-6
-max_generalization_gap = 1e-3   # Maximum allowed gap between train and test metric for accepting an n.
+max_generalization_gap = 1e-2   # Maximum allowed gap between train and test metric for accepting an n.
 n_min = 1
-n_max = 0             # 0 means number of selected invariants
+n_max = 4             # 0 means number of selected invariants
 stop_on_first_success = true
 patience = 0          # Additional consecutive passing dimensions required to confirm the first passing n.
 run_id_prefix = "n"
@@ -113,17 +113,19 @@ summary_name = "adaptive_stage1_summary.json"
 
 [sparsification]
 enabled = true
-method = "lasso"      # lasso | gated
-lambda_encoder_l1 = 1e-2 # Increase for stronger elementwise sparsity pressure before hard masking.
-lambda_gate = 1e-3
+method = "gated"      # lasso | gated
+lambda_encoder_l1 = 1e-1 # Increase for stronger elementwise sparsity pressure before hard masking.
+lambda_gate = 5e-2
 gate_init_probability = 0.95
-threshold = 1e-3      # Applied to normalized S weights, not the displayed raw-invariant coefficients.
-max_active_terms_per_row = 4 # 0 disables the cap; positive values keep only the strongest terms in each J row.
-epochs = 5000
-learning_rate = 1e-4
+threshold = 0.1      # Applied to normalized S weights, not the displayed raw-invariant coefficients.
+max_active_terms_per_row = 1 # Used when adaptive_max_active_terms=false.
+adaptive_max_active_terms = true
+max_active_terms_candidates = [1, 2, 3, 4] # Additive Stage 2 sweep: select the first cap that passes validation.
+epochs = 10000
+learning_rate = 5e-5
 batch_size = 0
-masked_refit_epochs = 5000
-masked_refit_learning_rate = 1e-4
+masked_refit_epochs = 10000
+masked_refit_learning_rate = 5e-5
 save_training_logs = true # Save Stage 2 sparsity/refit histories as separate JSON files for notebook plots.
 run_id = "stage2_sparse"
 summary_name = "adaptive_stage2_sparsify.json"

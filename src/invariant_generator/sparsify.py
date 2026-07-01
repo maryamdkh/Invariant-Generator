@@ -8,7 +8,11 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from invariant_generator.adaptive import adaptive_sparsification_run_id
+from invariant_generator.adaptive import (
+    adaptive_metric_threshold,
+    adaptive_run_passes,
+    adaptive_sparsification_run_id,
+)
 from invariant_generator.config import Config
 from invariant_generator.data import prepare_training_data
 from invariant_generator.evaluation import evaluate_model
@@ -97,6 +101,28 @@ def threshold_encoder_mask(
             mask[row_idx] = False
             mask[row_idx, ranked[:max_active]] = True
     return mask
+
+
+def active_term_candidates(config: Config) -> list[int]:
+    """Return Stage 2 active-term caps to evaluate."""
+    if config.sparsification.adaptive_max_active_terms:
+        candidates = list(config.sparsification.max_active_terms_candidates)
+        if not candidates:
+            input_dim = len(config.invariants.selected)
+            candidates = list(range(1, input_dim + 1))
+    else:
+        candidates = [int(config.sparsification.max_active_terms_per_row)]
+
+    normalized: list[int] = []
+    for value in candidates:
+        cap = int(value)
+        if cap < 0:
+            raise ValueError("max active term candidates must be >= 0.")
+        if cap not in normalized:
+            normalized.append(cap)
+    if not normalized:
+        raise ValueError("At least one max active term candidate is required.")
+    return normalized
 
 
 def _sparsity_penalty(
@@ -227,47 +253,128 @@ def sparsify_encoder_from_checkpoint(
         model.encoder.collapse_gates()
 
     dense_S = model.encoder_matrix().detach().float().cpu().numpy()
-    mask = threshold_encoder_mask(
-        dense_S,
-        threshold=sparse_config.sparsification.threshold,
-        max_active_terms_per_row=sparse_config.sparsification.max_active_terms_per_row,
-    )
-    apply_encoder_mask(model, mask)
-    sparse_S_before_refit = model.encoder_matrix().detach().float().cpu().numpy()
+    dense_state = deepcopy(model.state_dict())
+    metric, metric_threshold = adaptive_metric_threshold(sparse_config)
+    candidates = active_term_candidates(sparse_config)
+    candidate_results: list[dict[str, object]] = []
+    candidate_states: list[dict[str, torch.Tensor]] = []
+    selected_candidate: dict[str, object] | None = None
+    selected_state: dict[str, torch.Tensor] | None = None
 
-    refit_history = _train_sparse_epochs(
-        model,
-        sparse_config,
-        data=data,
-        device=device,
-        epochs=sparse_config.sparsification.masked_refit_epochs,
-        learning_rate=sparse_config.sparsification.masked_refit_learning_rate,
-        batch_size=sparse_config.sparsification.batch_size,
-        method="masked_refit",
-        mask=mask,
-    )
-    apply_encoder_mask(model, mask)
-    final_S = model.encoder_matrix().detach().float().cpu().numpy()
+    for cap in candidates:
+        model.load_state_dict(dense_state)
+        mask = threshold_encoder_mask(
+            dense_S,
+            threshold=sparse_config.sparsification.threshold,
+            max_active_terms_per_row=cap,
+        )
+        apply_encoder_mask(model, mask)
+        sparse_S_before_refit = model.encoder_matrix().detach().float().cpu().numpy()
 
-    train_metrics = evaluate_model(
-        model,
-        data.X_train,
-        data.y_train,
-        device=device,
-        batch_size=8192,
+        refit_history = _train_sparse_epochs(
+            model,
+            sparse_config,
+            data=data,
+            device=device,
+            epochs=sparse_config.sparsification.masked_refit_epochs,
+            learning_rate=sparse_config.sparsification.masked_refit_learning_rate,
+            batch_size=sparse_config.sparsification.batch_size,
+            method="masked_refit",
+            mask=mask,
+        )
+        apply_encoder_mask(model, mask)
+        final_S = model.encoder_matrix().detach().float().cpu().numpy()
+
+        train_metrics = evaluate_model(
+            model,
+            data.X_train,
+            data.y_train,
+            device=device,
+            batch_size=8192,
+        )
+        test_metrics = evaluate_model(
+            model,
+            data.X_test,
+            data.y_test,
+            device=device,
+            batch_size=8192,
+        )
+        formula_report = encoder_formula_report(
+            model,
+            sparse_config.invariants.selected,
+            threshold=sparse_config.sparsification.threshold,
+        )
+        passes = adaptive_run_passes(
+            train_metrics,
+            test_metrics,
+            metric=metric,
+            threshold=metric_threshold,
+            max_generalization_gap=sparse_config.adaptive.max_generalization_gap,
+        )
+        refit_history_path = None
+        if sparse_config.sparsification.save_training_logs:
+            suffix = "uncapped" if cap == 0 else f"cap{cap:02d}"
+            refit_history_path = save_json(
+                experiment_dir / f"adaptive_stage2_refit_{suffix}_history.json",
+                {
+                    "stage": "masked_refit",
+                    "method": "masked_refit",
+                    "max_active_terms_per_row": cap,
+                    "history": refit_history,
+                },
+            )
+        candidate = {
+            "max_active_terms_per_row": cap,
+            "threshold": sparse_config.sparsification.threshold,
+            "metric": metric,
+            "metric_threshold": metric_threshold,
+            "max_generalization_gap": sparse_config.adaptive.max_generalization_gap,
+            "passes": passes,
+            "sparse_S_before_refit": sparse_S_before_refit.tolist(),
+            "final_sparse_S": final_S.tolist(),
+            "mask": mask.astype(int).tolist(),
+            "active_counts": mask.sum(axis=1).astype(int).tolist(),
+            "train_metrics": train_metrics,
+            "test_metrics": test_metrics,
+            "refit_history": refit_history,
+            "refit_history_path": None
+            if refit_history_path is None
+            else str(refit_history_path),
+            "formulas": formula_report,
+        }
+        candidate_results.append(candidate)
+        candidate_states.append(deepcopy(model.state_dict()))
+
+        if (passes or not sparse_config.sparsification.adaptive_max_active_terms) and (
+            selected_candidate is None
+        ):
+            selected_candidate = candidate
+            selected_state = candidate_states[-1]
+            if sparse_config.sparsification.adaptive_max_active_terms:
+                break
+
+    if selected_candidate is None:
+        selected_index = min(
+            range(len(candidate_results)),
+            key=lambda idx: float(
+                candidate_results[idx]["test_metrics"][metric]  # type: ignore[index]
+            ),
+        )
+        selected_candidate = candidate_results[selected_index]
+        selected_state = candidate_states[selected_index]
+
+    model.load_state_dict(selected_state)
+    selected_cap = int(selected_candidate["max_active_terms_per_row"])
+    mask = np.asarray(selected_candidate["mask"], dtype=int)
+    sparse_S_before_refit = np.asarray(
+        selected_candidate["sparse_S_before_refit"],
+        dtype=float,
     )
-    test_metrics = evaluate_model(
-        model,
-        data.X_test,
-        data.y_test,
-        device=device,
-        batch_size=8192,
-    )
-    formula_report = encoder_formula_report(
-        model,
-        sparse_config.invariants.selected,
-        threshold=sparse_config.sparsification.threshold,
-    )
+    final_S = np.asarray(selected_candidate["final_sparse_S"], dtype=float)
+    train_metrics = selected_candidate["train_metrics"]
+    test_metrics = selected_candidate["test_metrics"]
+    formula_report = selected_candidate["formulas"]
+    refit_history = selected_candidate["refit_history"]
 
     checkpoint_out = experiment_dir / "checkpoint_best.pt"
     torch.save(
@@ -285,7 +392,7 @@ def sparsify_encoder_from_checkpoint(
         experiment_dir / "adaptive_stage2_mask.json",
         {
             "threshold": sparse_config.sparsification.threshold,
-            "max_active_terms_per_row": sparse_config.sparsification.max_active_terms_per_row,
+            "max_active_terms_per_row": selected_cap,
             "mask": mask.astype(int).tolist(),
             "active_counts": mask.sum(axis=1).astype(int).tolist(),
         },
@@ -306,6 +413,7 @@ def sparsify_encoder_from_checkpoint(
             {
                 "stage": "masked_refit",
                 "method": "masked_refit",
+                "max_active_terms_per_row": selected_cap,
                 "history": refit_history,
             },
         )
@@ -315,7 +423,15 @@ def sparsify_encoder_from_checkpoint(
             "source_checkpoint": str(checkpoint_path),
             "method": method,
             "threshold": sparse_config.sparsification.threshold,
-            "max_active_terms_per_row": sparse_config.sparsification.max_active_terms_per_row,
+            "adaptive_max_active_terms": sparse_config.sparsification.adaptive_max_active_terms,
+            "max_active_terms_candidates": candidates,
+            "max_active_terms_per_row": selected_cap,
+            "selected_max_active_terms_per_row": selected_cap,
+            "selection_metric": metric,
+            "selection_metric_threshold": metric_threshold,
+            "selection_max_generalization_gap": sparse_config.adaptive.max_generalization_gap,
+            "selected_candidate_passes": bool(selected_candidate["passes"]),
+            "candidate_results": candidate_results,
             "source_S": source_S.tolist(),
             "trained_dense_S": dense_S.tolist(),
             "sparse_S_before_refit": sparse_S_before_refit.tolist(),

@@ -204,6 +204,8 @@ class SparsificationConfig:
     gate_init_probability: float = 0.95
     threshold: float = 1e-3
     max_active_terms_per_row: int = 0
+    adaptive_max_active_terms: bool = False
+    max_active_terms_candidates: list[int] = field(default_factory=list)
     epochs: int = 1000
     learning_rate: float = 1e-4
     batch_size: int = 0
@@ -397,6 +399,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             "binary_operators",
             "unary_operators",
             "selected_invariants",
+            "max_active_terms_candidates",
         }:
             value = list(value)
         elif key == "maxdepth" and int(value) < 0:

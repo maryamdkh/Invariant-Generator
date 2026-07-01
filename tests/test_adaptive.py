@@ -12,7 +12,11 @@ from invariant_generator.adaptive_symbolic import compute_encoded_invariant_feat
 from invariant_generator.config import Config, load_config
 from invariant_generator.formulas import encoder_formula_report, encoder_to_raw_coefficients
 from invariant_generator.model import InvariantYieldModel
-from invariant_generator.sparsify import apply_encoder_mask, threshold_encoder_mask
+from invariant_generator.sparsify import (
+    active_term_candidates,
+    apply_encoder_mask,
+    threshold_encoder_mask,
+)
 from invariant_generator.train import TrainResult
 
 
@@ -27,6 +31,20 @@ def test_adaptive_stop_logic_supports_mse_and_rmse():
         metric="mse",
         threshold=1e-4,
     )
+
+
+def test_active_term_candidates_support_single_and_adaptive_modes():
+    config = Config()
+    config.sparsification.max_active_terms_per_row = 3
+    assert active_term_candidates(config) == [3]
+
+    config.sparsification.adaptive_max_active_terms = True
+    config.sparsification.max_active_terms_candidates = [1, 2, 2, 0]
+    assert active_term_candidates(config) == [1, 2, 0]
+
+    config.sparsification.max_active_terms_candidates = []
+    config.invariants.selected = ["I1", "I2", "I3"]
+    assert active_term_candidates(config) == [1, 2, 3]
     assert not adaptive_run_passes(
         {"mse": 9e-5},
         {"mse": 2e-4},
@@ -279,12 +297,14 @@ def test_formula_rendering_with_and_without_normalization():
 
 def test_adaptive_config_loads_new_sections():
     config = load_config(Path("configs") / "adaptive_encoder_rotated_hill.toml")
-    assert config.adaptive.results_subdir == "adaptive_rotatedhill"
+    assert config.adaptive.results_subdir == "adaptive_rotatedhill_exp03"
     assert config.adaptive.stage1_subdir == "stage1"
     assert config.adaptive.metric == "rmse"
     assert config.adaptive.patience == 0
-    assert config.sparsification.method in {"lasso", "gated"}
+    assert config.sparsification.method == "gated"
     assert config.sparsification.run_id == "stage2_sparse"
-    assert config.sparsification.max_active_terms_per_row == 4
+    assert config.sparsification.adaptive_max_active_terms is True
+    assert config.sparsification.max_active_terms_per_row == 1
+    assert config.sparsification.max_active_terms_candidates == [1, 2, 3, 4]
     assert config.symbolic.output_subdir == "stage3_pysr"
     assert config.symbolic.feature_space == "encoded_invariants"
