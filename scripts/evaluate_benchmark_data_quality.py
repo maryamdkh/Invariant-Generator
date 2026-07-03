@@ -18,7 +18,10 @@ def main() -> None:
     parser.add_argument(
         "--case",
         default=None,
-        help="Optional formula name. If omitted, evaluate all configured formulas.",
+        help=(
+            "Optional formula name from [benchmark].formula_names, e.g. "
+            "'single_H2'. If omitted, evaluate all configured formulas."
+        ),
     )
     args = parser.parse_args()
 

@@ -1,14 +1,48 @@
 [benchmark]
+# Enables benchmark-specific config loading. Normal training scripts ignore this
+# unless you call one of the benchmark scripts.
 enabled = true
+
+# Human-readable suite label used in aggregate reports.
 suite = "smoke"
+
+# Names of the hidden synthetic formulas to generate/evaluate. These names come
+# from FORMULA_REGISTRY in src/invariant_generator/benchmark.py:
+#   single_H2          -> f(sigma) = H2
+#   norm_H2_H5        -> sqrt((0.8 H2)^2 + (0.4 H5)^2)
+#   mixed_linear_norm -> sqrt((0.7 H1 - 0.2 H3)^2 + (0.5 H4 + 0.6 H8)^2)
+#   ratio_positive    -> sqrt((H1 H4)^2) / sqrt(H2^2 + H5^2)
+# Passing --case single_H2 to a benchmark script means "run only this one
+# formula"; omitting --case runs all formulas listed here.
 formula_names = ["single_H2", "norm_H2_H5", "mixed_linear_norm", "ratio_positive"]
+
+# Parent folder under [train].results_dir for generated datasets, metadata,
+# quality reports, pipeline outputs, and aggregate benchmark summaries.
 output_subdir = "self_eval_benchmark"
+
+# Number of unit-surface stress samples to save in each generated HDF dataset.
 n_samples = 2000
+
+# Number of random stress directions used when comparing true/recovered formulas
+# and when evaluating formula quality away from the generated surface.
 validation_samples = 10000
+
+# Number of random stress directions used to check f(k*sigma) ~= k*f(sigma).
 homogeneity_samples = 2048
+
+# Seed for synthetic stress-direction sampling and hidden structural tensors.
+# Changing this creates a different synthetic dataset for the same formula.
 direction_seed = 123
+
+# Seed for held-out random directions used in quality/recovery diagnostics.
 validation_seed = 321
+
+# Reject sampled directions whose hidden formula value is nonfinite or <= this.
+# This avoids projection blow-ups when sigma_surface = sigma / f(sigma).
 min_formula_value = 1e-8
+
+# Stop generation with an error if more than this fraction of attempted samples
+# must be rejected. High rejection usually means the formula is numerically poor.
 max_rejection_fraction = 0.95
 
 [invariants]

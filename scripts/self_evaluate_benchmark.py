@@ -18,7 +18,10 @@ def main() -> None:
     parser.add_argument(
         "--case",
         default=None,
-        help="Optional benchmark formula name to run instead of the full suite.",
+        help=(
+            "Optional formula name from [benchmark].formula_names, e.g. "
+            "'single_H2'. If omitted, run the full configured suite."
+        ),
     )
     parser.add_argument(
         "--stage",
