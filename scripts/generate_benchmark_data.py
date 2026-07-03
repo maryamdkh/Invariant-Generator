@@ -29,6 +29,7 @@ def main() -> None:
     for name in names:
         dataset = generate_benchmark_dataset(config, name)
         print(f"[INFO] {name}: dataset={dataset.dataset_path}")
+        print(f"[INFO] {name}: pipeline config={dataset.pipeline_config_path}")
         print(f"[INFO] {name}: metadata={dataset.metadata_path}")
         print(f"[INFO] {name}: quality={dataset.quality_path}")
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, is_dataclass
 from pathlib import Path
 import json
 import re
@@ -23,7 +23,7 @@ from invariant_generator.adaptive_symbolic import (
     compute_encoded_invariant_features,
     train_encoded_symbolic_from_config,
 )
-from invariant_generator.config import Config, INVARIANT_NAMES
+from invariant_generator.config import Config, INVARIANT_NAMES, PROJECT_ROOT, load_config
 from invariant_generator.data import canonicalize_stress_features
 from invariant_generator.invariants import INVARIANT_DEGREES, InvariantPool
 from invariant_generator.model import InvariantYieldModel
@@ -50,6 +50,7 @@ class GeneratedBenchmarkDataset:
     case_id: str
     formula: BenchmarkFormula
     dataset_path: Path
+    pipeline_config_path: Path
     metadata_path: Path
     quality_path: Path
     case_dir: Path
@@ -76,6 +77,10 @@ class BenchmarkResultRow:
 
 def _h(values: np.ndarray, index: int) -> np.ndarray:
     return values[:, index - 1]
+
+
+PIPELINE_CONFIG_NAME = "pipeline_config.toml"
+ADAPTIVE_TEMPLATE_CONFIG = PROJECT_ROOT / "configs" / "adaptive_encoder_rotated_hill.toml"
 
 
 FORMULA_REGISTRY: dict[str, BenchmarkFormula] = {
@@ -139,6 +144,130 @@ def benchmark_root(config: Config) -> Path:
 
 def case_id_for_formula(formula_name: str) -> str:
     return formula_name
+
+
+def _toml_key(key: str) -> str:
+    if re.fullmatch(r"[A-Za-z0-9_-]+", key):
+        return key
+    return json.dumps(key)
+
+
+def _toml_value(value: object, *, key: str | None = None) -> str:
+    if key == "maxdepth" and value is None:
+        return "-1"
+    if key == "k_values" and value is None:
+        return "[]"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, Path):
+        return json.dumps(str(value))
+    if isinstance(value, str):
+        return json.dumps(value)
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        return repr(value)
+    if isinstance(value, (list, tuple)):
+        return "[" + ", ".join(_toml_value(item) for item in value) + "]"
+    if isinstance(value, dict):
+        parts = [
+            f"{_toml_key(str(name))} = {_toml_value(item)}"
+            for name, item in value.items()
+        ]
+        return "{ " + ", ".join(parts) + " }"
+    if value is None:
+        raise ValueError(f"Cannot serialize None for TOML key {key!r}.")
+    raise TypeError(f"Unsupported TOML value for {key!r}: {type(value).__name__}")
+
+
+def _write_config_toml(config: Config, path: Path) -> Path:
+    section_order = [
+        "data",
+        "noise",
+        "augmentation",
+        "invariants",
+        "encoder",
+        "normalization",
+        "model",
+        "loss",
+        "constraints",
+        "train",
+        "adaptive",
+        "sparsification",
+        "symbolic",
+    ]
+    lines = [
+        "# Auto-generated synthetic benchmark pipeline config.",
+        "# Edit this file directly if you want to change training, adaptive,",
+        "# sparsification, or PySR settings for this specific synthetic case.",
+        "",
+    ]
+    for section_name in section_order:
+        section = getattr(config, section_name)
+        if section_name == "constraints":
+            lines.append("[constraints.A_psd]")
+            for field in fields(section.A_psd):
+                value = getattr(section.A_psd, field.name)
+                lines.append(f"{field.name} = {_toml_value(value, key=field.name)}")
+            lines.append("")
+            continue
+
+        if not is_dataclass(section):
+            continue
+        lines.append(f"[{section_name}]")
+        for field in fields(section):
+            value = getattr(section, field.name)
+            lines.append(f"{field.name} = {_toml_value(value, key=field.name)}")
+        lines.append("")
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def benchmark_case_config(
+    config: Config,
+    dataset: GeneratedBenchmarkDataset | Path,
+    formula_name: str,
+) -> Config:
+    pipeline_config = load_config(ADAPTIVE_TEMPLATE_CONFIG)
+    pipeline_config.benchmark = deepcopy(config.benchmark)
+
+    case_id = case_id_for_formula(formula_name)
+    dataset_path = dataset.dataset_path if isinstance(dataset, GeneratedBenchmarkDataset) else Path(dataset)
+    case_dir = benchmark_root(config) / case_id
+
+    pipeline_config.data.data_dir = dataset_path.parent.resolve()
+    pipeline_config.data.dataset_name = dataset_path.name
+    pipeline_config.data.dataset_key = config.benchmark.dataset_key
+    pipeline_config.data.stress_format = "mandel_3d"
+    pipeline_config.data.shuffle = True
+
+    pipeline_config.train.results_dir = config.train.results_dir.resolve()
+    pipeline_config.train.split_dir = (case_dir / "splits").resolve()
+    pipeline_config.train.use_saved_split = False
+    pipeline_config.train.save_split_if_missing = True
+    pipeline_config.train.run_id = str(Path(config.benchmark.output_subdir) / case_id / "base")
+
+    pipeline_config.adaptive.results_subdir = str(Path(config.benchmark.output_subdir) / case_id)
+    pipeline_config.sparsification.run_id = "stage2_sparse"
+    pipeline_config.symbolic.output_subdir = "stage3_pysr"
+    pipeline_config.symbolic.output_directory = (
+        config.train.results_dir / config.benchmark.output_subdir / case_id / "stage3_pysr"
+    ).resolve()
+    pipeline_config.symbolic.target_source = "data"
+    pipeline_config.symbolic.target_transform = "identity"
+    pipeline_config.symbolic.feature_space = "encoded_invariants"
+
+    pipeline_config.invariants.selected = INVARIANT_NAMES.copy()
+    pipeline_config.invariants.enable_second_order = True
+    pipeline_config.invariants.enable_fourth_order = True
+    pipeline_config.invariants.homogenize = True
+    pipeline_config.normalization.enabled = True
+    pipeline_config.normalization.mode = "scale_only"
+    pipeline_config.augmentation.homogeneity_degree = 1.0
+    pipeline_config.augmentation.surface_target = 1.0
+    return pipeline_config
 
 
 def _formula_seed_index(config: Config, formula_name: str) -> int:
@@ -255,6 +384,7 @@ def generate_benchmark_dataset(
     data_dir = case_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
     dataset_path = data_dir / f"{case_id}.hdf"
+    pipeline_config_path = case_dir / PIPELINE_CONFIG_NAME
     metadata_path = case_dir / "benchmark_metadata.json"
     quality_path = case_dir / "generation_quality.json"
 
@@ -350,6 +480,9 @@ def generate_benchmark_dataset(
     }
     save_json(quality_path, generation_quality)
 
+    pipeline_config = benchmark_case_config(config, dataset_path, formula.name)
+    _write_config_toml(pipeline_config, pipeline_config_path)
+
     metadata = {
         "case_id": case_id,
         "formula_name": formula.name,
@@ -364,6 +497,8 @@ def generate_benchmark_dataset(
         "stress_format": "mandel_3d",
         "dataset_key": config.benchmark.dataset_key,
         "dataset_path": str(dataset_path),
+        "pipeline_config_path": str(pipeline_config_path),
+        "pipeline_config_template": str(ADAPTIVE_TEMPLATE_CONFIG),
         "direction_seed": config.benchmark.direction_seed,
         "hidden_seed": hidden_seed,
         "generation_quality": generation_quality,
@@ -375,49 +510,12 @@ def generate_benchmark_dataset(
         case_id=case_id,
         formula=formula,
         dataset_path=dataset_path,
+        pipeline_config_path=pipeline_config_path,
         metadata_path=metadata_path,
         quality_path=quality_path,
         case_dir=case_dir,
         generation_quality=generation_quality,
     )
-
-
-def benchmark_case_config(
-    config: Config,
-    dataset: GeneratedBenchmarkDataset | Path,
-    formula_name: str,
-) -> Config:
-    case_config = deepcopy(config)
-    case_id = case_id_for_formula(formula_name)
-    dataset_path = dataset.dataset_path if isinstance(dataset, GeneratedBenchmarkDataset) else Path(dataset)
-
-    case_config.data.data_dir = dataset_path.parent
-    case_config.data.dataset_name = dataset_path.name
-    case_config.data.dataset_key = case_config.benchmark.dataset_key
-    case_config.data.stress_format = "mandel_3d"
-    case_config.data.shuffle = True
-
-    case_config.train.results_dir = config.train.results_dir
-    case_config.train.split_dir = benchmark_root(config) / case_id / "splits"
-    case_config.train.use_saved_split = False
-    case_config.train.save_split_if_missing = True
-    case_config.train.run_id = str(Path(case_config.benchmark.output_subdir) / case_id / "base")
-
-    case_config.adaptive.results_subdir = str(Path(case_config.benchmark.output_subdir) / case_id)
-    case_config.sparsification.run_id = "stage2_sparse"
-    case_config.symbolic.output_subdir = "stage3_pysr"
-    case_config.symbolic.target_source = "data"
-    case_config.symbolic.target_transform = "identity"
-
-    case_config.invariants.selected = INVARIANT_NAMES.copy()
-    case_config.invariants.enable_second_order = True
-    case_config.invariants.enable_fourth_order = True
-    case_config.invariants.homogenize = True
-    case_config.normalization.enabled = True
-    case_config.normalization.mode = "scale_only"
-    case_config.augmentation.homogeneity_degree = 1.0
-    case_config.augmentation.surface_target = 1.0
-    return case_config
 
 
 def _load_json(path: str | Path) -> dict[str, object]:
@@ -437,11 +535,15 @@ def _load_generated_dataset(config: Config, formula_name: str) -> GeneratedBench
         )
     metadata = _load_json(metadata_path)
     dataset_path = Path(str(metadata["dataset_path"]))
+    pipeline_config_path = Path(
+        str(metadata.get("pipeline_config_path", case_dir / PIPELINE_CONFIG_NAME))
+    )
     quality = _load_json(quality_path) if quality_path.exists() else {}
     return GeneratedBenchmarkDataset(
         case_id=case_id,
         formula=formula,
         dataset_path=dataset_path,
+        pipeline_config_path=pipeline_config_path,
         metadata_path=metadata_path,
         quality_path=quality_path,
         case_dir=case_dir,

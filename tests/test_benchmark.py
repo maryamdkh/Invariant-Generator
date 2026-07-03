@@ -17,7 +17,7 @@ from invariant_generator.benchmark import (
     run_benchmark_suite,
 )
 from invariant_generator.utils import save_json
-from invariant_generator.config import Config
+from invariant_generator.config import Config, load_config
 from invariant_generator.data import canonicalize_stress_features
 
 
@@ -51,9 +51,17 @@ def test_generate_benchmark_dataset_saves_surface_points(tmp_path):
     dataset = generate_benchmark_dataset(config, "single_H2")
 
     assert dataset.dataset_path.exists()
+    assert dataset.pipeline_config_path.exists()
     assert dataset.metadata_path.exists()
     assert dataset.quality_path.exists()
     assert dataset.generation_quality["surface_value_max_abs_error"] < 1e-5
+
+    pipeline_config = load_config(dataset.pipeline_config_path)
+    assert pipeline_config.data.data_dir == dataset.dataset_path.parent
+    assert pipeline_config.data.dataset_name == dataset.dataset_path.name
+    assert pipeline_config.data.stress_format == "mandel_3d"
+    assert pipeline_config.adaptive.results_subdir == "bench/single_H2"
+    assert pipeline_config.normalization.mode == "scale_only"
 
     with h5py.File(dataset.dataset_path, "r") as h5:
         X_mandel = np.asarray(h5["stress"], dtype=np.float64)
