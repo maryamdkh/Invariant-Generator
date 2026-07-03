@@ -48,6 +48,16 @@ def test_default_toml_can_omit_selected_invariants():
     assert config.symbolic.weight_mode == "inverse_target_squared"
 
 
+def test_benchmark_config_loads_from_toml():
+    config = load_config("configs/self_eval_benchmark.toml")
+
+    assert config.benchmark.enabled is True
+    assert config.benchmark.suite == "smoke"
+    assert config.benchmark.formula_names[0] == "single_H2"
+    assert config.normalization.mode == "scale_only"
+    assert config.symbolic.output_subdir == "stage3_pysr"
+
+
 def test_checkpoint_style_shallow_restore_rebuilds_nested_constraints():
     original = Config()
     original.constraints.A_psd.enabled = True

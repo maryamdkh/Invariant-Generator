@@ -322,6 +322,36 @@ class SymbolicConfig:
     early_stop_condition:str = "stop_if(loss, complexity) = loss < 1e-17" #(loss < 0.1) && (complexity < 10)
 
 
+@dataclass(slots=True)
+class BenchmarkConfig:
+    enabled: bool = False
+    suite: str = "smoke"
+    formula_names: list[str] = field(
+        default_factory=lambda: [
+            "single_H2",
+            "norm_H2_H5",
+            "mixed_linear_norm",
+            "ratio_positive",
+        ]
+    )
+    output_subdir: str = "self_eval_benchmark"
+    dataset_key: str = "stress"
+
+    n_samples: int = 2000
+    batch_size: int = 4096
+    direction_seed: int = 123
+    validation_samples: int = 10000
+    validation_seed: int = 321
+    homogeneity_samples: int = 2048
+    min_formula_value: float = 1e-8
+    max_rejection_fraction: float = 0.95
+
+    exact_relative_l2: float = 1e-6
+    numerical_relative_l2: float = 1e-3
+    max_relative_error: float = 1e-2
+    homogeneity_k_min: float = 0.25
+    homogeneity_k_max: float = 2.0
+
 
 @dataclass(slots=True)
 class Config:
@@ -340,6 +370,7 @@ class Config:
     adaptive: AdaptiveSweepConfig = field(default_factory=AdaptiveSweepConfig)
     sparsification: SparsificationConfig = field(default_factory=SparsificationConfig)
     symbolic: SymbolicConfig = field(default_factory=SymbolicConfig)
+    benchmark: BenchmarkConfig = field(default_factory=BenchmarkConfig)
 
     @property
     def experiment_dir(self) -> Path:
@@ -400,6 +431,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             "unary_operators",
             "selected_invariants",
             "max_active_terms_candidates",
+            "formula_names",
         }:
             value = list(value)
         elif key == "maxdepth" and int(value) < 0:

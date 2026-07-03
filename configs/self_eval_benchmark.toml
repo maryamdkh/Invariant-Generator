@@ -1,0 +1,148 @@
+[benchmark]
+enabled = true
+suite = "smoke"
+formula_names = ["single_H2", "norm_H2_H5", "mixed_linear_norm", "ratio_positive"]
+output_subdir = "self_eval_benchmark"
+n_samples = 2000
+validation_samples = 10000
+homogeneity_samples = 2048
+direction_seed = 123
+validation_seed = 321
+min_formula_value = 1e-8
+max_rejection_fraction = 0.95
+
+[invariants]
+enable_second_order = true
+enable_fourth_order = true
+homogenize = true
+init_scale = 0.05
+eps = 1e-12
+
+[normalization]
+enabled = true
+mode = "scale_only"
+eps = 1e-8
+batch_size = 8192
+
+[augmentation]
+enabled = true
+include_original = true
+augment_test = true
+n_aug_per_sample = 5
+k_range = [0.5, 1.75]
+homogeneity_degree = 1.0
+surface_target = 1.0
+
+[encoder]
+enabled = true
+output_dim = 0
+init = "identity"
+
+[model]
+hidden_dims = [64, 64]
+activation = "silu"
+output_activation = "softplus"
+
+[loss]
+lambda_structure = 1e-3
+lambda_encoder_l1_ratio = 1e-3
+lambda_encoder_l1 = 0.0
+lambda_encoder_l2 = 0.0
+lambda_encoder_column_l2 = 0.25
+eps = 1e-12
+
+[constraints.A_psd]
+enabled = true
+mode = "hard"
+target = "fourth_order_A"
+basis = "mandel"
+min_eigenvalue = 0.0
+
+[train]
+run_id = "self_eval_benchmark_base"
+results_dir = "results"
+split_dir = "results/splits"
+use_saved_split = false
+save_split_if_missing = true
+seed = 42
+epochs = 1000
+batch_size = 0
+learning_rate = 1e-3
+grad_clip_norm = 10.0
+device = "auto"
+log_every = 50
+save_every = 100
+lr_plateau_enabled = true
+lr_plateau_factor = 0.5
+lr_plateau_patience = 20
+lr_plateau_min_lr = 1e-7
+lr_plateau_min_delta = 1e-6
+early_stopping_enabled = true
+early_stopping_patience = 100
+early_stopping_min_delta = 1e-7
+
+[adaptive]
+enabled = true
+results_subdir = "self_eval_benchmark"
+stage1_subdir = "stage1"
+metric = "rmse"
+rmse_threshold = 1e-3
+mse_threshold = 1e-6
+n_min = 1
+n_max = 0
+stop_on_first_success = true
+patience = 0
+run_id_prefix = "n"
+summary_name = "adaptive_stage1_summary.json"
+
+[sparsification]
+enabled = true
+method = "lasso"
+lambda_encoder_l1 = 1e-3
+threshold = 1e-3
+max_active_terms_per_row = 0
+adaptive_max_active_terms = false
+epochs = 1000
+learning_rate = 1e-4
+batch_size = 0
+masked_refit_epochs = 1000
+masked_refit_learning_rate = 1e-4
+save_training_logs = true
+run_id = "stage2_sparse"
+summary_name = "adaptive_stage2_sparsify.json"
+
+[symbolic]
+top_k = 3
+feature_selection = "scaled_encoder_norm"
+selected_invariants = []
+target_transform = "identity"
+target_source = "data"
+feature_space = "raw_invariants"
+random_state = 42
+output_subdir = "stage3_pysr"
+output_directory = "results"
+run_id = "self_eval_pysr"
+niterations = 100000
+timeout_hours = 2.0
+warm_start = false
+parallelism = "multithreading"
+numprocs = 4
+batching = true
+batch_size = 100
+populations = 24
+population_size = 50
+ncycles_per_iteration = 5000
+model_selection = "best"
+elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
+weight_mode = "inverse_target_squared"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "sqrt"]
+maxsize = 120
+maxdepth = -1
+parsimony = 0.0
+complexity_of_constants = 2
+constraints = { square = 10, sqrt = 90, "*" = [8, 8] }
+nested_constraints = { square = { square = 1 }, sqrt = { sqrt = 0 } }
+precision = 64
+progress = true
+early_stop_condition = "stop_if(loss, complexity) = loss < 1e-17"
