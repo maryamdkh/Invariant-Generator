@@ -10,6 +10,7 @@ from invariant_generator.adaptive import (
 )
 from invariant_generator.adaptive_symbolic import train_encoded_symbolic_from_config
 from invariant_generator.config import load_config
+from invariant_generator.report import create_adaptive_analysis_notebook
 from invariant_generator.sparsify import sparsify_encoder_from_checkpoint
 
 
@@ -89,6 +90,11 @@ def main() -> None:
         print(f"[INFO] Formulas:         {result.formulas_path}")
         print(f"[INFO] Best equation:    {result.best_equation}")
         print(f"[INFO] Metrics:          {result.metrics_path}")
+        notebook_path = create_adaptive_analysis_notebook(
+            symbolic_config,
+            config_path=args.config,
+        )
+        print(f"[INFO] Analysis notebook: {notebook_path}")
 
 
 if __name__ == "__main__":
