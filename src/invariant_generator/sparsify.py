@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+from tqdm.auto import trange
 
 from invariant_generator.adaptive import (
     adaptive_metric_threshold,
@@ -155,6 +156,7 @@ def _train_sparse_epochs(
     batch_size: int,
     method: str,
     mask: np.ndarray | None = None,
+    desc: str | None = None,
 ) -> list[dict[str, float | int]]:
     if epochs <= 0:
         return []
@@ -163,8 +165,10 @@ def _train_sparse_epochs(
     optimizer = torch.optim.Adam(model.parameters(), lr=float(learning_rate))
     loader = _make_loader(data.X_train, data.y_train, batch_size=batch_size, shuffle=True)
     history: list[dict[str, float | int]] = []
+    progress_desc = desc or f"stage2 {method}"
+    progress = trange(1, int(epochs) + 1, desc=progress_desc)
 
-    for epoch in range(1, int(epochs) + 1):
+    for epoch in progress:
         model.train()
         total = 0.0
         data_loss = 0.0
@@ -192,12 +196,18 @@ def _train_sparse_epochs(
             data_loss += float(loss.data.detach().cpu())
             sparsity_loss += float(sparsity.detach().cpu())
 
-        history.append(
+        row = {
+            "epoch": epoch,
+            "loss_total": total,
+            "loss_data": data_loss,
+            "loss_sparsity": sparsity_loss,
+        }
+        history.append(row)
+        progress.set_postfix(
             {
-                "epoch": epoch,
-                "loss_total": total,
-                "loss_data": data_loss,
-                "loss_sparsity": sparsity_loss,
+                "loss": f"{total:.4g}",
+                "data": f"{data_loss:.4g}",
+                "sparse": f"{sparsity_loss:.4g}",
             }
         )
     return history
@@ -248,6 +258,7 @@ def sparsify_encoder_from_checkpoint(
         learning_rate=sparse_config.sparsification.learning_rate,
         batch_size=sparse_config.sparsification.batch_size,
         method=method,
+        desc=f"stage2 sparsity ({method})",
     )
     if model.encoder.gates is not None:
         model.encoder.collapse_gates()
@@ -281,6 +292,7 @@ def sparsify_encoder_from_checkpoint(
             batch_size=sparse_config.sparsification.batch_size,
             method="masked_refit",
             mask=mask,
+            desc=f"stage2 masked refit (cap={cap})",
         )
         apply_encoder_mask(model, mask)
         final_S = model.encoder_matrix().detach().float().cpu().numpy()
