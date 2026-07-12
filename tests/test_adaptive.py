@@ -303,9 +303,9 @@ def test_adaptive_config_loads_new_sections():
     assert config.adaptive.patience == 0
     assert config.sparsification.method == "gated"
     assert config.sparsification.run_id == "stage2_sparse"
-    assert config.sparsification.adaptive_max_active_terms is False
-    assert config.sparsification.max_active_terms_per_row == 3
-    assert config.sparsification.max_active_terms_candidates == []
+    assert config.sparsification.adaptive_max_active_terms is True
+    assert config.sparsification.max_active_terms_per_row == 1
+    assert config.sparsification.max_active_terms_candidates == [1, 2, 3, 4]
     assert config.train_input_noise.enabled is False
     assert config.train_input_noise.probability == 1.0
     assert config.symbolic.output_subdir == "stage3_pysr"
