@@ -81,9 +81,10 @@ import matplotlib.pyplot as plt
 
 from invariant_generator.adaptive import adaptive_sparsification_run_id
 from invariant_generator.config import load_config
-from invariant_generator.data import prepare_training_data
+from invariant_generator.data import canonicalize_stress_features, load_hdf_dataset, prepare_training_data, split_surface_data
 from invariant_generator.evaluation import evaluate_model, predict_numpy
 from invariant_generator.model import InvariantYieldModel
+from invariant_generator.stress_viz import plot_stress_space_summary, simulate_train_input_noise
 from invariant_generator.utils import resolve_device
 
 CONFIG_PATH = {config_literal}
@@ -109,6 +110,65 @@ def load_json(path):
         return None
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
+"""
+        ),
+        _markdown("## Stress-Space Data EDA"),
+        _code(
+            """
+if CONFIG_PATH is None:
+    print("No config path is embedded in this notebook.")
+else:
+    config = load_config(CONFIG_PATH)
+    X_raw = load_hdf_dataset(
+        config.data.data_dir,
+        config.data.dataset_name,
+        dataset_key=config.data.dataset_key,
+    )
+    X_clean, _ = canonicalize_stress_features(
+        X_raw,
+        stress_format=config.data.stress_format,
+    )
+    X_train_raw, X_test_raw, _ = split_surface_data(
+        X_clean,
+        test_size=config.data.test_size,
+        random_state=config.data.random_state,
+        shuffle=config.data.shuffle,
+        split_path=config.split_path,
+        load_if_exists=config.train.use_saved_split,
+        save_if_missing=config.train.save_split_if_missing,
+        surface_target=config.augmentation.surface_target,
+    )
+    print("raw train surface:", X_train_raw.shape)
+    print("raw test surface:", X_test_raw.shape)
+
+    noise_cfg = config.train_input_noise
+    if noise_cfg.enabled:
+        X_train_view = simulate_train_input_noise(
+            X_train_raw,
+            scale=noise_cfg.scale,
+            probability=noise_cfg.probability,
+            seed=noise_cfg.random_state,
+            relative_to_feature_std=noise_cfg.relative_to_feature_std,
+        )
+        title = (
+            "Raw train surface with simulated train-time noise "
+            f"(scale={noise_cfg.scale:g}, p={noise_cfg.probability:g})"
+        )
+        fig = plot_stress_space_summary(
+            X_train_raw,
+            noisy=X_train_view,
+            title=title,
+            max_samples=5000,
+            seed=noise_cfg.random_state,
+        )
+    else:
+        fig = plot_stress_space_summary(
+            X_train_raw,
+            title="Raw clean train surface",
+            max_samples=5000,
+            seed=config.data.random_state,
+        )
+    plt.show()
 """
         ),
         _markdown("## Stage 1: Adaptive n Sweep"),
