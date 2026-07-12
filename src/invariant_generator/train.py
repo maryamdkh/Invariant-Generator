@@ -55,6 +55,98 @@ def _make_loader(
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 
 
+def _train_input_noise_feature_scale(
+    X: np.ndarray,
+    *,
+    relative_to_feature_std: bool,
+) -> np.ndarray:
+    X = np.asarray(X, dtype=np.float64)
+    if not relative_to_feature_std:
+        return np.ones(X.shape[1], dtype=np.float64)
+    feature_std = X.std(axis=0, ddof=0)
+    return np.where(feature_std == 0.0, 1.0, feature_std)
+
+
+def _make_train_noise_generator(
+    *,
+    seed: int,
+    device: torch.device,
+) -> torch.Generator:
+    # MPS does not consistently support device generators across PyTorch
+    # versions, so draw noise on CPU and move it when needed.
+    generator_device = "cpu" if device.type == "mps" else device
+    generator = torch.Generator(device=generator_device)
+    generator.manual_seed(int(seed))
+    return generator
+
+
+def _rand_like_for_generator(
+    shape: torch.Size | tuple[int, ...],
+    *,
+    dtype: torch.dtype,
+    device: torch.device,
+    generator: torch.Generator,
+) -> torch.Tensor:
+    random_device = generator.device
+    values = torch.rand(shape, dtype=dtype, device=random_device, generator=generator)
+    return values.to(device=device)
+
+
+def _randn_like_for_generator(
+    shape: torch.Size | tuple[int, ...],
+    *,
+    dtype: torch.dtype,
+    device: torch.device,
+    generator: torch.Generator,
+) -> torch.Tensor:
+    random_device = generator.device
+    values = torch.randn(shape, dtype=dtype, device=random_device, generator=generator)
+    return values.to(device=device)
+
+
+def apply_train_input_noise(
+    X_batch: torch.Tensor,
+    *,
+    enabled: bool,
+    scale: float,
+    probability: float,
+    feature_scale: torch.Tensor,
+    generator: torch.Generator,
+) -> torch.Tensor:
+    if scale < 0:
+        raise ValueError("train_input_noise.scale must be >= 0.")
+    if not 0.0 <= probability <= 1.0:
+        raise ValueError("train_input_noise.probability must be in [0, 1].")
+    if (
+        not enabled
+        or scale == 0.0
+        or probability == 0.0
+        or X_batch.numel() == 0
+    ):
+        return X_batch
+
+    if feature_scale.shape != X_batch.shape[-1:]:
+        raise ValueError(
+            "train_input_noise feature scale must match stress dimension. "
+            f"Got {tuple(feature_scale.shape)}, expected {(X_batch.shape[-1],)}."
+        )
+
+    mask = _rand_like_for_generator(
+        (X_batch.shape[0], 1),
+        dtype=X_batch.dtype,
+        device=X_batch.device,
+        generator=generator,
+    ) < float(probability)
+    noise = _randn_like_for_generator(
+        X_batch.shape,
+        dtype=X_batch.dtype,
+        device=X_batch.device,
+        generator=generator,
+    )
+    noise = noise * feature_scale.to(dtype=X_batch.dtype, device=X_batch.device)
+    return X_batch + mask.to(dtype=X_batch.dtype) * float(scale) * noise
+
+
 def _save_checkpoint(
     path: Path,
     *,
@@ -269,6 +361,20 @@ def train_from_config(config: Config) -> TrainResult:
         batch_size=config.train.batch_size,
         shuffle=True,
     )
+    train_noise = config.train_input_noise
+    train_noise_feature_scale_np = _train_input_noise_feature_scale(
+        data.X_train,
+        relative_to_feature_std=train_noise.relative_to_feature_std,
+    )
+    train_noise_feature_scale = torch.as_tensor(
+        train_noise_feature_scale_np,
+        dtype=torch.float32,
+        device=device,
+    )
+    train_noise_generator = _make_train_noise_generator(
+        seed=train_noise.random_state,
+        device=device,
+    )
 
     history: list[dict[str, float | int | str]] = []
     best_test_mse = float("inf")
@@ -289,6 +395,13 @@ def train_from_config(config: Config) -> TrainResult:
     print(f"[INFO] Results dir:  {experiment_dir}")
     print(f"[INFO] Initial LR:   {_current_learning_rate(optimizer):.6g}")
     print(f"[INFO] Stop file:    {config.train.stop_file}")
+    if train_noise.enabled:
+        print(
+            "[INFO] Train noise:  "
+            f"scale={train_noise.scale:g}, "
+            f"probability={train_noise.probability:g}, "
+            f"relative_to_feature_std={train_noise.relative_to_feature_std}"
+        )
     print(
         "[INFO] Trainable params: "
         f"{parameter_counts['trainable']} "
@@ -325,6 +438,14 @@ def train_from_config(config: Config) -> TrainResult:
         for X_batch, y_batch in loader:
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
+            X_batch = apply_train_input_noise(
+                X_batch,
+                enabled=train_noise.enabled,
+                scale=train_noise.scale,
+                probability=train_noise.probability,
+                feature_scale=train_noise_feature_scale,
+                generator=train_noise_generator,
+            )
 
             optimizer.zero_grad(set_to_none=True)
             prediction = model(X_batch)
@@ -558,6 +679,8 @@ def train_from_config(config: Config) -> TrainResult:
             "encoder_input_feature_statistics": final_encoder_input_stats,
             "encoder_score_diagnostics": final_encoder_scores,
             "invariant_normalization": model.invariant_normalization_state(),
+            "train_input_noise": to_jsonable(config.train_input_noise),
+            "train_input_noise_feature_scale": train_noise_feature_scale_np.tolist(),
         },
     )
 

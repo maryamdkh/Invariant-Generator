@@ -5,7 +5,73 @@ import numpy as np
 import torch
 
 from invariant_generator.config import Config
-from invariant_generator.train import train_from_config
+from invariant_generator.train import (
+    _make_train_noise_generator,
+    apply_train_input_noise,
+    train_from_config,
+)
+
+
+def test_train_input_noise_disabled_zero_scale_or_zero_probability_leaves_batch():
+    X = torch.ones((4, 6), dtype=torch.float32)
+    feature_scale = torch.ones(6, dtype=torch.float32)
+    generator = _make_train_noise_generator(seed=123, device=torch.device("cpu"))
+
+    disabled = apply_train_input_noise(
+        X,
+        enabled=False,
+        scale=1.0,
+        probability=1.0,
+        feature_scale=feature_scale,
+        generator=generator,
+    )
+    zero_scale = apply_train_input_noise(
+        X,
+        enabled=True,
+        scale=0.0,
+        probability=1.0,
+        feature_scale=feature_scale,
+        generator=generator,
+    )
+    zero_probability = apply_train_input_noise(
+        X,
+        enabled=True,
+        scale=1.0,
+        probability=0.0,
+        feature_scale=feature_scale,
+        generator=generator,
+    )
+
+    torch.testing.assert_close(disabled, X)
+    torch.testing.assert_close(zero_scale, X)
+    torch.testing.assert_close(zero_probability, X)
+
+
+def test_train_input_noise_is_seed_deterministic_and_perturbs_all_samples():
+    X = torch.ones((4, 6), dtype=torch.float32)
+    feature_scale = torch.arange(1, 7, dtype=torch.float32)
+    generator_a = _make_train_noise_generator(seed=123, device=torch.device("cpu"))
+    generator_b = _make_train_noise_generator(seed=123, device=torch.device("cpu"))
+
+    noisy_a = apply_train_input_noise(
+        X,
+        enabled=True,
+        scale=0.1,
+        probability=1.0,
+        feature_scale=feature_scale,
+        generator=generator_a,
+    )
+    noisy_b = apply_train_input_noise(
+        X,
+        enabled=True,
+        scale=0.1,
+        probability=1.0,
+        feature_scale=feature_scale,
+        generator=generator_b,
+    )
+
+    torch.testing.assert_close(noisy_a, noisy_b)
+    assert torch.all(torch.any(noisy_a != X, dim=1))
 
 
 def test_successful_training_keeps_only_best_checkpoint(tmp_path):
@@ -50,6 +116,10 @@ def test_successful_training_keeps_only_best_checkpoint(tmp_path):
     config.train.log_every = 1
     config.train.batch_size = 0
     config.train.device = "cpu"
+    config.train_input_noise.enabled = True
+    config.train_input_noise.scale = 0.01
+    config.train_input_noise.probability = 0.5
+    config.train_input_noise.random_state = 7
 
     result = train_from_config(config)
 
@@ -66,6 +136,10 @@ def test_successful_training_keeps_only_best_checkpoint(tmp_path):
     assert payload["final_test_loss"]["loss_data"] >= 0.0
     assert payload["invariant_normalization"] is not None
     assert payload["encoder_input_feature_statistics"]["normalized"] is True
+    assert payload["train_input_noise"]["enabled"] is True
+    assert payload["train_input_noise"]["scale"] == 0.01
+    assert payload["train_input_noise"]["probability"] == 0.5
+    assert len(payload["train_input_noise_feature_scale"]) == 6
 
     last_row = payload["history"][-1]
     for key in [

@@ -20,6 +20,11 @@ from invariant_generator.evaluation import evaluate_model
 from invariant_generator.formulas import encoder_formula_report
 from invariant_generator.losses import YieldSurfaceLoss
 from invariant_generator.model import InvariantYieldModel
+from invariant_generator.train import (
+    _make_train_noise_generator,
+    _train_input_noise_feature_scale,
+    apply_train_input_noise,
+)
 from invariant_generator.utils import (
     resolve_device,
     save_config_snapshot,
@@ -164,6 +169,20 @@ def _train_sparse_epochs(
     criterion = YieldSurfaceLoss(config.loss, config.constraints)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(learning_rate))
     loader = _make_loader(data.X_train, data.y_train, batch_size=batch_size, shuffle=True)
+    train_noise = config.train_input_noise
+    train_noise_feature_scale_np = _train_input_noise_feature_scale(
+        data.X_train,
+        relative_to_feature_std=train_noise.relative_to_feature_std,
+    )
+    train_noise_feature_scale = torch.as_tensor(
+        train_noise_feature_scale_np,
+        dtype=torch.float32,
+        device=device,
+    )
+    train_noise_generator = _make_train_noise_generator(
+        seed=train_noise.random_state,
+        device=device,
+    )
     history: list[dict[str, float | int]] = []
     progress_desc = desc or f"stage2 {method}"
     progress = trange(1, int(epochs) + 1, desc=progress_desc)
@@ -176,6 +195,14 @@ def _train_sparse_epochs(
         for X_batch, y_batch in loader:
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
+            X_batch = apply_train_input_noise(
+                X_batch,
+                enabled=train_noise.enabled,
+                scale=train_noise.scale,
+                probability=train_noise.probability,
+                feature_scale=train_noise_feature_scale,
+                generator=train_noise_generator,
+            )
             optimizer.zero_grad(set_to_none=True)
             prediction = model(X_batch)
             loss = criterion(model, prediction, y_batch)

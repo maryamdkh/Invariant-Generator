@@ -184,6 +184,7 @@ def _write_config_toml(config: Config, path: Path) -> Path:
     section_order = [
         "data",
         "noise",
+        "train_input_noise",
         "augmentation",
         "invariants",
         "encoder",

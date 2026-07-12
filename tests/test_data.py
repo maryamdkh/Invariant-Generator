@@ -82,3 +82,49 @@ def test_prepare_training_data_can_augment_test_targets(tmp_path):
     np.testing.assert_allclose(data.X_test[1], X[1])
     np.testing.assert_allclose(data.X_test[2], 0.5 * X[0])
     np.testing.assert_allclose(data.X_test[3], 2.0 * X[0])
+
+
+def test_prepare_training_data_ignores_legacy_noise_config(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    X = np.array(
+        [
+            [1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    with h5py.File(data_dir / "toy.h5", "w") as f:
+        f.create_dataset("stress", data=X)
+
+    clean_config = Config()
+    clean_config.data.data_dir = data_dir
+    clean_config.data.dataset_name = "toy"
+    clean_config.data.dataset_key = "stress"
+    clean_config.data.test_size = 0.5
+    clean_config.data.shuffle = False
+    clean_config.train.split_dir = tmp_path / "splits"
+    clean_config.train.use_saved_split = False
+    clean_config.train.save_split_if_missing = False
+    clean_config.augmentation.enabled = False
+
+    noisy_config = Config()
+    noisy_config.data.data_dir = data_dir
+    noisy_config.data.dataset_name = "toy"
+    noisy_config.data.dataset_key = "stress"
+    noisy_config.data.test_size = 0.5
+    noisy_config.data.shuffle = False
+    noisy_config.train.split_dir = tmp_path / "splits"
+    noisy_config.train.use_saved_split = False
+    noisy_config.train.save_split_if_missing = False
+    noisy_config.augmentation.enabled = False
+    noisy_config.noise.enabled = True
+    noisy_config.noise.scale = 10.0
+
+    clean = prepare_training_data(clean_config)
+    noisy = prepare_training_data(noisy_config)
+
+    np.testing.assert_allclose(noisy.X_train, clean.X_train)
+    np.testing.assert_allclose(noisy.X_test, clean.X_test)

@@ -357,7 +357,7 @@ def augment_homogeneous_surface_data(
 
 
 def prepare_training_data(config: Config) -> PreparedData:
-    """Load, split, perturb, and augment data according to the config."""
+    """Load, split, and augment clean data according to the config."""
     X_raw = load_hdf_dataset(
         config.data.data_dir,
         config.data.dataset_name,
@@ -378,14 +378,6 @@ def prepare_training_data(config: Config) -> PreparedData:
         save_if_missing=config.train.save_split_if_missing,
         surface_target=config.augmentation.surface_target,
     )
-
-    if config.noise.enabled:
-        X_train_raw = add_gaussian_input_noise(
-            X_train_raw,
-            noise_scale=config.noise.scale,
-            random_state=config.noise.random_state,
-            relative_to_feature_std=config.noise.relative_to_feature_std,
-        )
 
     if config.augmentation.enabled:
         augmentation_options = {

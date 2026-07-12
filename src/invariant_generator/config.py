@@ -31,8 +31,19 @@ class DataConfig:
 
 @dataclass(slots=True)
 class NoiseConfig:
+    # Kept as a reusable preprocessing config for manual/offline noisy datasets.
+    # The standard training path uses TrainInputNoiseConfig instead.
     enabled: bool = False
     scale: float = 0.02
+    random_state: int = 42
+    relative_to_feature_std: bool = True
+
+
+@dataclass(slots=True)
+class TrainInputNoiseConfig:
+    enabled: bool = False
+    scale: float = 0.02
+    probability: float = 1.0
     random_state: int = 42
     relative_to_feature_std: bool = True
 
@@ -357,6 +368,9 @@ class BenchmarkConfig:
 class Config:
     data: DataConfig = field(default_factory=DataConfig)
     noise: NoiseConfig = field(default_factory=NoiseConfig)
+    train_input_noise: TrainInputNoiseConfig = field(
+        default_factory=TrainInputNoiseConfig
+    )
     augmentation: AugmentationConfig = field(default_factory=AugmentationConfig)
     invariants: InvariantConfig = field(default_factory=InvariantConfig)
     encoder: EncoderConfig = field(default_factory=EncoderConfig)
