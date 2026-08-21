@@ -92,6 +92,17 @@ target = "fourth_order_A"
 basis = "mandel"
 min_eigenvalue = 0.0
 
+# Keep this disabled in the generic self-evaluation suite because it contains
+# skew-dependent hidden formulas (I8). Enable it in cases meant to test PSD a.
+[constraints.a_psd]
+enabled = false
+mode = "check"
+target = "second_order_a"
+basis = "tensor"
+min_eigenvalue = 0.0
+tolerance = 1e-8
+penalty_weight = 1.0
+
 [train]
 run_id = "self_eval_benchmark_base"
 results_dir = "results"

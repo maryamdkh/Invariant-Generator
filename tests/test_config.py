@@ -31,6 +31,8 @@ def test_default_toml_can_omit_selected_invariants():
     assert config.normalization.enabled is True
     assert config.constraints.A_psd.enabled is True
     assert config.constraints.A_psd.mode == "hard"
+    assert config.constraints.a_psd.enabled is True
+    assert config.constraints.a_psd.mode == "hard"
     assert config.encoder.output_dim == 0
     assert config.train.run_id == "rotatedhill_exp02"
     assert config.loss.lambda_encoder_l1_ratio == 1e-2

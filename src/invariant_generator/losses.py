@@ -95,11 +95,18 @@ class YieldSurfaceLoss(nn.Module):
 
         constraint = zero
         if self.constraints is not None:
+            a_psd = self.constraints.a_psd
+            if a_psd.enabled and a_psd.mode.lower() == "penalty":
+                a = model.invariant_pool.effective_second_order_tensor()
+                constraint = constraint + float(a_psd.penalty_weight) * psd_penalty(
+                    a,
+                    min_eigenvalue=a_psd.min_eigenvalue,
+                )
             A_psd = self.constraints.A_psd
             if A_psd.enabled and A_psd.mode.lower() == "penalty":
                 A = model.invariant_pool.effective_fourth_order_tensor()
                 mandel = fourth_order_to_mandel_matrix(A)
-                constraint = float(A_psd.penalty_weight) * psd_penalty(
+                constraint = constraint + float(A_psd.penalty_weight) * psd_penalty(
                     mandel,
                     min_eigenvalue=A_psd.min_eigenvalue,
                 )

@@ -6,6 +6,7 @@ from invariant_generator.stress_viz import (
     principal_stresses,
     relative_noise_magnitude,
     simulate_train_input_noise,
+    plot_selected_stress_components,
 )
 
 
@@ -51,3 +52,11 @@ def test_physical_projection_shapes():
     assert principal.shape == (2, 3)
     assert deviatoric.shape == (2, 2)
     assert np.all(np.diff(principal, axis=1) <= 0.0)
+
+
+def test_selected_component_projection_supports_2d_and_3d():
+    X = np.arange(60, dtype=np.float64).reshape(10, 6)
+    fig_2d = plot_selected_stress_components(X, [0, 1])
+    fig_3d = plot_selected_stress_components(X, [0, 1, 2])
+    assert len(fig_2d.axes) == 1
+    assert len(fig_3d.axes) == 1

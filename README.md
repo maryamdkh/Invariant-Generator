@@ -49,6 +49,16 @@ basis = "mandel"
 Constraints do not select invariants or change PySR operators; they only enforce
 or report the configured physical property.
 
+The same `hard`, `penalty`, and `check` modes are available for the second-order
+structural tensor through `[constraints.a_psd]`. PSD requires `a` to be
+symmetric. Consequently, `mode = "hard"` uses `a = L L^T` and sets the skew
+part to zero; the skew-dependent invariants `I8` through `I10` are then zero.
+
+`[noise]` applies a fixed Gaussian perturbation to loaded stress samples before
+the split and homogeneous augmentation, modelling a noisy measured dataset.
+`[train_input_noise]` is separate on-the-fly perturbation during optimization.
+Enable either or both independently.
+
 The default rotated-hill config enables a recovery-oriented setup: hard PSD for
 `A`, full-width identity encoder initialization, and invariant standardization
 before the encoder. This avoids the old `output_dim = 4` identity encoder bias

@@ -14,17 +14,35 @@ def constraint_diagnostics(
     constraints: ConstraintsConfig,
 ) -> dict[str, object]:
     """Return configured physics-constraint diagnostics."""
+    result: dict[str, object] = {}
+    a_psd = constraints.a_psd
+    if a_psd.enabled:
+        a = model.invariant_pool.effective_second_order_tensor()
+        eigvals = psd_eigenvalues(a).detach().float().cpu().numpy()
+        min_eigenvalue = float(np.min(eigvals))
+        passed = min_eigenvalue >= float(a_psd.min_eigenvalue) - float(a_psd.tolerance)
+        result["a_psd"] = {
+            "enabled": True,
+            "mode": a_psd.mode.lower(),
+            "target": a_psd.target,
+            "basis": a_psd.basis.lower(),
+            "min_eigenvalue": min_eigenvalue,
+            "configured_min_eigenvalue": float(a_psd.min_eigenvalue),
+            "tolerance": float(a_psd.tolerance),
+            "passed": bool(passed),
+            "eigenvalues": [float(value) for value in eigvals],
+        }
+
     A_psd = constraints.A_psd
     if not A_psd.enabled:
-        return {}
+        return result
 
     A = model.invariant_pool.effective_fourth_order_tensor()
     mandel = fourth_order_to_mandel_matrix(A)
     eigvals = psd_eigenvalues(mandel).detach().float().cpu().numpy()
     min_eigenvalue = float(np.min(eigvals))
     passed = min_eigenvalue >= float(A_psd.min_eigenvalue) - float(A_psd.tolerance)
-    return {
-        "A_psd": {
+    result["A_psd"] = {
             "enabled": True,
             "mode": A_psd.mode.lower(),
             "target": A_psd.target,
@@ -34,19 +52,26 @@ def constraint_diagnostics(
             "tolerance": float(A_psd.tolerance),
             "passed": bool(passed),
             "eigenvalues": [float(value) for value in eigvals],
-        }
     }
+    return result
 
 
 def flatten_constraint_diagnostics(diagnostics: dict[str, object]) -> dict[str, float]:
     """Flatten selected diagnostics for per-epoch history rows."""
     A_psd = diagnostics.get("A_psd")
-    if not isinstance(A_psd, dict):
-        return {}
-    return {
-        "constraint_A_psd_min_eigenvalue": float(A_psd["min_eigenvalue"]),
-        "constraint_A_psd_passed": 1.0 if bool(A_psd["passed"]) else 0.0,
-    }
+    result: dict[str, float] = {}
+    if isinstance(A_psd, dict):
+        result.update({
+            "constraint_A_psd_min_eigenvalue": float(A_psd["min_eigenvalue"]),
+            "constraint_A_psd_passed": 1.0 if bool(A_psd["passed"]) else 0.0,
+        })
+    a_psd = diagnostics.get("a_psd")
+    if isinstance(a_psd, dict):
+        result.update({
+            "constraint_a_psd_min_eigenvalue": float(a_psd["min_eigenvalue"]),
+            "constraint_a_psd_passed": 1.0 if bool(a_psd["passed"]) else 0.0,
+        })
+    return result
 
 
 @torch.no_grad()

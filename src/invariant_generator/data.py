@@ -367,6 +367,13 @@ def prepare_training_data(config: Config) -> PreparedData:
         X_raw,
         stress_format=config.data.stress_format,
     )
+    if config.noise.enabled:
+        X = add_gaussian_input_noise(
+            X,
+            noise_scale=config.noise.scale,
+            random_state=config.noise.random_state,
+            relative_to_feature_std=config.noise.relative_to_feature_std,
+        )
 
     X_train_raw, X_test, y_test = split_surface_data(
         X,

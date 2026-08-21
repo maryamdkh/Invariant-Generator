@@ -145,6 +145,8 @@ class InvariantPool(nn.Module):
         homogenize: bool = False,
         init_scale: float = 0.05,
         eps: float = 1e-12,
+        second_order_psd_mode: str = "off",
+        second_order_psd_min_eigenvalue: float = 0.0,
         fourth_order_psd_mode: str = "off",
         fourth_order_psd_min_eigenvalue: float = 0.0,
     ) -> None:
@@ -152,8 +154,12 @@ class InvariantPool(nn.Module):
         self.selected = _validate_invariant_names(selected)
         self.homogenize = bool(homogenize)
         self.eps = float(eps)
+        self.second_order_psd_mode = second_order_psd_mode.lower()
+        self.second_order_psd_min_eigenvalue = float(second_order_psd_min_eigenvalue)
         self.fourth_order_psd_mode = fourth_order_psd_mode.lower()
         self.fourth_order_psd_min_eigenvalue = float(fourth_order_psd_min_eigenvalue)
+        if self.second_order_psd_mode not in {"off", "hard"}:
+            raise ValueError("second_order_psd_mode must be 'off' or 'hard'.")
         if self.fourth_order_psd_mode not in {"off", "hard"}:
             raise ValueError("fourth_order_psd_mode must be 'off' or 'hard'.")
 
@@ -202,10 +208,21 @@ class InvariantPool(nn.Module):
         if self.raw_a is None:
             raise RuntimeError("Second-order structure tensor is not enabled.")
 
-        a = self.raw_a
+        if self.second_order_psd_mode == "hard":
+            a = psd_matrix_from_factor(
+                self.raw_a,
+                min_eigenvalue=self.second_order_psd_min_eigenvalue,
+            )
+        else:
+            a = self.raw_a
         s = 0.5 * (a + a.transpose(-1, -2))
         w = 0.5 * (a - a.transpose(-1, -2))
         return s, w
+
+    def effective_second_order_tensor(self) -> torch.Tensor:
+        """Return the symmetric structural tensor used for PSD checks."""
+        s, _ = self.effective_second_order_parts()
+        return s
 
     def effective_fourth_order_tensor(self) -> torch.Tensor:
         if self.raw_A is None:
@@ -222,7 +239,12 @@ class InvariantPool(nn.Module):
         """Return 2-norms used by L_structure."""
         norms: dict[str, torch.Tensor] = {}
         if self.raw_a is not None:
-            norms["a"] = _vector_norm(self.raw_a, self.eps)
+            a = (
+                self.effective_second_order_tensor()
+                if self.second_order_psd_mode == "hard"
+                else self.raw_a
+            )
+            norms["a"] = _vector_norm(a, self.eps)
         if self.raw_A is not None:
             norms["A"] = _vector_norm(self.effective_fourth_order_tensor(), self.eps)
         return norms

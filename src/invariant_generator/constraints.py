@@ -73,21 +73,21 @@ def psd_matrix_from_factor(
     *,
     min_eigenvalue: float = 0.0,
 ) -> torch.Tensor:
-    """Create a symmetric PSD Mandel matrix from an unconstrained factor."""
-    if factor.shape[-2:] != (6, 6):
-        raise ValueError(f"factor must end with shape (6, 6), got {factor.shape}.")
+    """Create a symmetric PSD square matrix from an unconstrained factor."""
+    if factor.ndim < 2 or factor.shape[-2] != factor.shape[-1]:
+        raise ValueError(f"factor must end with a square shape, got {factor.shape}.")
 
     matrix = factor @ factor.transpose(-1, -2)
     if min_eigenvalue:
-        eye = torch.eye(6, dtype=factor.dtype, device=factor.device)
+        eye = torch.eye(factor.shape[-1], dtype=factor.dtype, device=factor.device)
         matrix = matrix + float(min_eigenvalue) * eye
     return 0.5 * (matrix + matrix.transpose(-1, -2))
 
 
 def psd_eigenvalues(matrix: torch.Tensor) -> torch.Tensor:
-    """Return ordered eigenvalues of a symmetric 6x6 matrix."""
-    if matrix.shape[-2:] != (6, 6):
-        raise ValueError(f"matrix must end with shape (6, 6), got {matrix.shape}.")
+    """Return ordered eigenvalues of a symmetric square matrix."""
+    if matrix.ndim < 2 or matrix.shape[-2] != matrix.shape[-1]:
+        raise ValueError(f"matrix must end with a square shape, got {matrix.shape}.")
     matrix = 0.5 * (matrix + matrix.transpose(-1, -2))
     return torch.linalg.eigvalsh(matrix)
 

@@ -7,6 +7,9 @@ import numpy as np
 from invariant_generator.data import add_gaussian_input_noise
 
 
+STRESS_COMPONENT_LABELS = (r"$\sigma_{11}$", r"$\sigma_{22}$", r"$\sigma_{33}$", r"$\sigma_{23}$", r"$\sigma_{13}$", r"$\sigma_{12}$")
+
+
 def stress_vector_to_tensor_np(stress: np.ndarray) -> np.ndarray:
     """Convert canonical 6-component stress vectors to symmetric 3x3 tensors."""
     stress = np.asarray(stress, dtype=np.float64)
@@ -106,6 +109,60 @@ def relative_noise_magnitude(clean: np.ndarray, noisy: np.ndarray) -> np.ndarray
     denominator = np.linalg.norm(clean, axis=1)
     denominator = np.where(denominator == 0.0, 1.0, denominator)
     return np.linalg.norm(noisy - clean, axis=1) / denominator
+
+
+def plot_selected_stress_components(
+    stress: np.ndarray,
+    components: tuple[int, ...] | list[int],
+    *,
+    title: str = "Stress-space component projection",
+    max_samples: int = 5000,
+    seed: int = 42,
+    point_size: float = 8.0,
+    alpha: float = 0.55,
+) -> object:
+    """Plot a selected two- or three-component projection of 6D stress data.
+
+    Components are zero-based indices in canonical Voigt order
+    ``[s11, s22, s33, s23, s13, s12]``.  This is a direct coordinate
+    projection, not a slice: points may differ in omitted components.
+    """
+    import matplotlib.pyplot as plt
+
+    stress = np.asarray(stress, dtype=np.float64)
+    components = tuple(int(index) for index in components)
+    if stress.ndim != 2 or stress.shape[1] != 6:
+        raise ValueError("stress must have shape (n_samples, 6).")
+    if len(components) not in {2, 3}:
+        raise ValueError("Select exactly two or three stress components.")
+    if len(set(components)) != len(components) or any(index < 0 or index >= 6 for index in components):
+        raise ValueError("components must be distinct zero-based indices from 0 through 5.")
+
+    values = sample_stress_rows(stress, max_samples=max_samples, seed=seed)
+    labels = [STRESS_COMPONENT_LABELS[index] for index in components]
+    if len(components) == 2:
+        fig, ax = plt.subplots(figsize=(7, 6))
+        ax.scatter(values[:, components[0]], values[:, components[1]], s=point_size, alpha=alpha)
+        ax.set_xlabel(labels[0])
+        ax.set_ylabel(labels[1])
+        ax.axhline(0.0, color="0.75", linewidth=0.8, zorder=0)
+        ax.axvline(0.0, color="0.75", linewidth=0.8, zorder=0)
+    else:
+        fig = plt.figure(figsize=(8, 7))
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(
+            values[:, components[0]],
+            values[:, components[1]],
+            values[:, components[2]],
+            s=point_size,
+            alpha=alpha,
+        )
+        ax.set_xlabel(labels[0])
+        ax.set_ylabel(labels[1])
+        ax.set_zlabel(labels[2])
+    ax.set_title(title)
+    fig.tight_layout()
+    return fig
 
 
 def plot_stress_space_summary(

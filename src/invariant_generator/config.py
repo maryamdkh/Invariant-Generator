@@ -31,8 +31,10 @@ class DataConfig:
 
 @dataclass(slots=True)
 class NoiseConfig:
-    # Kept as a reusable preprocessing config for manual/offline noisy datasets.
-    # The standard training path uses TrainInputNoiseConfig instead.
+    # A deterministic, one-time perturbation of the loaded stress samples.
+    # It is applied before splitting and homogeneous augmentation, so the model
+    # sees a fixed noisy dataset. TrainInputNoiseConfig remains an independent,
+    # on-the-fly robustness augmentation at the training batch boundary.
     enabled: bool = False
     scale: float = 0.02
     random_state: int = 42
@@ -141,8 +143,24 @@ class APsdConstraintConfig:
 
 
 @dataclass(slots=True)
+class SecondOrderPsdConstraintConfig:
+    """PSD constraint for the second-order structural tensor a."""
+
+    enabled: bool = False
+    mode: str = "check"
+    target: str = "second_order_a"
+    basis: str = "tensor"
+    min_eigenvalue: float = 0.0
+    tolerance: float = 1e-8
+    penalty_weight: float = 1.0
+
+
+@dataclass(slots=True)
 class ConstraintsConfig:
     A_psd: APsdConstraintConfig = field(default_factory=APsdConstraintConfig)
+    a_psd: SecondOrderPsdConstraintConfig = field(
+        default_factory=SecondOrderPsdConstraintConfig
+    )
 
 
 @dataclass(slots=True)
@@ -394,7 +412,15 @@ class Config:
     def split_path(self) -> Path:
         test_pct = int(round(self.data.test_size * 100))
         seed = self.data.random_state
-        name = f"{self.data.dataset_name}_{self.data.stress_format}_test{test_pct}_seed{seed}.npz"
+        noise_tag = "clean"
+        if self.noise.enabled:
+            scale = format(float(self.noise.scale), ".8g").replace("-", "m").replace(".", "p")
+            reference = "std" if self.noise.relative_to_feature_std else "absolute"
+            noise_tag = f"static_noise_{scale}_{reference}_seed{self.noise.random_state}"
+        name = (
+            f"{self.data.dataset_name}_{self.data.stress_format}_"
+            f"{noise_tag}_test{test_pct}_seed{seed}.npz"
+        )
         return self.train.split_dir / name
 
 

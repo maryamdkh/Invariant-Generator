@@ -210,6 +210,7 @@ class InvariantYieldModel(nn.Module):
     def from_config(cls, config: Config) -> "InvariantYieldModel":
         coerce_config_dataclasses(config)
         A_psd = config.constraints.A_psd
+        a_psd = config.constraints.a_psd
         A_psd_mode = A_psd.mode.lower()
         A_psd_target = A_psd.target.lower()
         A_psd_basis = A_psd.basis.lower()
@@ -227,6 +228,21 @@ class InvariantYieldModel(nn.Module):
                     "constraints.A_psd requires invariants.enable_fourth_order=true."
                 )
 
+        a_psd_mode = a_psd.mode.lower()
+        if a_psd.enabled:
+            if a_psd.target.lower() != "second_order_a":
+                raise ValueError("constraints.a_psd.target must be 'second_order_a'.")
+            if a_psd.basis.lower() != "tensor":
+                raise ValueError("constraints.a_psd.basis must be 'tensor'.")
+            if a_psd_mode not in {"hard", "penalty", "check"}:
+                raise ValueError(
+                    "constraints.a_psd.mode must be 'hard', 'penalty', or 'check'."
+                )
+            if not config.invariants.enable_second_order:
+                raise ValueError(
+                    "constraints.a_psd requires invariants.enable_second_order=true."
+                )
+
         invariant_pool = InvariantPool(
             config.invariants.selected,
             enable_second_order=config.invariants.enable_second_order,
@@ -234,6 +250,10 @@ class InvariantYieldModel(nn.Module):
             homogenize=config.invariants.homogenize,
             init_scale=config.invariants.init_scale,
             eps=config.invariants.eps,
+            second_order_psd_mode="hard"
+            if a_psd.enabled and a_psd_mode == "hard"
+            else "off",
+            second_order_psd_min_eigenvalue=a_psd.min_eigenvalue,
             fourth_order_psd_mode="hard"
             if A_psd.enabled and A_psd_mode == "hard"
             else "off",

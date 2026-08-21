@@ -206,11 +206,13 @@ def _write_config_toml(config: Config, path: Path) -> Path:
     for section_name in section_order:
         section = getattr(config, section_name)
         if section_name == "constraints":
-            lines.append("[constraints.A_psd]")
-            for field in fields(section.A_psd):
-                value = getattr(section.A_psd, field.name)
-                lines.append(f"{field.name} = {_toml_value(value, key=field.name)}")
-            lines.append("")
+            for constraint_name in ("A_psd", "a_psd"):
+                constraint = getattr(section, constraint_name)
+                lines.append(f"[constraints.{constraint_name}]")
+                for field in fields(constraint):
+                    value = getattr(constraint, field.name)
+                    lines.append(f"{field.name} = {_toml_value(value, key=field.name)}")
+                lines.append("")
             continue
 
         if not is_dataclass(section):

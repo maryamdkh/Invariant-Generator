@@ -84,7 +84,7 @@ def test_prepare_training_data_can_augment_test_targets(tmp_path):
     np.testing.assert_allclose(data.X_test[3], 2.0 * X[0])
 
 
-def test_prepare_training_data_ignores_legacy_noise_config(tmp_path):
+def test_prepare_training_data_applies_fixed_dataset_noise_before_the_pipeline(tmp_path):
     data_dir = tmp_path / "data"
     data_dir.mkdir()
     X = np.array(
@@ -126,5 +126,11 @@ def test_prepare_training_data_ignores_legacy_noise_config(tmp_path):
     clean = prepare_training_data(clean_config)
     noisy = prepare_training_data(noisy_config)
 
-    np.testing.assert_allclose(noisy.X_train, clean.X_train)
-    np.testing.assert_allclose(noisy.X_test, clean.X_test)
+    assert not np.allclose(noisy.X_train, clean.X_train)
+    assert not np.allclose(noisy.X_test, clean.X_test)
+
+    # The static noise realization is reproducible and gets its own split path.
+    noisy_repeat = prepare_training_data(noisy_config)
+    np.testing.assert_allclose(noisy.X_train, noisy_repeat.X_train)
+    np.testing.assert_allclose(noisy.X_test, noisy_repeat.X_test)
+    assert noisy.split_path != clean.split_path

@@ -11,8 +11,7 @@ test_size = 0.1
 random_state = 42
 shuffle = true
 
-# Legacy/manual preprocessing noise only. Use [train_input_noise] for stochastic
-# perturbations applied while training.
+# Fixed measurement-style noise, applied once before splitting and augmentation.
 [noise]
 enabled = false
 scale = 0.02
@@ -76,6 +75,15 @@ enabled = true
 mode = "hard"
 target = "fourth_order_A"
 basis = "mandel"
+min_eigenvalue = 0.0
+tolerance = 1e-8
+penalty_weight = 1.0
+
+[constraints.a_psd]
+enabled = true
+mode = "hard"
+target = "second_order_a"
+basis = "tensor"
 min_eigenvalue = 0.0
 tolerance = 1e-8
 penalty_weight = 1.0

@@ -11,8 +11,8 @@ test_size = 0.1
 random_state = 42
 shuffle = true
 
-# Legacy/manual preprocessing noise only. Use [train_input_noise] for stochastic
-# perturbations applied while training.
+# Fixed measurement-style noise, applied once before splitting and augmentation.
+# This is independent of [train_input_noise].
 [noise]
 enabled = false
 scale = 0.02
@@ -79,6 +79,17 @@ enabled = true
 mode = "hard"        # hard | penalty | check
 target = "fourth_order_A"
 basis = "mandel"
+min_eigenvalue = 0.0
+tolerance = 1e-8
+penalty_weight = 1.0
+
+# PSD is defined for a symmetric second-order tensor. In hard mode, a = L L^T,
+# so its skew part is zero and invariants I8-I10 are identically zero.
+[constraints.a_psd]
+enabled = true
+mode = "hard"        # hard | penalty | check
+target = "second_order_a"
+basis = "tensor"
 min_eigenvalue = 0.0
 tolerance = 1e-8
 penalty_weight = 1.0

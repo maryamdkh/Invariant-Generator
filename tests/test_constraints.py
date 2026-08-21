@@ -48,6 +48,43 @@ def test_hard_A_psd_parameterization_guarantees_nonnegative_quadratic_form():
     assert torch.all(values >= -1e-6)
 
 
+def test_hard_a_psd_parameterization_guarantees_symmetric_psd_tensor():
+    config = Config()
+    config.invariants.selected = ["I4", "I8"]
+    config.invariants.enable_second_order = True
+    config.invariants.enable_fourth_order = False
+    config.constraints.a_psd.enabled = True
+    config.constraints.a_psd.mode = "hard"
+
+    model = InvariantYieldModel.from_config(config)
+    a = model.invariant_pool.effective_second_order_tensor()
+    eigvals = psd_eigenvalues(a)
+    assert torch.all(eigvals >= -1e-7)
+
+    _, skew = model.invariant_pool.effective_second_order_parts()
+    torch.testing.assert_close(skew, torch.zeros_like(skew))
+
+    diagnostics = constraint_diagnostics(model, config.constraints)
+    assert diagnostics["a_psd"]["passed"] is True
+
+
+def test_a_psd_penalty_contributes_for_negative_symmetric_part():
+    config = Config()
+    config.invariants.selected = ["I4"]
+    config.invariants.enable_second_order = True
+    config.invariants.enable_fourth_order = False
+    config.constraints.a_psd.enabled = True
+    config.constraints.a_psd.mode = "penalty"
+    config.constraints.a_psd.penalty_weight = 2.0
+
+    model = InvariantYieldModel.from_config(config)
+    criterion = YieldSurfaceLoss(config.loss, config.constraints)
+    with torch.no_grad():
+        model.invariant_pool.raw_a.copy_(-torch.eye(3))
+    loss = criterion(model, torch.zeros(1), torch.zeros(1))
+    assert float(loss.constraint.detach()) > 0.0
+
+
 def test_A_psd_check_mode_reports_violation_without_hard_parameterization():
     config = Config()
     config.invariants.selected = ["I11"]
