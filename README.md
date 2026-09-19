@@ -15,6 +15,12 @@ Run training with:
 uv run python scripts/train.py --config configs/default.toml
 ```
 
+Two external CPFEM yield-surface adapters are available for DX56D steel and
+single-crystal gold. They convert the published source data to the existing HDF
+input contract, so the training pipeline itself is unchanged. See
+[`EXTERNAL_DATASETS.md`](EXTERNAL_DATASETS.md) for preparation, provenance, and
+run commands.
+
 After training, run symbolic regression with PySR on the most important
 pre-encoder invariant columns selected from the learned encoder `S` weights:
 
