@@ -12,8 +12,6 @@ __pycache__/
 
 results/
 data/external/raw/
-data/dx56d_*.hdf
-data/single_crystal_gold_*.hdf
 .vscode 
 
 .jupyter-data/
@@ -25,4 +23,9 @@ commands.md
 benchmarkplan.md
 notes.md
 plan.md
+
+
+usefulcommands.md
+logdev/
+*.sbatch.sh
 

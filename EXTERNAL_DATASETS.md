@@ -12,8 +12,9 @@ stress format: voigt_3d
 ```
 
 Downloaded source archives are stored under `data/external/raw/` and are
-ignored by Git. Prepared HDF files are also ignored because they are generated
-artifacts with source-specific licensing and provenance metadata.
+ignored by Git. The small prepared HDF inputs are included with the project so
+cluster runs do not depend on external repository availability. Each HDF also
+contains source and preparation provenance metadata.
 
 ## DX56D deep-drawing steel
 
@@ -28,13 +29,14 @@ The archive contains several independently sampled CPFEM descriptions of the
 same initial yield surface. The default adapter uses the 402-point Miller
 sampling because it provides a deterministic full-stress reference set.
 
-Download and prepare it:
+The pipeline-ready `data/dx56d_miller.hdf` is included with the project. To
+reproduce it from the original archive:
 
 ```bash
 uv run python scripts/prepare_external_yield_data.py dx56d --download
 ```
 
-This creates `data/dx56d_miller.hdf`. To use a different published sampling:
+To use a different published sampling:
 
 ```bash
 uv run python scripts/prepare_external_yield_data.py dx56d \
@@ -69,14 +71,15 @@ and recorded in the HDF provenance metadata. In the published file, this
 normally removes the hydrostatic loading path, which does not activate
 pressure-insensitive crystal slip.
 
-Download and prepare it:
+The pipeline-ready `data/single_crystal_gold_ep002.hdf` is included with the
+project. To reproduce it from the original JSON:
 
 ```bash
 uv run python scripts/prepare_external_yield_data.py gold --download
 ```
 
-This creates `data/single_crystal_gold_ep002.hdf`. To study sensitivity to the
-operational yield definition, create another file with a different threshold:
+To study sensitivity to the operational yield definition, create another file
+with a different threshold:
 
 ```bash
 uv run python scripts/prepare_external_yield_data.py gold \
