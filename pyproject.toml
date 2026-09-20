@@ -3,7 +3,9 @@ name = "invariant-generator"
 version = "0.1.0"
 description = "PyTorch invariant-generator pipeline for yield-surface prediction."
 readme = "README.md"
-requires-python = ">=3.11"
+# JuliaCall (used by the optional PySR stage) does not currently support
+# Python 3.14. Keep one Python range valid for the complete pipeline.
+requires-python = ">=3.11,<3.14"
 dependencies = [
     "h5py>=3.11",
     "numpy>=2.0",

@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import argparse
+from importlib import import_module
 from pathlib import Path
 
-from invariant_generator.adaptive import (
-    adaptive_sparsification_run_id,
-    config_for_adaptive_n,
-    run_adaptive_sweep,
-)
-from invariant_generator.adaptive_symbolic import train_encoded_symbolic_from_config
-from invariant_generator.config import load_config
-from invariant_generator.report import create_adaptive_analysis_notebook
-from invariant_generator.sparsify import sparsify_encoder_from_checkpoint
+
+def _preflight_symbolic_runtime() -> None:
+    """Initialize PySR/Julia before importing Torch-backed pipeline modules."""
+    try:
+        import_module("pysr")
+    except ImportError as exc:
+        raise ImportError(
+            "PySR is required for Stage 3. Run this command with "
+            "`uv run --extra symbolic ...` or install it with "
+            "`uv sync --extra symbolic`."
+        ) from exc
 
 
 def main() -> None:
@@ -41,6 +44,22 @@ def main() -> None:
         help="Encoder output dimension for stage2/stage3 when not running stage1 in this command.",
     )
     args = parser.parse_args()
+
+    # PySR uses JuliaCall, whose runtime should be initialized before Torch.
+    # Doing this before the pipeline imports also detects a missing/broken
+    # symbolic environment before expensive Stage 1 and Stage 2 training.
+    if args.stage in {"all", "stage3"}:
+        _preflight_symbolic_runtime()
+
+    from invariant_generator.adaptive import (
+        adaptive_sparsification_run_id,
+        config_for_adaptive_n,
+        run_adaptive_sweep,
+    )
+    from invariant_generator.adaptive_symbolic import train_encoded_symbolic_from_config
+    from invariant_generator.config import load_config
+    from invariant_generator.report import create_adaptive_analysis_notebook
+    from invariant_generator.sparsify import sparsify_encoder_from_checkpoint
 
     config = load_config(args.config)
     selected_n = args.selected_n

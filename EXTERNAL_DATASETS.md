@@ -11,6 +11,10 @@ component order: [s11, s22, s33, s23, s13, s12]
 stress format: voigt_3d
 ```
 
+The complete pipeline, including PySR/JuliaCall, currently requires Python
+3.11, 3.12, or 3.13. Python 3.14 is intentionally excluded in
+`pyproject.toml` because JuliaCall does not support it.
+
 Downloaded source archives are stored under `data/external/raw/` and are
 ignored by Git. The small prepared HDF inputs are included with the project so
 cluster runs do not depend on external repository availability. Each HDF also
