@@ -33,6 +33,8 @@ logdev/
 *.sbatch.sh
 
 .julia_depot/
+.julia_depot-*/
+.venv-*/
 cluster/logs/
 cluster/tasks.txt
 data/yield_benchmarks/

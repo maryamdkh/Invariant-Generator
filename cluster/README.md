@@ -10,21 +10,27 @@ folder, so tasks never share files.
 rsync -av --exclude .venv --exclude .uv-cache --exclude results --exclude data/feynman_tables/pmlb_data ./ <user>@<cluster>:<project-dir>/Invariant-Generator/
 ```
 
-## 2. One-time setup on the login node
+## 2. One-time setup, once per node architecture
+
+On Arrhenius the login node is x86_64 and the GPU nodes are aarch64, so the
+environment is built twice (`.venv-x86_64`, `.venv-aarch64`); the scripts
+pick the right one with `uname -m`.
 
 ```bash
 cd <project-dir>/Invariant-Generator
 bash cluster/setup_env.sh
+srun -A <project-account> -p gpu --gpus=1 -t 01:00:00 --pty bash cluster/setup_env.sh
 ```
 
-This installs the Python environment with uv, downloads Julia and
-precompiles PySR inside the project (`.julia_depot/`), and regenerates the
-noiseless Feynman data for all 119 equations (`data/feynman/`).
+Each run installs a per-architecture uv and the Python environment,
+downloads Julia and precompiles PySR (`.julia_depot-<arch>/`), and
+regenerates the noiseless Feynman data for all 119 equations
+(`data/feynman/`).
 
 ## 3. Make the task list and submit
 
 ```bash
-.venv/bin/python cluster/make_tasks.py --positive-only --seeds 42,43,44,45,46
+.venv-$(uname -m)/bin/python cluster/make_tasks.py --positive-only --seeds 42,43,44,45,46
 mkdir -p cluster/logs
 sbatch -A <project-account> --array=1-$(wc -l < cluster/tasks.txt)%40 cluster/feynman_array.sbatch
 ```
@@ -55,8 +61,8 @@ Copy the downloaded dataset (`data/llm_srbench/`, gated: access must be
 approved on Hugging Face) to the cluster, then on the login node:
 
 ```bash
-.venv/bin/python scripts/prepare_llm_srbench.py
-.venv/bin/python cluster/make_tasks.py --manifest data/llm_srbench_converted/manifest.json --seeds 42,43,44,45,46 --output cluster/tasks_llmsr.txt
+.venv-$(uname -m)/bin/python scripts/prepare_llm_srbench.py
+.venv-$(uname -m)/bin/python cluster/make_tasks.py --manifest data/llm_srbench_converted/manifest.json --seeds 42,43,44,45,46 --output cluster/tasks_llmsr.txt
 RUN=llmsr_v2 MANIFEST=data/llm_srbench_converted/manifest.json DATA_DIR=data/llm_srbench_converted TASKS=cluster/tasks_llmsr.txt \
   sbatch -A <project-account> --array=1-$(wc -l < cluster/tasks_llmsr.txt)%40 cluster/feynman_array.sbatch
 ```
