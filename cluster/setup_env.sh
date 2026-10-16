@@ -5,6 +5,9 @@ set -euo pipefail
 
 # Keep Julia (used by PySR) inside the project, not in a small home quota.
 export JULIA_DEPOT_PATH="$PWD/.julia_depot"
+# Julia (PySR) needs a newer libstdc++ than many clusters ship in /lib64
+# (GLIBCXX_3.4.30 not found); use the copy bundled with Julia.
+export LD_LIBRARY_PATH="$PWD/.venv/julia_env/pyjuliapkg/install/lib/julia:${LD_LIBRARY_PATH:-}"
 
 if ! command -v uv >/dev/null 2>&1; then
     curl -LsSf https://astral.sh/uv/install.sh | sh

@@ -21,6 +21,9 @@ MANIFEST="${MANIFEST:-data/feynman/manifest.json}"
 DATA_DIR="${DATA_DIR:-data/feynman}"
 TASKS="${TASKS:-cluster/tasks.txt}"
 export JULIA_DEPOT_PATH="$PWD/.julia_depot"
+# Julia (PySR) needs a newer libstdc++ than many clusters ship in /lib64
+# (GLIBCXX_3.4.30 not found); use the copy bundled with Julia.
+export LD_LIBRARY_PATH="$PWD/.venv/julia_env/pyjuliapkg/install/lib/julia:${LD_LIBRARY_PATH:-}"
 # Torch and PySR share the allocation; keep BLAS from oversubscribing.
 export OMP_NUM_THREADS=1
 
