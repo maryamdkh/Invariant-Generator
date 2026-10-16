@@ -37,6 +37,7 @@ from invariant_generator.symbolic import (
     _import_pysr_regressor,
     _save_equations_csv,
     pysr_regressor_options,
+    transform_symbolic_target,
 )
 from invariant_generator.utils import save_json
 
@@ -52,6 +53,15 @@ def problem_config(base: Config, entry: dict[str, Any], *, results_dir: Path) ->
     config.adaptive.n_min = 1
     # A reduction needs fewer encoded variables than inputs.
     config.adaptive.n_max = max(1, len(entry["variables"]) - 1)
+    if config.data.target_transform.lower() == "log":
+        # log y needs y > 0 everywhere; otherwise fall back to fitting y.
+        import h5py
+
+        with h5py.File(config.data.data_dir / f"{entry['equation_id']}.h5", "r") as handle:
+            positive = bool(np.all(np.asarray(handle[config.data.target_key]) > 0))
+        if not positive:
+            config.data.target_transform = "identity"
+            config.symbolic.target_transform = "identity"
     return config
 
 
@@ -67,6 +77,8 @@ def run_pysr_baseline(config: Config, output_dir: Path) -> dict[str, Any]:
     """PySR on the raw inputs with the same settings as the pipeline's Stage 3."""
     PySRRegressor = _import_pysr_regressor()
     output_dir.mkdir(parents=True, exist_ok=True)
+    config = deepcopy(config)
+    config.data.target_transform = "identity"  # PySR alone always fits y itself.
     data = prepare_training_data(config)
     config = _with_stop_condition(config, data.y_train)
     names = list(config.data.feature_names)
@@ -117,6 +129,15 @@ def run_pipeline(
     retrained (e.g. for a second Stage 3 with a different PySR budget).
     """
     result: dict[str, Any] = {}
+    if config.input_transform.kind == "log":
+        import h5py
+
+        with h5py.File(config.data.data_dir / f"{config.data.dataset_name}.h5", "r") as handle:
+            positive_inputs = bool(np.all(np.asarray(handle[config.data.dataset_key]) > 0))
+        if not positive_inputs:
+            # Log features need positive inputs; the pipeline has nothing to add
+            # and the row reports the PySR-alone result for this problem.
+            return {"reduction": False, "skipped": "non-positive inputs for log features"}
     stage1_summary = adaptive_stage1_dir(config) / config.adaptive.summary_name
     if reuse_stages and stage1_summary.exists():
         saved = json.loads(stage1_summary.read_text(encoding="utf-8"))
@@ -163,7 +184,10 @@ def run_pipeline(
     if stage3_subdir is not None:
         symbolic_config.symbolic.output_subdir = stage3_subdir
     data = prepare_training_data(symbolic_config)
-    symbolic_config = _with_stop_condition(symbolic_config, data.y_train)
+    pysr_target = transform_symbolic_target(
+        data.y_train, target_transform=symbolic_config.symbolic.target_transform,
+    )
+    symbolic_config = _with_stop_condition(symbolic_config, pysr_target)
     started = time.perf_counter()
     stage3 = train_encoded_symbolic_from_config(symbolic_config, checkpoint_path=sparse_checkpoint)
     result["pysr_seconds"] = time.perf_counter() - started

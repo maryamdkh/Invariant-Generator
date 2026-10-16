@@ -409,8 +409,11 @@ def transform_symbolic_target(target: np.ndarray, *, target_transform: str) -> n
         return target
     if target_transform == "square":
         return target**2
+    if target_transform == "exp":
+        # Inverse of [data].target_transform = "log".
+        return np.exp(target)
     raise ValueError(
-        "symbolic.target_transform must be 'identity' or 'square', "
+        "symbolic.target_transform must be 'identity', 'square' or 'exp', "
         f"got {target_transform!r}."
     )
 

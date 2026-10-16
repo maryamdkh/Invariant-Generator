@@ -236,3 +236,61 @@ def test_symbolic_check_handles_pi_constants_and_named_theta(tmp_path):
         known_truth, info["symbols"], X_fresh=info["X_fresh"],
     )
     assert report["symbolic_recovery"]
+
+
+def test_log_target_keeps_the_split_and_round_trips_through_stage3(tmp_path):
+    from invariant_generator.symbolic import transform_symbolic_target
+
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    rng = np.random.default_rng(0)
+    X = rng.uniform(1.0, 2.0, size=(40, 2))
+    y = X[:, 0] ** 2 / X[:, 1]
+    with h5py.File(data_dir / "case.h5", "w") as f:
+        f.create_dataset("X", data=X)
+        f.create_dataset("y", data=y)
+    config = Config()
+    config.data.kind = "supervised"
+    config.data.data_dir = data_dir
+    config.data.dataset_name = "case"
+    config.data.dataset_key = "X"
+    config.data.feature_names = ["a", "b"]
+    config.train.split_dir = tmp_path / "splits"
+    config.augmentation.enabled = False
+    config.input_transform.kind = "log"
+    raw = prepare_training_data(config)
+    config.data.target_transform = "log"
+    logged = prepare_training_data(config)
+    np.testing.assert_array_equal(raw.X_test, logged.X_test)
+    np.testing.assert_allclose(logged.y_train, np.log(raw.y_train))
+    np.testing.assert_allclose(
+        transform_symbolic_target(logged.y_test, target_transform="exp"), raw.y_test,
+    )
+    with h5py.File(data_dir / "case.h5", "r+") as f:
+        f["y"][0] = -1.0
+    config.train.use_saved_split = False
+    with pytest.raises(ValueError, match="strictly positive"):
+        prepare_training_data(config)
+
+
+def test_known_formula_loads_for_dotted_names_and_eval_inputs(tmp_path):
+    from invariant_generator.adaptive_symbolic import load_known_formula
+
+    name = "lsrt_II.36.38_1_0"  # LLM-SRBench names contain dots
+    X_eval = np.random.default_rng(0).uniform(1, 2, size=(50, 2))
+    with h5py.File(tmp_path / f"{name}.h5", "w") as f:
+        f.create_dataset("X", data=X_eval)
+        f.create_dataset("y", data=X_eval[:, 0] * X_eval[:, 1])
+        f.create_dataset("X_eval", data=X_eval)
+    (tmp_path / f"{name}.json").write_text(json.dumps({
+        "formula": "a*b", "eval_key": "X_eval", "inputs_positive": True,
+    }))
+    config = Config()
+    config.data.data_dir = tmp_path
+    config.data.dataset_name = name
+    config.data.feature_names = ["a", "b"]
+    known = load_known_formula(config, fallback_X=None)
+    assert known is not None
+    truth, info = known
+    np.testing.assert_array_equal(info["X_fresh"], X_eval)
+    assert info["positive"] and str(truth) == "a*b"

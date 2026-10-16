@@ -1,0 +1,118 @@
+# Feynman benchmark v2 (development run): identical to feynman_benchmark.toml
+# (the pilot) except for the Stage 1-2 revisions of RESEARCH_LOG.md entries
+# 11-12. PySR settings are unchanged, so PySR-alone results are comparable.
+#
+# - Stage 1-2 fit log(y) when y > 0 (monotone: same groups); Stage 3 fits y.
+# - n is accepted when the bottleneck fit is within 2x of a full-width
+#   reference fit (floor 1e-3), not under a fixed 1% threshold.
+# - One restart starts from the reference's top gradient directions.
+# - Stage 2 hands PySR the sparsest integer basis of the snapped groups.
+
+[data]
+kind = "supervised"
+data_dir = "data/feynman"
+dataset_name = "set_per_equation"
+dataset_key = "X"
+target_key = "y"
+feature_names = ["set_per_equation"]
+validation_size = 0.1
+test_size = 0.1
+random_state = 42
+shuffle = true
+target_transform = "log"
+
+[augmentation]
+enabled = false
+
+[input_transform]
+kind = "log"
+
+[encoder]
+enabled = true
+output_dim = 1
+init = "random"
+
+[normalization]
+enabled = true
+mode = "standard"
+
+[model]
+hidden_dims = [64, 64]
+output_activation = "none"
+standardize_target = true
+
+[loss]
+lambda_structure = 0.0
+lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l2 = 0.0
+
+[train]
+run_id = "feynman_benchmark"
+results_dir = "results/feynman_benchmark"
+split_dir = "results/feynman_benchmark/splits"
+use_saved_split = true
+save_split_if_missing = true
+seed = 42
+epochs = 3000
+batch_size = 0
+learning_rate = 1e-3
+encoder_learning_rate_scale = 30.0
+# CPU is as fast as MPS for this small MLP and is reproducible.
+device = "cpu"
+log_every = 25
+save_every = 0
+lr_plateau_min_delta = 0.0
+early_stopping_min_delta = 0.0
+early_stopping_patience = 20
+
+[adaptive]
+results_subdir = "set_per_equation"
+metric = "nrmse"
+nrmse_threshold = 0.01
+stop_on_first_success = true
+restarts = 3
+acceptance = "relative_to_reference"
+relative_factor = 2.0
+relative_floor = 1e-3
+reference_init = true
+
+[sparsification]
+method = "snap"
+snap_denominators = [1, 2, 3, 4, 6]
+masked_refit_epochs = 1500
+masked_refit_learning_rate = 3e-3
+masked_refit_schedule = "cosine"
+masked_refit_min_learning_rate = 1e-5
+snap_basis = "sparsest"
+run_id = "stage2_snap"
+
+[symbolic]
+# Shared by both arms; only the inputs differ (monomial groups vs raw inputs).
+target_source = "data"
+target_transform = "exp"
+encoded_feature_transform = "exp"
+output_subdir = "stage3_pysr"
+run_id = "pysr_search"
+weight_mode = "none"
+elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "sqrt", "exp", "log", "sin", "cos"]
+constraints = {}
+nested_constraints = { exp = { exp = 0, log = 0 }, log = { exp = 0, log = 0 }, sin = { sin = 0, cos = 0 }, cos = { sin = 0, cos = 0 } }
+maxsize = 35
+maxdepth = -1
+parsimony = 0.0
+complexity_of_constants = 1
+model_selection = "best"
+parallelism = "multithreading"
+numprocs = 10
+populations = 30
+population_size = 50
+ncycles_per_iteration = 500
+niterations = 1000000
+timeout_hours = 0.25
+batching = false
+warm_start = false
+progress = false
+precision = 64
+random_state = 42

@@ -1,0 +1,7 @@
+reference nrmse 0.02338764831591933 spectrum [1.0, 0.119, 0.0677, 0.038, 0.0313]
+runs [(1, 0.0693), (2, 0.008)] threshold 0.04677529663183866 selected 2 694s
+principal-angle cosines between learned rows and span{J2, J3}: [0.999999 0.999993]
+  J2 captured by learned span: 0.999999
+  J3 captured by learned span: 0.999993
+
+[exited with code 0]

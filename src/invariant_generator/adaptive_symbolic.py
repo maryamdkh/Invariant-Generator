@@ -303,7 +303,8 @@ def load_known_formula(
     import json
     import sympy as sp
 
-    metadata_path = (config.data.data_dir / config.data.dataset_name).with_suffix(".json")
+    # Names may contain dots (e.g. "lsrt_II.36.38_1_0"), so append, not with_suffix.
+    metadata_path = config.data.data_dir / f"{config.data.dataset_name}.json"
     if not metadata_path.exists():
         return None
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
@@ -311,7 +312,9 @@ def load_known_formula(
         return None
     ranges = metadata.get("input_ranges", {})
     names = list(config.data.feature_names)
-    positive = all(name in ranges and ranges[name][0] > 0 for name in names)
+    positive = bool(metadata.get(
+        "inputs_positive", all(name in ranges and ranges[name][0] > 0 for name in names),
+    ))
     symbols = {name: sp.Symbol(name, positive=True if positive else None) for name in names}
     if "substitution" in metadata:
         # Hidden-variable pilots write the formula in theta and say what replaced it.
@@ -322,11 +325,17 @@ def load_known_formula(
     else:
         truth = sp.sympify(metadata["formula"], locals=symbols)
     rng = np.random.default_rng(config.symbolic.random_state)
-    X_fresh = (
-        np.column_stack([rng.uniform(*ranges[name], size=n_fresh) for name in names])
-        if all(name in ranges for name in names)
-        else fallback_X
-    )
+    if "eval_key" in metadata:
+        # Benchmark-provided evaluation inputs (e.g. an official test split),
+        # stored next to the training data; truth is evaluated on them in float64.
+        import h5py
+
+        with h5py.File(config.data.data_dir / f"{config.data.dataset_name}.h5", "r") as handle:
+            X_fresh = np.asarray(handle[metadata["eval_key"]], dtype=np.float64)
+    elif all(name in ranges for name in names):
+        X_fresh = np.column_stack([rng.uniform(*ranges[name], size=n_fresh) for name in names])
+    else:
+        X_fresh = fallback_X
     return truth, {"symbols": symbols, "X_fresh": X_fresh, "positive": positive}
 
 
@@ -473,13 +482,14 @@ def train_encoded_symbolic_from_config(
             X_validation=data.X_validation,
             y_validation=data.y_validation,
             X_test=data.X_test,
-            y_test=data.y_test,
+            # The PySR target scale (y itself when Stages 1-2 trained on log y).
+            y_test=y_test,
             prediction_test=test_prediction,
         )
         save_json(
             output_dir / "original_input_evaluation.json",
             original_input_evaluation(
-                expanded, known, test_prediction=test_prediction, y_test=data.y_test,
+                expanded, known, test_prediction=test_prediction, y_test=y_test,
             ),
         )
     metrics_path = save_json(

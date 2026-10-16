@@ -255,12 +255,55 @@ def snap_encoder_rows(R: np.ndarray, *, denominator: int) -> tuple[np.ndarray, f
     return snapped, worst
 
 
+def graded_encoder_rows(
+    B: np.ndarray,
+    degrees: np.ndarray,
+    *,
+    tolerance: float = 1e-2,
+) -> tuple[np.ndarray, float] | None:
+    """Basis of the row space whose rows each use features of one degree only.
+
+    For polynomial feature maps graded by degree (e.g. quadratic and cubic
+    stress invariants), a target like f(J2, J3) has a row space that splits
+    into homogeneous parts, but the learned rows can be any mixture. For each
+    degree d, combinations c with ||c^T B[:, deg != d]|| small (left singular
+    vectors of the off-degree block) give rows supported on degree d.
+    Returns (rows, largest relative off-degree residual), or None when the
+    row space does not split into exactly n homogeneous rows.
+    """
+    B = np.asarray(B, dtype=np.float64)
+    B = B / np.linalg.norm(B, axis=1, keepdims=True).clip(1e-300)
+    degrees = np.asarray(degrees)
+    n_rows = B.shape[0]
+    rows: list[np.ndarray] = []
+    worst = 0.0
+    for degree in np.unique(degrees):
+        off = B[:, degrees != degree]
+        U, singular, _ = np.linalg.svd(off, full_matrices=True)
+        singular = np.concatenate([singular, np.zeros(n_rows - singular.size)])
+        for index in np.flatnonzero(singular < tolerance):
+            combination = U[:, index]
+            row = combination @ B
+            residual = float(np.linalg.norm(row[degrees != degree]) / np.linalg.norm(row))
+            row[degrees != degree] = 0.0
+            rows.append(row / np.abs(row).max())
+            worst = max(worst, residual)
+    if len(rows) != n_rows:
+        return None
+    return np.vstack(rows), worst
+
+
 def _snap_encoder_from_checkpoint(
     config: Config,
     *,
     checkpoint_path: str | Path,
 ) -> SparsifyResult:
-    """Stage 2 for power-law encoders: snap exponents, freeze S, refit the MLP."""
+    """Stage 2 with a frozen, interpretable encoder basis, then an MLP refit.
+
+    method = "snap": power-law encoders; snap exponents to simple fractions.
+    method = "graded": polynomial feature maps; one homogeneous row per
+    degree component of the learned row space.
+    """
     from fractions import Fraction
 
     seed_everything(config.train.seed)
@@ -300,14 +343,40 @@ def _snap_encoder_from_checkpoint(
     selected: dict[str, object] | None = None
     selected_state: dict[str, torch.Tensor] | None = None
     seen: set[bytes] = set()
+    method = config.sparsification.method.lower()
     basis = config.sparsification.snap_basis.lower()
     if basis not in {"rref", "sparsest"}:
         raise ValueError("sparsification.snap_basis must be 'rref' or 'sparsest'.")
-    for denominator in config.sparsification.snap_denominators:
-        snapped, residual = snap_encoder_rows(canonical, denominator=int(denominator))
-        if basis == "sparsest":
-            # Same row space, so the same information; only the groups change.
-            snapped = sparsest_integer_basis(snapped)
+
+    def candidate_bases():
+        if method == "graded":
+            pool = model.invariant_pool
+            if not hasattr(pool, "terms"):
+                raise ValueError("method='graded' needs a polynomial feature map with degrees.")
+            graded = graded_encoder_rows(
+                source_raw, np.array([len(term) for term in pool.terms]),
+            )
+            if graded is not None:
+                yield "graded", graded[0], graded[1]
+            return
+        for denominator in config.sparsification.snap_denominators:
+            snapped, residual = snap_encoder_rows(canonical, denominator=int(denominator))
+            if basis == "sparsest":
+                # Same row space, so the same information; only the groups change.
+                snapped = sparsest_integer_basis(snapped)
+            yield int(denominator), snapped, residual
+
+    if method == "graded":
+        with torch.no_grad():
+            raw_features = model.raw_invariant_features(
+                torch.as_tensor(data.X_train, dtype=torch.float32, device=device)
+            ).cpu().numpy().astype(np.float64)
+
+    for denominator, snapped, residual in candidate_bases():
+        if method == "graded":
+            # Row scale is free; unit spread keeps J of different degrees on a
+            # comparable scale for the refit MLP.
+            snapped = snapped / (raw_features @ snapped.T).std(axis=0).clip(1e-300)[:, None]
         if snapped.tobytes() in seen:
             continue
         seen.add(snapped.tobytes())
@@ -326,7 +395,7 @@ def _snap_encoder_from_checkpoint(
             learning_rate=config.sparsification.masked_refit_learning_rate,
             batch_size=config.sparsification.batch_size,
             method="masked_refit",
-            desc=f"stage2 snapped refit (1/{denominator})",
+            desc=f"stage2 frozen-basis refit ({denominator})",
             schedule=config.sparsification.masked_refit_schedule,
             min_learning_rate=config.sparsification.masked_refit_min_learning_rate,
         )
@@ -340,10 +409,14 @@ def _snap_encoder_from_checkpoint(
             max_generalization_gap=config.adaptive.max_generalization_gap,
         )
         candidate = {
-            "denominator": int(denominator),
+            "denominator": denominator,
             "rounding_residual": residual,
-            "exponents": [[str(Fraction(float(v)).limit_denominator(int(denominator))) for v in row]
-                          for row in snapped],
+            # Exact rationals only for snapped exponents; graded rows stay real.
+            "exponents": None if method == "graded" else [
+                [str(Fraction(float(v)).limit_denominator(int(denominator))) for v in row]
+                for row in snapped
+            ],
+            "rows": snapped.tolist(),
             "passes": passes,
             "train_metrics": train_metrics,
             "test_metrics": test_metrics,
@@ -385,7 +458,7 @@ def _snap_encoder_from_checkpoint(
         experiment_dir / config.sparsification.summary_name,
         {
             "source_checkpoint": str(checkpoint_path),
-            "method": "snap",
+            "method": method,
             "selection_metric": metric,
             "selection_partition": "validation" if config.data.kind == "supervised" else "test",
             "selection_metric_threshold": metric_threshold,
@@ -582,7 +655,7 @@ def sparsify_encoder_from_checkpoint(
 ) -> SparsifyResult:
     sparse_config = deepcopy(config)
     sparse_config.train.run_id = run_id or adaptive_sparsification_run_id(sparse_config)
-    if sparse_config.sparsification.method.lower() == "snap":
+    if sparse_config.sparsification.method.lower() in {"snap", "graded"}:
         return _snap_encoder_from_checkpoint(sparse_config, checkpoint_path=checkpoint_path)
     seed_everything(sparse_config.train.seed)
     device = resolve_device(sparse_config.train.device)

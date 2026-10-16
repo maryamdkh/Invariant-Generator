@@ -1,47 +1,74 @@
-# Paper plan: adaptive interpretable bottleneck for symbolic regression
+# Paper plan (CS/ML venue)
+
+Target: ML venue (NeurIPS/ICML/ICLR main track or AI4Science workshop, TMLR,
+Machine Learning: Science and Technology). The paper is method-first; yield
+surfaces are one application domain, not the story.
+
+## Working title
+
+Adaptive interpretable bottlenecks: learning a minimal set of closed-form
+variables to scale symbolic regression
 
 ## Claim
 
-One adaptive bottleneck finds the few interpretable variables a target
-depends on, returns them in closed form, and hands them to symbolic
-regression (SR), which then recovers equations it misses on raw inputs at
-matched compute. The same framework works with tensor invariants (anisotropic
-yield surfaces) and with power-law groups (physics laws), without units.
+Symbolic regression (SR) fails mainly because its search space grows
+combinatorially with the number of inputs. A small neural model can find,
+from data alone, the minimal number of input combinations the target depends
+on and express them in closed form; any SR backend then searches over those
+few variables. At matched compute this recovers more equations, faster, and
+(with a portfolio fallback) never fewer than the backend alone.
 
-## Positioning (closest work; verify before citing)
+## Contributions
 
-| Line of work | What it does | Our difference |
-|---|---|---|
-| AI Feynman (Udrescu & Tegmark 2020) | Dimensional analysis + NN-guided recursion before SR | Unit-free; adaptive n; works on tensor invariants |
-| Dimensionless learning: Bakarji et al. 2022 (Nat. Comput. Sci.), Xie et al. 2022 (Nat. Commun.), IT-pi (Yuan & Lozano-Duran 2025), Hi-pi (2025), arXiv:2411.15919 | Learns power-law groups, mostly from a dimension matrix or with a fixed group count | No units; minimal n chosen from data; exact rational exponents; coupled to SR |
-| FePySR (Yu, Lu, Lai, arXiv:2605.12704, 2026) | Neural feature extraction before PySR | Our features are closed-form groups with selected n; must be a baseline |
-| Mechanics model discovery: EUCLID (Flaschel et al. 2022), neural-polynomial elastoplasticity (CMAME 2024), ICNN yield functions | Sparse libraries or networks for yield/plasticity | We learn the invariants themselves, then SR |
+1. **Method.** A linear bottleneck over an interpretable feature map, with
+   (a) data-driven choice of the bottleneck width n relative to an
+   unconstrained reference model, (b) closed-form variables: exact rational
+   exponents in the sparsest integer basis for power-law maps, invariant
+   combinations for tensor inputs, (c) a backend-agnostic hand-off to SR with a
+   portfolio fallback.
+2. **Analysis.** n* equals the rank of the gradient span in feature space;
+   this gives an a priori structure count per benchmark equation (98/110 AI
+   Feynman equations are reducible in log space) and a diagnostic for the
+   learned model.
+3. **Evidence.** Standard SR benchmarks with matched compute, seeds, noise,
+   and ablations; plus a structured-input domain (anisotropic plasticity) where
+   the feature map is a tensor-invariant basis.
 
-## Method revisions (all opt-in; yield-surface defaults unchanged)
+## Positioning (verify each before citing)
 
-1. Stage 1: choose n from the gradient spectrum of a full-width network
-   (row-normalized d f / d features), instead of a fixed nrmse threshold.
-2. Stage 2: exact rational exponents (snap) in the sparsest integer basis.
-3. Stage 3: portfolio fallback (part of the budget on raw inputs), so the
-   pipeline is never worse than SR alone at matched compute.
-4. Sign-aware log features to cover all 119 Feynman equations.
+| Line of work | Gap we address |
+|---|---|
+| SR systems: PySR (Cranmer 2023), AI Feynman 1/2 (Udrescu & Tegmark 2020; Udrescu et al. 2020), uDSR, LLM-guided SR: LLM-SR (2024/25), LaSR (NeurIPS 2024) | Search still over raw inputs; our front end is orthogonal and can wrap any of them |
+| Feature/dimension reduction before SR: FePySR (2026), DeepPySR (2026), latent-variable SR (McConaghy 2010) | Their features are not closed form or the width is not chosen from data |
+| Dimensionless learning: Bakarji et al. 2022, Xie et al. 2022, IT-pi 2025, Hi-pi 2025 | Need units or a fixed group count; ours is unit-free with adaptive n |
+| Active subspaces / sufficient dimension reduction (Constantine 2015) | Linear directions, not closed-form groups, and not coupled to SR |
+| Benchmarks: SRBench (La Cava et al. 2021), SRSD-Feynman (Matsubara et al.), LLM-SRBench (ICML 2025) | Evaluate on all three; LLM-SRBench addresses memorized textbook equations |
+| ML yield functions (application): convex neural yield discovery (arXiv:2606.19375, 2026), neural-polynomial + SR (CMAME 2024), EUCLID (2022-2025), survey "AI Meets Plasticity" (arXiv:2602.01215, 2026) | Black-box or fixed libraries; ours learns the invariants and returns closed forms |
 
-## Protocol (fixed before the full run)
+Classic yield criteria are used as ground truths, as in the recent ML
+papers above: Hill (1948), Cazacu & Barlat (2001) CB2001, Barlat et al.
+(2005) Yld2004-18p; PDFs in `references/`.
 
-- Development set: the 21 pilot equations (already seen). Test set: the other
-  98 AI Feynman equations and all SRSD-Feynman tiers (different sampling
-  ranges). Report them separately; tune only on development.
-- Noise 0, 1e-3, 1e-2 (Gaussian, relative to target std); 5-10 seeds.
-- Matched total compute per arm; recovery vs budget (5, 15, 60 min).
-- Arms: PySR alone; PySR with units; pipeline; pipeline + fallback; PySR on
-  the true groups (upper bound); ablations (no snapping, rref vs sparsest
-  basis, n fixed to the number of inputs); FePySR if its code runs.
-- Metrics: SRBench symbolic solution, numerical recovery (fresh-sample
-  relative L2 < 1e-6), R^2 > 0.999 rate, complexity, time to solution.
-  Paired per-equation tests (McNemar / Wilcoxon), bootstrap intervals.
+## Experiments
 
-## Yield-surface experiments
+1. **Main SR benchmarks:** SRBench AI Feynman (119; 21 development, rest
+   test), SRSD-Feynman (Easy/Medium/Hard), LLM-SRBench (LSR-Transform,
+   LSR-Synth). Noise 0, 1e-3, 1e-2; 5 seeds; matched total compute; recovery
+   vs budget (5/15/60 min).
+2. **Arms:** backend alone (PySR; LaSR or LLM-SR if feasible), pipeline,
+   pipeline + portfolio, oracle groups (upper bound), FePySR if runnable.
+3. **Ablations:** fixed-threshold vs reference-relative n; no snapping; RREF vs
+   sparsest basis; no encoder-LR scaling; n fixed to the input count.
+4. **Structured inputs (application section):** rotated Hill48 (exact
+   recovery), CB2001 with published 2090-T3 coefficients (needs a quadratic
+   and a cubic orthotropic invariant: two encoder rows over an orthotropic
+   polynomial integrity basis), Yld2004-18p (stress test: not polynomial; report
+   accuracy and compactness honestly).
+5. **Metrics:** SRBench symbolic solution, numerical recovery (< 1e-6 on fresh
+   points), R^2 > 0.999 rate, complexity, time to solution; paired tests and
+   bootstrap intervals.
 
-- Rotated Hill (existing): exact recovery from noisy data.
-- Second criterion: open; see the representability note in the week-1 report.
-- Real data: DX56D and single-crystal gold (existing adapters).
+## Compute
+
+Development runs on the laptop; full runs on Vera/Arrhenius via
+`cluster/` (the author submits jobs; two-factor login).

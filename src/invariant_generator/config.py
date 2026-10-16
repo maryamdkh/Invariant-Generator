@@ -31,6 +31,11 @@ class DataConfig:
     random_state: int = 42
     shuffle: bool = True
 
+    # Supervised data only: "log" trains Stages 1-2 on log(y) (requires y > 0).
+    # The map is monotone, so the groups the target depends on are unchanged;
+    # set [symbolic].target_transform = "exp" so PySR still fits y.
+    target_transform: str = "identity"
+
 
 @dataclass(slots=True)
 class NoiseConfig:

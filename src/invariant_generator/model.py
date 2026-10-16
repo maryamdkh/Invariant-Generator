@@ -10,6 +10,7 @@ from invariant_generator.config import Config, coerce_config_dataclasses
 from invariant_generator.invariants import InvariantPool
 from invariant_generator.input_features import (
     LogFeaturePool,
+    OrthotropicPolynomialPool,
     PairwiseFeaturePool,
     input_feature_names,
 )
@@ -292,6 +293,10 @@ class InvariantYieldModel(nn.Module):
             if a_psd.enabled or A_psd.enabled:
                 raise ValueError("Stress tensor constraints require stress_invariants.")
             invariant_pool = LogFeaturePool(config.data.feature_names)
+        elif config.input_transform.kind == "orthotropic_polynomial":
+            if a_psd.enabled or A_psd.enabled:
+                raise ValueError("Stress tensor constraints require stress_invariants.")
+            invariant_pool = OrthotropicPolynomialPool()
         elif config.input_transform.kind == "pairwise":
             if a_psd.enabled or A_psd.enabled:
                 raise ValueError("Stress tensor constraints require stress_invariants.")

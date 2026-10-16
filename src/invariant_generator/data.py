@@ -545,6 +545,14 @@ def prepare_supervised_data(config: Config) -> PreparedData:
     combined = np.concatenate((train_idx, val_idx, test_idx))
     if len(combined) != len(y) or not np.array_equal(np.sort(combined), np.arange(len(y))):
         raise ValueError(f"Saved supervised split indices are invalid: {split_path}")
+    # Applied after the split, which is defined on the raw data.
+    target_transform = config.data.target_transform.lower()
+    if target_transform == "log":
+        if np.any(y <= 0):
+            raise ValueError("data.target_transform='log' requires a strictly positive target.")
+        y = np.log(y)
+    elif target_transform != "identity":
+        raise ValueError("data.target_transform must be 'identity' or 'log'.")
     return PreparedData(
         X_train=X[train_idx], y_train=y[train_idx],
         X_validation=X[val_idx], y_validation=y[val_idx],

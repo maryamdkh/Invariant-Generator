@@ -184,5 +184,203 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
   gap gives n* on 9/21; count of singular values > 1e-2 gives n* on 11/21.
   The noise floor of the gradient spectrum tracks the MLP's fit (val nrmse
   2e-3 to 3e-2).
-- log-y targets: running; first three equations show much cleaner gaps
-  (II.6.15a: 1, 0.05, then 0.002).
+- log-y targets (`experiments/outputs/gradient_spectrum_log_y.txt`; 3
+  equations skipped because y <= 0 occurs: test_3, test_9, test_19): fits
+  improve (val nrmse mostly 1e-3 to 5e-3) and spectra show clean gaps; both
+  the largest-gap rule and the 1e-2 cutoff give n* on 14/18. Misses: I.32.17
+  and test_17 (gap rule), III.9.52 (poor fit), I.40.1, test_6 (cutoff), test_11
+  and test_12 (weak directions: test_12 has singular values 1, 0.0075, 0.0016,
+  i.e. nearly a one-group function on the sampled domain).
+- Decision: do not tune a spectral cutoff on 18 development equations. Use
+  log y in Stage 1-2 when y > 0, accept n relative to the full-width
+  reference fit, initialize one restart from the top gradient directions, and
+  report the spectrum as a diagnostic. Stage 3 and the PySR-alone arm keep
+  fitting the original y.
+
+## 13. Checkpoint commit (2026-10-16)
+
+- Branch `feynman-generalization`, commit `8b9955c` (all work up to entry 12).
+
+## 14. Stage 1-2 revisions implemented (2026-10-16)
+
+- `data.target_transform = "log"` (supervised): Stages 1-2 train on log y
+  after the split (split unchanged); `symbolic.target_transform = "exp"` maps
+  back so PySR fits y; Stage 3 test errors and the PySR early-stop threshold
+  use the y scale. The runner falls back to identity when some y <= 0.
+  The PySR-alone arm always fits y.
+- Runner: `--seed` (training seed and PySR random_state; data split fixed),
+  `--portfolio-raw-share`.
+- Config `configs/feynman_benchmark_v2.toml` = pilot config + log target,
+  relative acceptance (factor 2, floor 1e-3), reference-initialized restart,
+  sparsest basis. PySR settings identical to the pilot, so pilot PySR-alone
+  results (seed 42) are reused as the baseline arm of the seed-42 dev run.
+- Checks: 79 tests pass; rotated-Hill Stage 1 weights/keys and Stage 2
+  outputs identical to the original code.
+
+## 15. v2 smoke test and seed-42 development run (2026-10-16)
+
+- Smoke (`results/feynman_benchmark/v2_smoke/`, 2 min PySR, pipeline and
+  portfolio arms): I.32.17, missed by the pilot's fixed threshold, now gets
+  n = 2 = n* (reference val nrmse 0.0016, gradient spectrum 1, 0.037, 0.0015;
+  n = 1: 0.033 rejected, n = 2: 0.0010 accepted). test_5 groups in the
+  sparsest basis: `m1/m2`, `d^3/(G m1)`. At 2 min neither reached the 1e-6
+  criterion (4.7e-5, 1.1e-5). Portfolio reused Stages 1-2 as intended.
+- Launched seed-42 development run (`results/feynman_benchmark/v2_dev_seed42/`,
+  config `configs/feynman_benchmark_v2.toml`, 15 min PySR per arm; portfolio
+  splits 7.5/7.5 min). Baseline arm seeded from the pilot (identical PySR
+  settings and seed), marked `reused_from` in the summary.
+
+## 16. Cluster tooling (2026-10-16)
+
+- Clusters available: Vera and Arrhenius (SLURM). Added `cluster/`:
+  `setup_env.sh` (uv env, Julia/PySR precompile in `.julia_depot/`, data for
+  all 119 equations), `make_tasks.py` (one task per equation x seed;
+  `--positive-only` gives 110 equations), `feynman_array.sbatch` (all arms per
+  task, own results folder, `--numprocs` = SLURM cores), and
+  `scripts/merge_feynman_benchmark.py` (merges per-task summaries; recovery per
+  arm across seeds and per equation). Dry run: 119 datasets generated, 550
+  tasks for 5 seeds, merge reproduces the pilot's 12 vs 9.
+
+## 17. Venue, references and yield benchmarks (2026-10-16)
+
+- Author's decisions: target a CS/ML venue (method-first framing; yield
+  surfaces become an application section); prefer recent literature for
+  positioning; cluster jobs are submitted by the author (two-factor login),
+  using `cluster/`.
+- References in `references/`: Cazacu & Barlat (2001) CB2001
+  (`generalized_drucker.pdf`): J2^0 (Eq. 5, a1-a6), J3^0 (Eq. 4, b1-b11),
+  criterion (J2^0)^3 - c (J3^0)^2 = k^2 (Eq. 8); coefficients for 6016-T4
+  (c = 1.4) and 2090-T3 (a1 = 0.586, a2 = 1.05, a3 = 0.823, a4 = 0.96,
+  b1 = 1.44, b2 = 0.061, b3 = -1.302, b4 = -0.281, b5 = -0.375, b10 = 0.445,
+  c = 1.285; plane stress); linear-transformation variant (Eqs. 12-13).
+  Barlat et al. (2005) Yld2004-18p (`...S0749641904001160...`). Cazacu,
+  Plunkett & Barlat (2006) CPB06 (`...S0749641905001257...`).
+- Literature check for the CS framing: LLM-SRBench (ICML 2025 Oral, 239
+  problems, anti-memorization) is now a standard SR benchmark; LLM-SR and
+  LaSR are current LLM-guided SR systems. Recent ML yield work: convex neural
+  yield discovery (arXiv:2606.19375), "AI Meets Plasticity" survey
+  (arXiv:2602.01215). Plan rewritten: `PAPER_PLAN.md`.
+- Yield benchmark decision: Hill48 (exact), CB2001 2090-T3 (two encoder rows
+  over an orthotropic polynomial integrity basis: a quadratic and a cubic
+  invariant), Yld2004-18p (non-polynomial stress test).
+
+## 18. Yield-surface benchmarks: criteria, data, feature map (2026-10-16)
+
+- `src/invariant_generator/yield_criteria.py`: CB2001 (Eqs. 4, 5, 8) and
+  Yld2004-18p (Eqs. 5, 14, 15; Table 2, a = 8) as equivalent stresses
+  (degree-1 homogeneous, = 1 for uniaxial x tension). Presets:
+  `cb2001_2090T3`, `cb2001_6016T4` (plane-stress fits; unidentified a5, a6,
+  b6-b9, b11 set to 1), `yld2004_2090T3`, `yld2004_6111T4`.
+- Validation (`tests/test_yield_criteria.py`): isotropic limits equal
+  classical J2/J3 and Hershey to ~1e-15; all presets positive, homogeneous and
+  pressure-insensitive on random 3D stresses; directional yield stresses match
+  the papers' figures (2090-T3, Barlat 2005 Fig. 7: CB2001 within 0.05,
+  Yld2004 within 0.02; 6016-T4, CB2001 Fig. 4: within 0.01). A transcription
+  error in the 6016-T4 coefficients (a3, a4) was caught by these checks and
+  fixed.
+- Data: `scripts/prepare_yield_benchmark.py` -> `data/yield_benchmarks/`
+  (2,000 surface points per criterion, Mandel format like rotatedhill.hdf).
+- Feature map `input_transform.kind = "orthotropic_polynomial"`: 29 degree-2/3
+  monomials of the orthotropic integrity basis (CB2001 Eqs. 2-3). J2^0 and
+  J3^0 of CB2001 are exact linear combinations (residual ~1e-14; 9 and 20
+  terms), so the exact answer is n = 2. Config `configs/yield_cb2001_2090T3.toml`;
+  probe `experiments/probes/yield_stage1_probe.py` (running).
+- LLM-SRBench: gated on Hugging Face (401 without accepted terms); the author
+  needs to accept the terms and download it to `data/llm_srbench/`.
+- Incident: the seed-42 dev run (detached process) stopped during III.9.52's
+  portfolio arm, coinciding with a working-directory change of the agent's
+  shell; relaunched as a tracked task, resuming from its summary.
+
+## 19. CB2001 (2090-T3) Stage 1 result (2026-10-16)
+
+- `experiments/probes/yield_stage1_probe.py configs/yield_cb2001_2090T3.toml`
+  (output `experiments/outputs/yield_cb2001_2090T3_stage1.txt`, 694 s):
+  full-width reference nrmse 0.023 (gradient spectrum 1, 0.12, 0.068, ...);
+  n = 1: 0.069 (rejected), n = 2: 0.008 (accepted; threshold 0.047).
+- The two learned encoder rows span the generating invariants: principal-angle
+  cosines with span{J2^0, J3^0} = 0.999999 and 0.999993. The pipeline
+  recovered both CB2001 generalized invariants (9 and 20 monomial terms) from
+  yield-surface points alone.
+- Note: the reference model fit worse than the n = 2 bottleneck, so the
+  relative rule's threshold (2x reference) was loose here; the decision was
+  still correct (n = 1 is 8.7x worse than n = 2).
+- Next for this benchmark: Stage 2 with a degree-graded basis (one purely
+  quadratic and one purely cubic row) and Stage 3 PySR for
+  f = ((J2)^3 - c (J3)^2)^(1/6).
+
+## 20. Degree-graded Stage 2 for polynomial feature maps (2026-10-16)
+
+- `sparsification.method = "graded"` (`graded_encoder_rows`): for features
+  graded by polynomial degree, find combinations of the learned rows supported
+  on a single degree (left singular vectors of the off-degree block), freeze
+  them, refit the MLP. Test: recovers J2^0 and J3^0 exactly from an arbitrary
+  mix of the two (`tests/test_yield_criteria.py`).
+- First CB2001 run: graded split residual 0.0013 (row space splits cleanly
+  into one quadratic and one cubic row), but the frozen refit reached val
+  nrmse 0.052 > 0.01 and Stage 2 fell back to the dense rows; PySR (15 min)
+  then returned a long expression in the mixed rows that is NaN on some fresh
+  directions. Cause: graded rows normalized by their largest coefficient give
+  J on very different scales. Fix: rescale each graded row to unit spread of
+  J on training data (row scale is free); refit epochs 2000 -> 4000. Rerun
+  in progress (`results/yield_benchmarks/cb2001_pipeline_probe2.log`).
+- Open consistency issue: Stage 2 acceptance uses the absolute metric
+  threshold, while v2 Stage 1 uses the reference-relative rule. Left
+  unchanged during the running seed-42 dev run; to align before the
+  cluster run.
+
+## 21. LLM-SRBench (LSR-Transform) integration (2026-10-16)
+
+- Data: author obtained access (gated, manual approval) and downloaded
+  nnheui/llm-srbench to `data/llm_srbench/` (228 MB). Layout: parquet tables
+  (name, symbols, symbol_descs, symbol_properties, expression) and
+  `lsr_bench_data.hdf5` with `lsr_transform/<name>/{train, test}` (~50k/12.5k
+  rows) and `lsr_synth/<domain>/<name>/{train, test, ood_test}`; float32;
+  columns [output, inputs...] in `symbols` order (verified: formula vs data
+  median relative error 2e-8 to 2e-7, i.e. float32 precision; a few
+  near-singular problems reach relative L2 up to 0.6 from float32 inputs).
+- LSR-Synth (129 problems) not converted: ground truths contain named
+  constants without values (e.g. F0, beta, omega0) and one malformed constant
+  (CRK0 `..._z`), so only numeric test/OOD error can be scored there.
+- `scripts/prepare_llm_srbench.py` -> `data/llm_srbench_converted/`: per
+  problem 3,000 seeded rows of the official train split (X, y) and 10,000
+  rows of the official test split (X_eval). 111 problems; 91 with positive
+  inputs (log features apply); 67 with positive targets.
+- Evaluation: candidates are scored against the ground-truth formula in
+  float64 on X_eval (`eval_key` in the problem JSON), not against float32
+  outputs. Problems with non-positive inputs skip the log pipeline
+  (`skipped`) and count as PySR alone. Runner: `--data-dir`.
+- Smoke run (2 problems, 2 min PySR) in progress: `results/llm_srbench/smoke/`.
+
+## 22. CB2001 (2090-T3) end to end (2026-10-16)
+
+- Rerun with unit-spread graded rows (`experiments/outputs/yield_cb2001_2090T3_stages23.txt`):
+  Stage 2 graded basis accepted (off-degree residual 0.0013; val nrmse
+  0.0047): J1 = quadratic invariant with 9 terms, J2 = cubic invariant with 20
+  terms, i.e. the support of CB2001's J2^0 and J3^0.
+- Stage 3 (PySR, 15 min, 4 threads): sqrt(J1 (cbrt(0.647 - 0.817 J2^2/J1^3)
+  - 0.068)); true form sqrt(J1 cbrt(1 - c' J2^2/J1^3)) x const. Right nested
+  structure (J3^2/J2^3 inside a cube root inside a square root) with one
+  spurious -0.068 term. Relative L2 vs the true criterion on 5,000 fresh
+  stress directions: 2.0e-4.
+- Remaining error has two sources: approximate encoder coefficients (learned,
+  ~1e-3) and one structural slip in PySR. Planned method step: a final joint
+  refit of all constants (encoder rows and formula constants) on the training
+  data once a structure is found ("constant polishing").
+- Smoke result after fixing a path bug (problem names with dots, e.g.
+  `II.36.38_1_0`, broke `Path.with_suffix` when locating the problem JSON, so
+  scoring was skipped; regression test added): II.36.38_1_0 recovered exactly
+  by both arms, PySR 1.2 s on the groups (`T f kb/mom`, `M alpha/(eps c^2)`)
+  vs 33 s on raw inputs; II.6.15a_1_0 not recovered at 2 min by either
+  (pipeline 6.4e-4, PySR alone 1.2e-2). `scripts/rescore_feynman_benchmark.py`
+  gained `--data-dir`.
+
+## 23. Interim: seed-42 dev run, 5 of 21 equations (2026-10-16 13:05)
+
+- Recovered by every arm: II.36.38, I.11.19 (PySR on groups 2 s each).
+  Not recovered by any arm: III.9.52 (Stage 1 n = 2 < n* = 3), II.6.15a,
+  I.32.17 (Stage 1 now finds n = n* = 2, unlike the pilot, but PySR misses).
+- II.6.15a: pilot pipeline recovered it; v2 finds equally valid groups in a
+  different basis (`x/y`, `eps r^5/(p_d x z)`; the sparsest-basis score ties
+  with the pilot's y-based group) and PySR reaches only 1.3e-5 in 15 min.
+  With one seed this is not separable from PySR run-to-run variance, which
+  is why the protocol needs several seeds.

@@ -31,3 +31,14 @@ plan.md
 usefulcommands.md
 logdev/
 *.sbatch.sh
+
+.julia_depot/
+cluster/logs/
+cluster/tasks.txt
+data/yield_benchmarks/
+data/llm_srbench/
+data/llm_srbench_converted/
+
+# Publisher PDFs stay local (copyright).
+references/*.pdf
+.DS_Store

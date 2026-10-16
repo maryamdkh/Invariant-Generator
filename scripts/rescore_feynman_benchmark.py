@@ -18,6 +18,7 @@ def main() -> None:
     parser.add_argument("summary", type=Path)
     parser.add_argument("--config", default="configs/feynman_benchmark.toml")
     parser.add_argument("--manifest", type=Path, default=Path("data/feynman/manifest.json"))
+    parser.add_argument("--data-dir", type=Path, default=None)
     args = parser.parse_args()
 
     backup = args.summary.with_name("benchmark_summary.before_rescore.json")
@@ -26,6 +27,8 @@ def main() -> None:
     rows = json.loads(args.summary.read_text(encoding="utf-8"))
     entries = {e["equation_id"]: e for e in json.loads(args.manifest.read_text(encoding="utf-8"))}
     base = load_config(args.config)
+    if args.data_dir is not None:
+        base.data.data_dir = args.data_dir.resolve()
     for row in rows:
         entry = entries[row["equation_id"]]
         base.data.dataset_name = entry["equation_id"]

@@ -1,0 +1,117 @@
+# CB2001 (Cazacu & Barlat 2001) with published 2090-T3 coefficients.
+# Generate data first: scripts/prepare_yield_benchmark.py
+# Features: degree-2/3 orthotropic invariant monomials (29). The exact answer
+# is n = 2 encoder rows spanning the generalized J2^0 and J3^0.
+
+[data]
+data_dir = "data/yield_benchmarks"
+dataset_name = "cb2001_2090T3"
+dataset_key = "stress"
+stress_format = "mandel_3d"
+feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
+test_size = 0.1
+random_state = 42
+shuffle = true
+
+[augmentation]
+enabled = true
+include_original = true
+augment_test = true
+k_values = []
+n_aug_per_sample = 5
+k_range = [0.5, 1.75]
+random_state = 42
+shuffle = true
+homogeneity_degree = 1.0
+surface_target = 1.0
+
+[input_transform]
+kind = "orthotropic_polynomial"
+
+[encoder]
+enabled = true
+output_dim = 1
+init = "random"
+
+[normalization]
+enabled = true
+mode = "scale_only"
+
+[model]
+hidden_dims = [64, 64]
+activation = "silu"
+output_activation = "softplus"
+
+[loss]
+lambda_param = 0.0
+lambda_structure = 0.0
+lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l1 = 0.0
+lambda_encoder_l2 = 0.0
+
+[train]
+run_id = "yield_cb2001_2090T3"
+results_dir = "results/yield_benchmarks"
+split_dir = "results/yield_benchmarks/splits"
+seed = 42
+epochs = 4000
+batch_size = 0
+learning_rate = 1e-3
+encoder_learning_rate_scale = 30.0
+device = "cpu"
+log_every = 25
+save_every = 0
+lr_plateau_min_delta = 0.0
+early_stopping_min_delta = 0.0
+early_stopping_patience = 20
+
+[adaptive]
+results_subdir = "cb2001_2090T3"
+metric = "nrmse"
+nrmse_threshold = 0.01
+n_min = 1
+n_max = 4
+stop_on_first_success = true
+restarts = 3
+acceptance = "relative_to_reference"
+relative_factor = 2.0
+relative_floor = 1e-3
+reference_init = true
+
+[sparsification]
+method = "graded"
+masked_refit_epochs = 4000
+masked_refit_learning_rate = 3e-3
+masked_refit_schedule = "cosine"
+masked_refit_min_learning_rate = 1e-5
+run_id = "stage2_graded"
+
+[symbolic]
+target_source = "data"
+target_transform = "identity"
+output_subdir = "stage3_pysr"
+run_id = "pysr_search"
+weight_mode = "none"
+elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "cube", "sqrt", "cbrt"]
+constraints = {}
+nested_constraints = {}
+maxsize = 30
+maxdepth = -1
+parsimony = 0.0
+complexity_of_constants = 1
+model_selection = "best"
+parallelism = "multithreading"
+numprocs = 4
+populations = 16
+population_size = 50
+ncycles_per_iteration = 500
+niterations = 1000000
+timeout_hours = 0.25
+batching = false
+warm_start = false
+progress = false
+precision = 64
+random_state = 42
+early_stop_condition = "stop_if(loss, complexity) = loss < 1e-12"

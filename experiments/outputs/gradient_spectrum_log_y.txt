@@ -1,0 +1,21 @@
+RESULT feynman_III_9_52   d=6 n*=3 val_nrmse=3.6e-01 n_gap=3 n_1e-2=6 spectrum=[1.   ,0.818,0.539,0.188,0.159,0.129] t=14s
+RESULT feynman_II_36_38   d=8 n*=2 val_nrmse=2.0e-03 n_gap=2 n_1e-2=2 spectrum=[1.   ,0.197,0.002,0.002,0.001,0.001,0.001,0.001] t=24s
+RESULT feynman_II_6_15a   d=6 n*=2 val_nrmse=1.4e-03 n_gap=2 n_1e-2=2 spectrum=[1.   ,0.05 ,0.002,0.001,0.001,0.001] t=24s
+RESULT feynman_I_11_19    d=6 n*=3 val_nrmse=2.9e-03 n_gap=3 n_1e-2=3 spectrum=[1.   ,0.304,0.291,0.003,0.002,0.002] t=25s
+RESULT feynman_I_32_17    d=6 n*=2 val_nrmse=1.7e-03 n_gap=1 n_1e-2=2 spectrum=[1.000e+00,3.415e-02,1.642e-03,1.207e-03,9.093e-04,8.420e-04] t=26s
+RESULT feynman_I_40_1     d=6 n*=2 val_nrmse=8.4e-03 n_gap=2 n_1e-2=5 spectrum=[1.   ,0.204,0.037,0.01 ,0.01 ,0.009] t=25s
+RESULT feynman_I_9_18     d=9 n*=6 val_nrmse=4.0e-03 n_gap=6 n_1e-2=6 spectrum=[1.   ,0.111,0.109,0.062,0.022,0.021,0.002,0.001,0.001] t=27s
+RESULT feynman_test_1     d=7 n*=2 val_nrmse=2.6e-03 n_gap=2 n_1e-2=2 spectrum=[1.   ,0.153,0.002,0.002,0.002,0.002,0.001] t=25s
+RESULT feynman_test_11    d=4 n*=4 val_nrmse=3.9e-03 n_gap=2 n_1e-2=4 spectrum=[1.   ,0.758,0.246,0.122] t=25s
+RESULT feynman_test_12    d=5 n*=3 val_nrmse=1.0e-03 n_gap=1 n_1e-2=1 spectrum=[1.000e+00,7.476e-03,1.604e-03,9.206e-04,7.935e-04] t=24s
+RESULT feynman_test_16    d=6 n*=4 val_nrmse=5.0e-03 n_gap=4 n_1e-2=4 spectrum=[1.   ,0.391,0.14 ,0.049,0.003,0.002] t=25s
+RESULT feynman_test_17    d=6 n*=3 val_nrmse=2.5e-03 n_gap=1 n_1e-2=3 spectrum=[1.   ,0.062,0.046,0.003,0.002,0.002] t=25s
+RESULT feynman_test_18    d=5 n*=2 val_nrmse=1.3e-03 n_gap=2 n_1e-2=2 spectrum=[1.   ,0.422,0.001,0.001,0.001] t=26s
+SKIP feynman_test_19: nonpositive y
+SKIP feynman_test_3: nonpositive y
+RESULT feynman_test_4     d=5 n*=3 val_nrmse=3.5e-03 n_gap=3 n_1e-2=3 spectrum=[1.   ,0.123,0.061,0.004,0.002] t=26s
+RESULT feynman_test_5     d=4 n*=2 val_nrmse=5.5e-04 n_gap=2 n_1e-2=2 spectrum=[1.000e+00,4.617e-02,1.141e-03,7.957e-04] t=26s
+RESULT feynman_test_6     d=7 n*=1 val_nrmse=4.1e-03 n_gap=1 n_1e-2=6 spectrum=[1.   ,0.047,0.025,0.018,0.012,0.01 ,0.008] t=25s
+RESULT feynman_test_7     d=5 n*=2 val_nrmse=3.2e-03 n_gap=2 n_1e-2=2 spectrum=[1.   ,0.089,0.004,0.003,0.002] t=25s
+RESULT feynman_test_8     d=4 n*=3 val_nrmse=1.7e-03 n_gap=3 n_1e-2=3 spectrum=[1.   ,0.341,0.112,0.002] t=25s
+SKIP feynman_test_9: nonpositive y
