@@ -11,6 +11,9 @@ __pycache__/
 *.py[cod]
 
 results/
+data/feynman_gaussian/
+data/feynman/
+data/feynman_tables/pmlb_data/
 data/external/raw/
 .vscode 
 
@@ -28,4 +31,3 @@ plan.md
 usefulcommands.md
 logdev/
 *.sbatch.sh
-

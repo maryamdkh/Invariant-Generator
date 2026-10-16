@@ -361,6 +361,46 @@ def _pysr_fit_kwargs(config: Config, target: np.ndarray) -> dict[str, Any]:
     return {"weights": weights}
 
 
+def pysr_regressor_options(
+    config: Config,
+    *,
+    output_directory: str | Path | None = None,
+    run_id: str | None = None,
+) -> dict[str, Any]:
+    """Build the common PySR search settings used by symbolic pipeline stages."""
+    symbolic = config.symbolic
+    return {
+        "parallelism": symbolic.parallelism,
+        "procs": symbolic.numprocs,
+        "batching": symbolic.batching,
+        "batch_size": symbolic.batch_size,
+        "niterations": symbolic.niterations,
+        "timeout_in_seconds": int(symbolic.timeout_hours * 3600),
+        "warm_start": symbolic.warm_start,
+        "populations": symbolic.populations,
+        "population_size": symbolic.population_size,
+        "ncycles_per_iteration": symbolic.ncycles_per_iteration,
+        "model_selection": symbolic.model_selection,
+        "elementwise_loss": symbolic.elementwise_loss,
+        "binary_operators": symbolic.binary_operators,
+        "unary_operators": symbolic.unary_operators,
+        "maxsize": symbolic.maxsize,
+        "maxdepth": symbolic.maxdepth,
+        "parsimony": symbolic.parsimony,
+        "complexity_of_constants": symbolic.complexity_of_constants,
+        "constraints": symbolic.constraints,
+        "nested_constraints": symbolic.nested_constraints,
+        "precision": symbolic.precision,
+        "progress": symbolic.progress,
+        "output_directory": str(
+            symbolic.output_directory if output_directory is None else output_directory
+        ),
+        "run_id": symbolic.run_id if run_id is None else run_id,
+        "early_stop_condition": symbolic.early_stop_condition,
+        "random_state": symbolic.random_state,
+    }
+
+
 def transform_symbolic_target(target: np.ndarray, *, target_transform: str) -> np.ndarray:
     """Apply the user-selected target transform for symbolic regression."""
     target = np.asarray(target, dtype=np.float64)
@@ -563,34 +603,7 @@ def train_symbolic_from_config(
         },
     )
 
-    pysr_model = PySRRegressor(
-        parallelism=config.symbolic.parallelism,
-        procs = config.symbolic.numprocs,
-        batching = config.symbolic.batching,
-        batch_size = config.symbolic.batch_size,
-        niterations=config.symbolic.niterations,
-        timeout_in_seconds=int(config.symbolic.timeout_hours * 3600),
-        warm_start=config.symbolic.warm_start,
-        populations=config.symbolic.populations,
-        population_size=config.symbolic.population_size,
-        ncycles_per_iteration=config.symbolic.ncycles_per_iteration,
-        model_selection=config.symbolic.model_selection,
-        elementwise_loss=config.symbolic.elementwise_loss,
-        binary_operators=config.symbolic.binary_operators,
-        unary_operators=config.symbolic.unary_operators,
-        maxsize=config.symbolic.maxsize,
-        maxdepth=config.symbolic.maxdepth,
-        parsimony=config.symbolic.parsimony,
-        complexity_of_constants=config.symbolic.complexity_of_constants,
-        constraints=config.symbolic.constraints,
-        nested_constraints=config.symbolic.nested_constraints,
-        precision=config.symbolic.precision,
-        progress=config.symbolic.progress,
-        output_directory=str(config.symbolic.output_directory),
-        run_id=config.symbolic.run_id,
-        early_stop_condition=config.symbolic.early_stop_condition,
-        random_state=config.symbolic.random_state
-    )
+    pysr_model = PySRRegressor(**pysr_regressor_options(config))
 
  
     pysr_model.fit(

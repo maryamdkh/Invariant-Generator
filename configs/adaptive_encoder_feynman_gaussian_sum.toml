@@ -1,0 +1,98 @@
+# Pilot: published Feynman I.6.20a with theta replaced by a+b.
+# Generate the paired data with scripts/prepare_feynman_gaussian.py first.
+
+[data]
+kind = "supervised"
+data_dir = "data/feynman_gaussian"
+dataset_name = "i_6_20a_sum"
+dataset_key = "X"
+target_key = "y"
+feature_names = ["a", "b"]
+validation_size = 0.1
+test_size = 0.1
+random_state = 42
+shuffle = true
+
+[augmentation]
+enabled = false
+
+[input_transform]
+kind = "pairwise"
+include_products = true
+include_ratios = true
+denominator_floor = 1e-6
+
+[encoder]
+enabled = true
+output_dim = 1
+init = "random"
+
+[normalization]
+enabled = true
+mode = "scale_only"
+
+[model]
+hidden_dims = [64, 64]
+output_activation = "softplus"
+
+[loss]
+lambda_structure = 0.0
+lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l2 = 0.0
+
+[train]
+run_id = "feynman_i_6_20a_sum_base"
+results_dir = "results"
+split_dir = "results/splits"
+use_saved_split = true
+save_split_if_missing = true
+seed = 42
+epochs = 1200
+batch_size = 0
+learning_rate = 1e-3
+log_every = 25
+save_every = 100
+early_stopping_patience = 20
+
+[adaptive]
+results_subdir = "feynman_i_6_20a_sum"
+metric = "rmse"
+rmse_threshold = 0.006
+n_min = 1
+n_max = 2
+stop_on_first_success = true
+
+[sparsification]
+method = "gated"
+lambda_encoder_l1 = 0.01
+lambda_gate = 0.01
+threshold = 0.02
+adaptive_max_active_terms = true
+max_active_terms_candidates = [1, 2, 3]
+epochs = 500
+learning_rate = 1e-4
+masked_refit_epochs = 500
+masked_refit_learning_rate = 1e-4
+run_id = "stage2_sparse"
+
+[symbolic]
+target_source = "data"
+target_transform = "identity"
+output_subdir = "stage3_pysr"
+run_id = "pysr_search"
+weight_mode = "none"
+elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "exp"]
+constraints = {}
+nested_constraints = {}
+maxsize = 25
+parsimony = 0.001
+parallelism = "multithreading"
+numprocs = 4
+populations = 8
+population_size = 40
+ncycles_per_iteration = 500
+niterations = 1000000
+timeout_hours = 0.25
+early_stop_condition = "stop_if(loss, complexity) = loss < 1e-10"

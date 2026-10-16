@@ -81,7 +81,7 @@ import matplotlib.pyplot as plt
 
 from invariant_generator.adaptive import adaptive_sparsification_run_id
 from invariant_generator.config import load_config
-from invariant_generator.data import canonicalize_stress_features, load_hdf_dataset, prepare_training_data, split_surface_data
+from invariant_generator.data import add_gaussian_input_noise, canonicalize_stress_features, load_hdf_dataset, prepare_training_data, resolve_saved_surface_split, split_surface_data
 from invariant_generator.evaluation import evaluate_model, predict_numpy
 from invariant_generator.model import InvariantYieldModel
 from invariant_generator.stress_viz import plot_stress_space_summary, simulate_train_input_noise
@@ -128,12 +128,19 @@ else:
         X_raw,
         stress_format=config.data.stress_format,
     )
+    X_for_split = (
+        add_gaussian_input_noise(
+            X_clean, noise_scale=config.noise.scale,
+            random_state=config.noise.random_state,
+            relative_to_feature_std=config.noise.relative_to_feature_std,
+        ) if config.noise.enabled else X_clean
+    )
     X_train_raw, X_test_raw, _ = split_surface_data(
-        X_clean,
+        X_for_split,
         test_size=config.data.test_size,
         random_state=config.data.random_state,
         shuffle=config.data.shuffle,
-        split_path=config.split_path,
+        split_path=resolve_saved_surface_split(config, X_for_split),
         load_if_exists=config.train.use_saved_split,
         save_if_missing=config.train.save_split_if_missing,
         surface_target=config.augmentation.surface_target,

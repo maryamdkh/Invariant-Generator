@@ -104,3 +104,6 @@ where `L_data` is the sum of squared errors against the homogeneous scaling
 target, and the structure/encoder terms normalize the trainable tensors and
 encourage sparsity in the encoder. `L_constraint` is zero unless a constraint
 uses penalty mode.
+
+For the first Feynman input-expansion run using the same adaptive stages, see
+[`FEYNMAN_PILOT.md`](FEYNMAN_PILOT.md).

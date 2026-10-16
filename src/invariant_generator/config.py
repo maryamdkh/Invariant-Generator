@@ -13,9 +13,11 @@ INVARIANT_NAMES = [f"I{i}" for i in range(1, 14)]
 
 @dataclass(slots=True)
 class DataConfig:
+    kind: str = "surface"  # surface | supervised
     data_dir: Path = field(default_factory=lambda: PROJECT_ROOT / "data")
     dataset_name: str = "rotatedhill"
     dataset_key: str = "stress"
+    target_key: str = "y"
 
     # Default order: [s11, s22, s33, s23, s13, s12].
     # Set stress_format="mandel_3d" for 6-column datasets with sqrt(2)-scaled
@@ -25,6 +27,7 @@ class DataConfig:
     feature_names: list[str] = field(default_factory=lambda: STRESS_NAMES.copy())
 
     test_size: float = 0.1
+    validation_size: float = 0.1
     random_state: int = 42
     shuffle: bool = True
 
@@ -89,12 +92,23 @@ class InvariantConfig:
 
 
 @dataclass(slots=True)
+class InputTransformConfig:
+    kind: str = "stress_invariants"  # stress_invariants | pairwise | log
+    include_products: bool = True
+    include_ratios: bool = True
+    denominator_floor: float = 1e-6
+    max_features: int = 256
+
+
+@dataclass(slots=True)
 class EncoderConfig:
     enabled: bool = False
 
     # 0 means "same as number of selected invariants".
     output_dim: int = 0
     init: str = "identity"
+    # Optional explicit initial S (output_dim rows), applied after `init`.
+    init_weights: list[list[float]] | None = None
 
 
 @dataclass(slots=True)
@@ -116,6 +130,10 @@ class ModelConfig:
     # "softplus" keeps the predicted effective stress non-negative.
     # Use "none" if you want the network output unconstrained.
     output_activation: str = "softplus"
+
+    # Predict (y - mean) / std internally and map back, with mean/std fitted
+    # on the training targets. Useful when targets are far from unit scale.
+    standardize_target: bool = False
 
 
 @dataclass(slots=True)
@@ -180,6 +198,9 @@ class TrainConfig:
     batch_size: int = 0
 
     learning_rate: float = 1e-3
+    # Multiplies the learning rate of the encoder S only. Values > 1 let the
+    # low-dimensional encoder direction move faster than the MLP adapts around it.
+    encoder_learning_rate_scale: float = 1.0
     grad_clip_norm: float | None = 10.0
     device: str = "auto"
 
@@ -212,14 +233,30 @@ class AdaptiveSweepConfig:
     enabled: bool = True
     results_subdir: str = "adaptive_rotatedhill"
     stage1_subdir: str = "stage1"
-    metric: str = "rmse"
+    metric: str = "rmse"  # rmse | mse | nrmse
     mse_threshold: float = 1e-6
     rmse_threshold: float = 1e-3
+    # nrmse = rmse / std(y) of the evaluated partition. It needs a non-constant
+    # target, so use it for supervised data, not for surface data with y = 1.
+    nrmse_threshold: float = 1e-2
     max_generalization_gap: float | None = None
     n_min: int = 1
     n_max: int = 0
     stop_on_first_success: bool = True
     patience: int = 0
+    # Independent random initializations per n; the best selection-partition
+    # metric is kept. A low-dimensional encoder can settle in a poor local
+    # solution, so restarts separate "n too small" from "unlucky start".
+    restarts: int = 1
+    # absolute: accept n when the metric is below the fixed threshold.
+    # relative_to_reference: first train a full-width model without the
+    # bottleneck; accept n when its metric is within relative_factor of that
+    # reference (never below relative_floor). The reference also gives the
+    # gradient spectrum, whose top singular vectors can initialize restart 0.
+    acceptance: str = "absolute"
+    relative_factor: float = 2.0
+    relative_floor: float = 1e-3
+    reference_init: bool = False
     run_id_prefix: str = "n"
     summary_name: str = "adaptive_stage1_summary.json"
 
@@ -227,7 +264,15 @@ class AdaptiveSweepConfig:
 @dataclass(slots=True)
 class SparsificationConfig:
     enabled: bool = True
+    # lasso | gated: sparsity training, thresholding and masked refit.
+    # snap: canonicalize the encoder rows (RREF), snap them to simple
+    # fractions with the smallest passing denominator, freeze S and refit the
+    # regressor. Intended for log features, where rows are power-law exponents.
     method: str = "lasso"
+    snap_denominators: list[int] = field(default_factory=lambda: [1, 2, 3, 4, 6])
+    # Basis of the snapped row space handed to Stage 3: "rref" (canonical
+    # echelon rows) or "sparsest" (fewest variables per group).
+    snap_basis: str = "rref"
     lambda_encoder_l1: float = 1e-3
     lambda_gate: float = 1e-3
     gate_init_probability: float = 0.95
@@ -240,6 +285,15 @@ class SparsificationConfig:
     batch_size: int = 0
     masked_refit_epochs: int = 1000
     masked_refit_learning_rate: float = 1e-4
+    # constant | cosine (cosine decays to masked_refit_min_learning_rate).
+    masked_refit_schedule: str = "constant"
+    masked_refit_min_learning_rate: float = 1e-6
+    # magnitude: keep the largest thresholded coefficients of each row.
+    # exhaustive: refit every support with exactly `cap` terms per row and keep
+    # the one with the best selection-partition metric. Correlated features can
+    # make the largest coefficients a poor support, which magnitude cannot fix.
+    support_search: str = "magnitude"
+    max_support_candidates: int = 256
     save_training_logs: bool = True
     run_id: str = "stage2_sparse"
     summary_name: str = "adaptive_stage2_sparsify.json"
@@ -254,6 +308,9 @@ class SymbolicConfig:
     target_transform: str = "identity"
     target_source: str = "data"
     feature_space: str = "raw_invariants"
+    # Map applied to the encoded variables before the adaptive Stage 3 PySR.
+    # "exp" turns log-feature rows into monomials prod_j x_j^B_j.
+    encoded_feature_transform: str = "identity"
     random_state: int = 42
     output_subdir: str = "symbolic"
 
@@ -391,6 +448,7 @@ class Config:
     )
     augmentation: AugmentationConfig = field(default_factory=AugmentationConfig)
     invariants: InvariantConfig = field(default_factory=InvariantConfig)
+    input_transform: InputTransformConfig = field(default_factory=InputTransformConfig)
     encoder: EncoderConfig = field(default_factory=EncoderConfig)
     normalization: InvariantNormalizationConfig = field(
         default_factory=InvariantNormalizationConfig
@@ -410,6 +468,13 @@ class Config:
 
     @property
     def split_path(self) -> Path:
+        if self.data.kind == "supervised":
+            validation_pct = int(round(self.data.validation_size * 100))
+            test_pct = int(round(self.data.test_size * 100))
+            return self.train.split_dir / (
+                f"{self.data.dataset_name}_supervised_val{validation_pct}_"
+                f"test{test_pct}_seed{self.data.random_state}.npz"
+            )
         test_pct = int(round(self.data.test_size * 100))
         seed = self.data.random_state
         noise_tag = "clean"
@@ -471,6 +536,7 @@ def _set_known_fields(section_obj: Any, values: dict[str, Any], *, section: str)
             "unary_operators",
             "selected_invariants",
             "max_active_terms_candidates",
+            "snap_denominators",
             "formula_names",
         }:
             value = list(value)

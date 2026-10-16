@@ -1,0 +1,6 @@
+RESULT scale_only 3000        val_nrmse=0.0223 g(J)_floor=1.7e-03 time=20s raw=[2.676, 2.765, -0.126, 2.996, -0.143, 0.264, 0.248]
+RESULT standard 3000          val_nrmse=0.0186 g(J)_floor=1.4e-03 time=19s raw=[3.046, 2.799, -0.076, 2.895, 0.041, 0.218, 0.241]
+RESULT standard 3000 seed7    val_nrmse=0.0023 g(J)_floor=1.7e-04 time=18s raw=[0.415, 0.507, 1.326, 2.341, 1.287, -0.016, -0.026]
+RESULT scale_only 8000        val_nrmse=0.0093 g(J)_floor=7.0e-04 time=49s raw=[2.827, 2.861, 0.488, 2.522, 0.48, 0.124, 0.118]
+
+[exited with code 0]

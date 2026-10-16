@@ -8,6 +8,11 @@ from torch.nn import functional as F
 
 from invariant_generator.config import Config, coerce_config_dataclasses
 from invariant_generator.invariants import InvariantPool
+from invariant_generator.input_features import (
+    LogFeaturePool,
+    PairwiseFeaturePool,
+    input_feature_names,
+)
 
 
 def _activation(name: str) -> nn.Module:
@@ -145,6 +150,23 @@ class InvariantStandardizer(nn.Module):
         return (invariants - self.effective_mean) / self.std
 
 
+class TargetStandardizer(nn.Module):
+    """Non-trainable affine map from the regressor's unit-scale output to y."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.register_buffer("mean", torch.zeros((), dtype=torch.float32))
+        self.register_buffer("std", torch.ones((), dtype=torch.float32))
+
+    def set_statistics(self, mean: float, std: float) -> None:
+        with torch.no_grad():
+            self.mean.fill_(float(mean))
+            self.std.fill_(max(float(std), 1e-12))
+
+    def forward(self, standardized: torch.Tensor) -> torch.Tensor:
+        return standardized * self.std + self.mean
+
+
 class MLPRegressor(nn.Module):
     """Small feed-forward network used after invariant generation."""
 
@@ -194,17 +216,23 @@ class InvariantYieldModel(nn.Module):
 
     def __init__(
         self,
-        invariant_pool: InvariantPool,
+        invariant_pool: InvariantPool | PairwiseFeaturePool | LogFeaturePool,
         regressor: MLPRegressor,
         *,
         encoder: SparseInvariantEncoder | None = None,
         normalizer: InvariantStandardizer | None = None,
+        target_scaler: TargetStandardizer | None = None,
     ) -> None:
         super().__init__()
         self.invariant_pool = invariant_pool
         self.normalizer = normalizer
         self.encoder = encoder
         self.regressor = regressor
+        # Registered only when enabled, so default checkpoints keep their keys.
+        if target_scaler is not None:
+            self.target_scaler = target_scaler
+        else:
+            self.target_scaler = None
 
     @classmethod
     def from_config(cls, config: Config) -> "InvariantYieldModel":
@@ -243,22 +271,39 @@ class InvariantYieldModel(nn.Module):
                     "constraints.a_psd requires invariants.enable_second_order=true."
                 )
 
-        invariant_pool = InvariantPool(
-            config.invariants.selected,
-            enable_second_order=config.invariants.enable_second_order,
-            enable_fourth_order=config.invariants.enable_fourth_order,
-            homogenize=config.invariants.homogenize,
-            init_scale=config.invariants.init_scale,
-            eps=config.invariants.eps,
-            second_order_psd_mode="hard"
-            if a_psd.enabled and a_psd_mode == "hard"
-            else "off",
-            second_order_psd_min_eigenvalue=a_psd.min_eigenvalue,
-            fourth_order_psd_mode="hard"
-            if A_psd.enabled and A_psd_mode == "hard"
-            else "off",
-            fourth_order_psd_min_eigenvalue=A_psd.min_eigenvalue,
-        )
+        if config.input_transform.kind == "stress_invariants":
+            invariant_pool = InvariantPool(
+                config.invariants.selected,
+                enable_second_order=config.invariants.enable_second_order,
+                enable_fourth_order=config.invariants.enable_fourth_order,
+                homogenize=config.invariants.homogenize,
+                init_scale=config.invariants.init_scale,
+                eps=config.invariants.eps,
+                second_order_psd_mode="hard"
+                if a_psd.enabled and a_psd_mode == "hard"
+                else "off",
+                second_order_psd_min_eigenvalue=a_psd.min_eigenvalue,
+                fourth_order_psd_mode="hard"
+                if A_psd.enabled and A_psd_mode == "hard"
+                else "off",
+                fourth_order_psd_min_eigenvalue=A_psd.min_eigenvalue,
+            )
+        elif config.input_transform.kind == "log":
+            if a_psd.enabled or A_psd.enabled:
+                raise ValueError("Stress tensor constraints require stress_invariants.")
+            invariant_pool = LogFeaturePool(config.data.feature_names)
+        elif config.input_transform.kind == "pairwise":
+            if a_psd.enabled or A_psd.enabled:
+                raise ValueError("Stress tensor constraints require stress_invariants.")
+            input_feature_names(config)  # Enforce the configured expansion cap.
+            invariant_pool = PairwiseFeaturePool(
+                config.data.feature_names,
+                include_products=config.input_transform.include_products,
+                include_ratios=config.input_transform.include_ratios,
+                denominator_floor=config.input_transform.denominator_floor,
+            )
+        else:
+            raise ValueError(f"Unknown input transformation: {config.input_transform.kind!r}")
 
         invariant_dim = invariant_pool.output_dim
         normalizer: InvariantStandardizer | None = None
@@ -286,6 +331,15 @@ class InvariantYieldModel(nn.Module):
                 output_dim,
                 init=config.encoder.init,
             )
+            if config.encoder.init_weights is not None:
+                weights = torch.as_tensor(config.encoder.init_weights, dtype=torch.float32)
+                if weights.shape != encoder.raw_weight.shape:
+                    raise ValueError(
+                        f"encoder.init_weights has shape {tuple(weights.shape)}, "
+                        f"expected {tuple(encoder.raw_weight.shape)}."
+                    )
+                with torch.no_grad():
+                    encoder.raw_weight.copy_(weights)
             regressor_input_dim = output_dim
 
         regressor = MLPRegressor(
@@ -295,7 +349,13 @@ class InvariantYieldModel(nn.Module):
             output_activation=config.model.output_activation,
         )
 
-        return cls(invariant_pool, regressor, encoder=encoder, normalizer=normalizer)
+        return cls(
+            invariant_pool,
+            regressor,
+            encoder=encoder,
+            normalizer=normalizer,
+            target_scaler=TargetStandardizer() if config.model.standardize_target else None,
+        )
 
     def raw_invariant_features(self, stress: torch.Tensor) -> torch.Tensor:
         return self.invariant_pool(stress)
@@ -313,7 +373,10 @@ class InvariantYieldModel(nn.Module):
         return features
 
     def forward(self, stress: torch.Tensor) -> torch.Tensor:
-        return self.regressor(self.invariant_features(stress))
+        prediction = self.regressor(self.invariant_features(stress))
+        if self.target_scaler is not None:
+            prediction = self.target_scaler(prediction)
+        return prediction
 
     @staticmethod
     def _parameter_count(module: nn.Module | None, *, trainable_only: bool) -> int:

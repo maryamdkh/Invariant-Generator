@@ -6,6 +6,7 @@ from invariant_generator.data import (
     augment_homogeneous_surface_data,
     canonicalize_stress_features,
     prepare_training_data,
+    save_surface_split,
 )
 
 
@@ -134,3 +135,30 @@ def test_prepare_training_data_applies_fixed_dataset_noise_before_the_pipeline(t
     np.testing.assert_allclose(noisy.X_train, noisy_repeat.X_train)
     np.testing.assert_allclose(noisy.X_test, noisy_repeat.X_test)
     assert noisy.split_path != clean.split_path
+
+
+def test_prepare_training_data_reuses_verified_legacy_split(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    X = np.arange(60, dtype=np.float64).reshape(10, 6)
+    with h5py.File(data_dir / "toy.h5", "w") as f:
+        f.create_dataset("stress", data=X)
+    config = Config()
+    config.data.data_dir = data_dir
+    config.data.dataset_name = "toy"
+    config.data.dataset_key = "stress"
+    config.data.test_size = 0.2
+    config.data.random_state = 42
+    config.data.shuffle = True
+    config.train.split_dir = tmp_path / "splits"
+    config.train.use_saved_split = True
+    config.train.save_split_if_missing = True
+    config.augmentation.enabled = False
+    legacy = config.train.split_dir / "toy_voigt_3d_test20_seed42.npz"
+    save_surface_split(legacy, X[:8], X[8:], np.ones(2),
+                       test_size=0.2, random_state=42, shuffle=True)
+
+    prepared = prepare_training_data(config)
+    assert prepared.split_path == legacy
+    np.testing.assert_array_equal(prepared.X_test, X[8:])
+    assert not config.split_path.exists()

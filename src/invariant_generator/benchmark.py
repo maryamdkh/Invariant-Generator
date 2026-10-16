@@ -220,6 +220,8 @@ def _write_config_toml(config: Config, path: Path) -> Path:
         lines.append(f"[{section_name}]")
         for field in fields(section):
             value = getattr(section, field.name)
+            if field.name == "init_weights" and value is None:
+                continue  # TOML has no null; an omitted key loads as None.
             lines.append(f"{field.name} = {_toml_value(value, key=field.name)}")
         lines.append("")
 

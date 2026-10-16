@@ -310,3 +310,54 @@ def test_adaptive_config_loads_new_sections():
     assert config.train_input_noise.probability == 1.0
     assert config.symbolic.output_subdir == "stage3_pysr"
     assert config.symbolic.feature_space == "encoded_invariants"
+
+
+def test_stage1_restarts_keep_the_best_seed_per_dimension(tmp_path, monkeypatch):
+    config = Config()
+    config.invariants.selected = ["I1", "I2", "I3"]
+    config.invariants.enable_second_order = False
+    config.invariants.enable_fourth_order = False
+    config.train.results_dir = tmp_path / "results"
+    config.train.seed = 10
+    config.adaptive.results_subdir = "restart_test"
+    config.adaptive.n_min = 1
+    config.adaptive.n_max = 2
+    config.adaptive.metric = "rmse"
+    config.adaptive.rmse_threshold = 0.2
+    config.adaptive.restarts = 3
+    seeds_seen = []
+
+    def fake_train_from_config(run_config):
+        seeds_seen.append(run_config.train.seed)
+        exp = run_config.experiment_dir
+        exp.mkdir(parents=True, exist_ok=True)
+        checkpoint = exp / "checkpoint_best.pt"
+        checkpoint.write_text("fake", encoding="utf-8")
+        return TrainResult(
+            experiment_dir=exp,
+            best_checkpoint=checkpoint,
+            recovery_checkpoint=exp / "checkpoint_latest.pt",
+            history_path=exp / "history.json",
+            best_epoch=1,
+            best_test_mse=0.0,
+        )
+
+    def fake_evaluate(run_config, _checkpoint):
+        # Only seed 11 finds a passing n=1 solution.
+        value = 0.1 if run_config.train.seed == 11 else 0.5
+        return {"rmse": value}, {"rmse": value}
+
+    monkeypatch.setattr("invariant_generator.adaptive.train_from_config", fake_train_from_config)
+    monkeypatch.setattr(
+        "invariant_generator.adaptive.evaluate_checkpoint_on_train_and_test",
+        fake_evaluate,
+    )
+
+    result = run_adaptive_sweep(config)
+
+    assert seeds_seen == [10, 11, 12]
+    assert result.selected_n == 1
+    assert result.selected_checkpoint == (
+        tmp_path / "results" / "restart_test" / "stage1" / "n01" / "seed011" / "checkpoint_best.pt"
+    )
+    assert [record["seed"] for record in result.runs[0].restarts] == [10, 11, 12]

@@ -109,11 +109,12 @@ def main() -> None:
         print(f"[INFO] Formulas:         {result.formulas_path}")
         print(f"[INFO] Best equation:    {result.best_equation}")
         print(f"[INFO] Metrics:          {result.metrics_path}")
-        notebook_path = create_adaptive_analysis_notebook(
-            symbolic_config,
-            config_path=args.config,
-        )
-        print(f"[INFO] Analysis notebook: {notebook_path}")
+        if symbolic_config.data.kind == "surface":
+            notebook_path = create_adaptive_analysis_notebook(
+                symbolic_config,
+                config_path=args.config,
+            )
+            print(f"[INFO] Analysis notebook: {notebook_path}")
 
 
 if __name__ == "__main__":

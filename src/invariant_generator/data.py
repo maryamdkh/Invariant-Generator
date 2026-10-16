@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Sequence
 import json
+from collections import Counter
+import hashlib
 
 import h5py
 import numpy as np
@@ -19,6 +21,16 @@ class PreparedData:
     y_test: np.ndarray
     feature_names: list[str]
     split_path: Path
+    X_validation: np.ndarray | None = None
+    y_validation: np.ndarray | None = None
+
+    @property
+    def X_selection(self) -> np.ndarray:
+        return self.X_test if self.X_validation is None else self.X_validation
+
+    @property
+    def y_selection(self) -> np.ndarray:
+        return self.y_test if self.y_validation is None else self.y_validation
 
 
 def _resolve_hdf_path(data_dir: Path, dataset_name: str) -> Path:
@@ -213,6 +225,44 @@ def load_surface_split(
     return X_train_raw, X_test, y_test
 
 
+def resolve_saved_surface_split(config: Config, X: np.ndarray) -> Path:
+    """Reuse a verified split, including the pre-`clean` filename convention."""
+    current = config.split_path
+    if not config.train.use_saved_split:
+        return current
+    candidates = [current]
+    if not config.noise.enabled:
+        legacy_name = (
+            f"{config.data.dataset_name}_{config.data.stress_format}_"
+            f"test{int(round(config.data.test_size * 100))}_"
+            f"seed{config.data.random_state}.npz"
+        )
+        candidates.append(config.train.split_dir / legacy_name)
+    for path in candidates:
+        if not path.exists():
+            continue
+        train, test, target = load_surface_split(path, expected_n_features=X.shape[1])
+        with np.load(path, allow_pickle=False) as stored:
+            if "metadata" not in stored:
+                raise ValueError(f"Saved split has no metadata: {path}")
+            metadata = json.loads(str(stored["metadata"].item()))
+        expected = {
+            "test_size": float(config.data.test_size),
+            "random_state": config.data.random_state,
+            "shuffle": bool(config.data.shuffle),
+        }
+        if any(metadata.get(key) != value for key, value in expected.items()):
+            raise ValueError(f"Saved split settings do not match the config: {path}")
+        if len(train) + len(test) != len(X) or not np.all(target == config.augmentation.surface_target):
+            raise ValueError(f"Saved split size or targets do not match the dataset: {path}")
+        source_rows = Counter(row.tobytes() for row in np.ascontiguousarray(X))
+        split_rows = Counter(row.tobytes() for row in np.ascontiguousarray(np.vstack((train, test))))
+        if source_rows != split_rows:
+            raise ValueError(f"Saved split rows do not match the current dataset: {path}")
+        return path
+    return current
+
+
 def split_surface_data(
     X: np.ndarray,
     *,
@@ -358,6 +408,10 @@ def augment_homogeneous_surface_data(
 
 def prepare_training_data(config: Config) -> PreparedData:
     """Load, split, and augment clean data according to the config."""
+    if config.data.kind == "supervised":
+        return prepare_supervised_data(config)
+    if config.data.kind != "surface":
+        raise ValueError(f"Unknown data kind: {config.data.kind!r}")
     X_raw = load_hdf_dataset(
         config.data.data_dir,
         config.data.dataset_name,
@@ -375,12 +429,13 @@ def prepare_training_data(config: Config) -> PreparedData:
             relative_to_feature_std=config.noise.relative_to_feature_std,
         )
 
+    split_path = resolve_saved_surface_split(config, X)
     X_train_raw, X_test, y_test = split_surface_data(
         X,
         test_size=config.data.test_size,
         random_state=config.data.random_state,
         shuffle=config.data.shuffle,
-        split_path=config.split_path,
+        split_path=split_path,
         load_if_exists=config.train.use_saved_split,
         save_if_missing=config.train.save_split_if_missing,
         surface_target=config.augmentation.surface_target,
@@ -416,5 +471,83 @@ def prepare_training_data(config: Config) -> PreparedData:
         X_test=X_test,
         y_test=y_test,
         feature_names=feature_names,
-        split_path=config.split_path,
+        split_path=split_path,
+    )
+
+
+def prepare_supervised_data(config: Config) -> PreparedData:
+    """Load paired X/y data and reuse a verified train/validation/test split."""
+    if config.input_transform.kind not in {"pairwise", "log"}:
+        raise ValueError("Supervised data require the pairwise or log input transformation.")
+    if config.augmentation.enabled:
+        raise ValueError("Homogeneous surface augmentation must be disabled for supervised data.")
+    path = _resolve_hdf_path(config.data.data_dir, config.data.dataset_name)
+    if not path.exists():
+        raise FileNotFoundError(f"Dataset file not found: {path}")
+    with h5py.File(path, "r") as f:
+        X = np.asarray(f[config.data.dataset_key], dtype=np.float64)
+        y = np.asarray(f[config.data.target_key], dtype=np.float64).reshape(-1)
+    if X.ndim != 2 or y.shape != (X.shape[0],) or X.shape[0] < 3:
+        raise ValueError("Supervised data require 2D X and matching 1D y with at least 3 rows.")
+    if len(config.data.feature_names) != X.shape[1]:
+        raise ValueError("data.feature_names must match the supervised input columns.")
+    if not np.isfinite(X).all() or not np.isfinite(y).all():
+        raise ValueError("Supervised data must be finite.")
+    if config.input_transform.kind == "pairwise" and config.input_transform.include_ratios:
+        if X.shape[1] > 1 and np.any(np.abs(X) < config.input_transform.denominator_floor):
+            raise ValueError("Ratio input has values too close to zero; disable ratios or change the domain.")
+    if config.input_transform.kind == "log" and np.any(X <= 0):
+        raise ValueError("Log input transformation requires strictly positive inputs.")
+    if config.noise.enabled:
+        raise ValueError("Fixed input noise is not yet supported for supervised benchmark data.")
+    if not (0 < config.data.test_size < 1 and 0 < config.data.validation_size < 1):
+        raise ValueError("validation_size and test_size must be between 0 and 1.")
+    if config.data.test_size + config.data.validation_size >= 1:
+        raise ValueError("validation_size + test_size must be less than 1.")
+
+    digest = hashlib.sha256()
+    digest.update(np.ascontiguousarray(X).tobytes())
+    digest.update(np.ascontiguousarray(y).tobytes())
+    dataset_hash = digest.hexdigest()
+    split_path = config.split_path
+    expected = {
+        "data_hash": dataset_hash,
+        "validation_size": float(config.data.validation_size),
+        "test_size": float(config.data.test_size),
+        "random_state": int(config.data.random_state),
+        "shuffle": bool(config.data.shuffle),
+    }
+    if config.train.use_saved_split and split_path.exists():
+        with np.load(split_path, allow_pickle=False) as saved:
+            metadata = json.loads(str(saved["metadata"].item()))
+            if metadata != expected:
+                raise ValueError(f"Saved supervised split does not match dataset/config: {split_path}")
+            train_idx = np.asarray(saved["train_idx"], dtype=np.int64)
+            val_idx = np.asarray(saved["val_idx"], dtype=np.int64)
+            test_idx = np.asarray(saved["test_idx"], dtype=np.int64)
+    else:
+        order = np.arange(len(y))
+        if config.data.shuffle:
+            order = np.random.default_rng(config.data.random_state).permutation(order)
+        n_test = max(1, int(round(len(y) * config.data.test_size)))
+        n_val = max(1, int(round(len(y) * config.data.validation_size)))
+        if n_test + n_val >= len(y):
+            raise ValueError("Split sizes leave no training rows.")
+        test_idx = order[:n_test]
+        val_idx = order[n_test:n_test + n_val]
+        train_idx = order[n_test + n_val:]
+        if config.train.save_split_if_missing:
+            split_path.parent.mkdir(parents=True, exist_ok=True)
+            np.savez_compressed(
+                split_path, train_idx=train_idx, val_idx=val_idx,
+                test_idx=test_idx, metadata=json.dumps(expected),
+            )
+    combined = np.concatenate((train_idx, val_idx, test_idx))
+    if len(combined) != len(y) or not np.array_equal(np.sort(combined), np.arange(len(y))):
+        raise ValueError(f"Saved supervised split indices are invalid: {split_path}")
+    return PreparedData(
+        X_train=X[train_idx], y_train=y[train_idx],
+        X_validation=X[val_idx], y_validation=y[val_idx],
+        X_test=X[test_idx], y_test=y[test_idx],
+        feature_names=list(config.data.feature_names), split_path=split_path,
     )

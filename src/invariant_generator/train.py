@@ -20,6 +20,7 @@ from invariant_generator.diagnostics import (
 from invariant_generator.evaluation import evaluate_model
 from invariant_generator.losses import YieldSurfaceLoss
 from invariant_generator.model import InvariantYieldModel
+from invariant_generator.input_features import input_feature_names
 from invariant_generator.utils import (
     now_utc_iso,
     resolve_device,
@@ -173,6 +174,26 @@ def _save_checkpoint(
         payload["scheduler_state_dict"] = scheduler.state_dict()
     torch.save(payload, path)
     return path
+
+
+def _optimizer_param_groups(
+    model: InvariantYieldModel,
+    config: Config,
+    *,
+    learning_rate: float | None = None,
+):
+    """Give the encoder S its own learning rate when a scale is configured."""
+    scale = float(config.train.encoder_learning_rate_scale)
+    if scale == 1.0 or model.encoder is None:
+        return model.parameters()
+    base = float(config.train.learning_rate if learning_rate is None else learning_rate)
+    encoder_params = list(model.encoder.parameters())
+    encoder_ids = {id(param) for param in encoder_params}
+    # Group 0 keeps the base learning rate, which history and logs report.
+    return [
+        {"params": [param for param in model.parameters() if id(param) not in encoder_ids]},
+        {"params": encoder_params, "lr": base * scale},
+    ]
 
 
 def _current_learning_rate(optimizer: torch.optim.Optimizer) -> float:
@@ -340,6 +361,8 @@ def train_from_config(config: Config) -> TrainResult:
     save_config_snapshot(config, experiment_dir)
 
     data = prepare_training_data(config)
+    feature_names = input_feature_names(config)
+    selection_label = "validation" if config.data.kind == "supervised" else "test"
     model = InvariantYieldModel.from_config(config).to(device)
     _fit_invariant_normalizer(
         model,
@@ -347,11 +370,18 @@ def train_from_config(config: Config) -> TrainResult:
         device=device,
         batch_size=config.normalization.batch_size,
     )
+    if model.target_scaler is not None:
+        model.target_scaler.set_statistics(
+            float(np.mean(data.y_train)), float(np.std(data.y_train)),
+        )
     criterion = YieldSurfaceLoss(config.loss, config.constraints)
 
     # No optimizer weight decay is used here: all regularization should appear
     # explicitly in YieldSurfaceLoss so the optimized objective matches the notes.
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.train.learning_rate)
+    optimizer = torch.optim.Adam(
+        _optimizer_param_groups(model, config),
+        lr=config.train.learning_rate,
+    )
     scheduler = _make_plateau_scheduler(optimizer, config)
     parameter_counts = model.parameter_counts()
 
@@ -390,8 +420,8 @@ def train_from_config(config: Config) -> TrainResult:
     print(f"[INFO] Dataset:      {config.data.dataset_name}")
     print(f"[INFO] Split path:   {data.split_path}")
     print(f"[INFO] Train shape:  {data.X_train.shape}")
-    print(f"[INFO] Test shape:   {data.X_test.shape}")
-    print(f"[INFO] Invariants:   {', '.join(config.invariants.selected)}")
+    print(f"[INFO] {selection_label.title()} shape: {data.X_selection.shape}")
+    print(f"[INFO] Input features: {', '.join(feature_names)}")
     print(f"[INFO] Results dir:  {experiment_dir}")
     print(f"[INFO] Initial LR:   {_current_learning_rate(optimizer):.6g}")
     print(f"[INFO] Stop file:    {config.train.stop_file}")
@@ -505,15 +535,15 @@ def train_from_config(config: Config) -> TrainResult:
             test_loss_terms = _evaluate_loss_terms(
                 model,
                 criterion,
-                data.X_test,
-                data.y_test,
+                data.X_selection,
+                data.y_selection,
                 device=device,
                 batch_size=8192,
             )
             test_metrics = evaluate_model(
                 model,
-                data.X_test,
-                data.y_test,
+                data.X_selection,
+                data.y_selection,
                 device=device,
                 batch_size=8192,
             )
@@ -525,10 +555,10 @@ def train_from_config(config: Config) -> TrainResult:
                 "epoch": epoch,
                 **epoch_terms,
                 **{f"train_{k}": v for k, v in train_loss_terms.items()},
-                **{f"test_{k}": v for k, v in test_loss_terms.items()},
-                **{f"test_{k}": v for k, v in test_metrics.items()},
+                **{f"{selection_label}_{k}": v for k, v in test_loss_terms.items()},
+                **{f"{selection_label}_{k}": v for k, v in test_metrics.items()},
                 **epoch_grad_terms,
-                **_encoder_diagnostics(model, config.invariants.selected),
+                **_encoder_diagnostics(model, feature_names),
                 **flatten_constraint_diagnostics(current_constraint_diagnostics),
             }
             row["learning_rate"] = _current_learning_rate(optimizer)
@@ -571,7 +601,7 @@ def train_from_config(config: Config) -> TrainResult:
             ):
                 stop_reason = (
                     "early stopping: "
-                    f"test_mse did not improve by {config.train.early_stopping_min_delta:g} "
+                    f"{selection_label}_mse did not improve by {config.train.early_stopping_min_delta:g} "
                     f"for {evaluations_without_improvement} evaluations"
                 )
                 print(f"[INFO] {stop_reason}")
@@ -586,9 +616,9 @@ def train_from_config(config: Config) -> TrainResult:
                     f"structure={train_loss_terms['loss_structure']:.6g} "
                     f"encoder={train_loss_terms['loss_encoder']:.6g} "
                     f"constraint={train_loss_terms['loss_constraint']:.6g} "
-                    f"test_total={test_loss_terms['loss_total']:.6g} "
-                    f"test_data={test_loss_terms['loss_data']:.6g} "
-                    f"test_mse={test_metrics['mse']:.6g} "
+                    f"{selection_label}_total={test_loss_terms['loss_total']:.6g} "
+                    f"{selection_label}_data={test_loss_terms['loss_data']:.6g} "
+                    f"{selection_label}_mse={test_metrics['mse']:.6g} "
                     f"lr={_current_learning_rate(optimizer):.6g} "
                     f"stale={evaluations_without_improvement}"
                 )
@@ -610,8 +640,8 @@ def train_from_config(config: Config) -> TrainResult:
 
     final_metrics = evaluate_model(
         model,
-        data.X_test,
-        data.y_test,
+        data.X_selection,
+        data.y_selection,
         device=device,
         batch_size=8192,
     )
@@ -626,8 +656,8 @@ def train_from_config(config: Config) -> TrainResult:
     final_test_loss_terms = _evaluate_loss_terms(
         model,
         criterion,
-        data.X_test,
-        data.y_test,
+        data.X_selection,
+        data.y_selection,
         device=device,
         batch_size=8192,
     )
@@ -635,21 +665,21 @@ def train_from_config(config: Config) -> TrainResult:
     final_invariant_stats = invariant_feature_statistics(
         model,
         data.X_train,
-        config.invariants.selected,
+        feature_names,
         device=device,
         batch_size=8192,
     )
     final_encoder_input_stats = invariant_feature_statistics(
         model,
         data.X_train,
-        config.invariants.selected,
+        feature_names,
         device=device,
         batch_size=8192,
         normalized=True,
     )
     final_encoder_scores = encoder_score_diagnostics(
         model,
-        config.invariants.selected,
+        feature_names,
         feature_std=final_encoder_input_stats["std"],
     )
 
@@ -662,6 +692,7 @@ def train_from_config(config: Config) -> TrainResult:
             "elapsed_seconds": time.perf_counter() - t0,
             "history": history,
             "final_metrics": final_metrics,
+            "selection_partition": selection_label,
             "final_train_loss": final_train_loss_terms,
             "final_test_loss": final_test_loss_terms,
             "best_epoch": best_epoch,
@@ -672,7 +703,7 @@ def train_from_config(config: Config) -> TrainResult:
             "parameter_counts": parameter_counts,
             "encoder_diagnostics": _encoder_diagnostics(
                 model,
-                config.invariants.selected,
+                feature_names,
             ),
             "constraint_diagnostics": final_constraint_diagnostics,
             "invariant_feature_statistics": final_invariant_stats,
