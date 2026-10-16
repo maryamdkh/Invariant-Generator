@@ -10,6 +10,7 @@
 #SBATCH -n 1
 #SBATCH -c 16
 #SBATCH -t 01:30:00
+#SBATCH --mem=64G
 #SBATCH -o cluster/logs/%x-%A_%a.out
 set -euo pipefail
 
