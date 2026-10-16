@@ -13,8 +13,16 @@ export UV_PROJECT_ENVIRONMENT="$PWD/.venv-$ARCH"
 export JULIA_DEPOT_PATH="$PWD/.julia_depot-$ARCH"
 PYTHON="$UV_PROJECT_ENVIRONMENT/bin/python"
 # Julia (PySR) needs a newer libstdc++ than many clusters ship in /lib64
-# (GLIBCXX_3.4.30 not found); use the copy bundled with Julia.
-export LD_LIBRARY_PATH="$UV_PROJECT_ENVIRONMENT/julia_env/pyjuliapkg/install/lib/julia:${LD_LIBRARY_PATH:-}"
+# (GLIBCXX_3.4.30 not found). Preload only the copy bundled with Julia;
+# putting its whole lib directory on LD_LIBRARY_PATH breaks Julia's own
+# loader (libLLVM not found).
+JULIA_LIB="$UV_PROJECT_ENVIRONMENT/julia_env/pyjuliapkg/install/lib/julia"
+preload_julia_libstdcxx() {
+    if [ -f "$JULIA_LIB/libstdc++.so.6" ]; then
+        export LD_PRELOAD="$JULIA_LIB/libstdc++.so.6${LD_PRELOAD:+:$LD_PRELOAD}"
+    fi
+}
+preload_julia_libstdcxx
 
 # uv is a native binary too: keep one per architecture.
 UV_DIR="$HOME/.local/uv-$ARCH"
@@ -23,6 +31,14 @@ if ! "$UV_DIR/uv" --version >/dev/null 2>&1; then
 fi
 
 "$UV_DIR/uv" sync --extra symbolic
+
+# The first import downloads Julia into the environment; it may fail on the
+# old system libstdc++ before the bundled copy exists, so preload and retry.
+"$PYTHON" -c "import juliacall" || true
+preload_julia_libstdcxx
+if [ ! -f "$JULIA_LIB/libstdc++.so.6" ]; then
+    echo "Note: no bundled libstdc++.so.6 in $JULIA_LIB; relying on the system one."
+fi
 
 # First PySR fit downloads Julia and precompiles SymbolicRegression.jl.
 "$PYTHON" - <<'EOF'
