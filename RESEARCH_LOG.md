@@ -501,3 +501,14 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
 - Scoring note: with noise the 1e-6 criterion mostly measures whether the
   constants are exact; also report fresh-point R^2 and a symbolic check with
   constants rounded to ~3 digits (post hoc from `expanded_equation`).
+
+## 29. Submitted: LLM-SRBench and noisy Feynman, v3, seed 42 (2026-10-17)
+
+- LLM-SRBench LSR-Transform, 111 problems (91 positive-input), job array
+  3983674, `RUN=llmsr_v3`. Conversion on the cluster matched the Mac (worst
+  median formula-vs-data error 2.0e-7). Needed pandas/pyarrow, now declared
+  as the `benchmarks` extra (`4b5e97d`).
+- AI Feynman with 1% target noise, 110 positive-input equations, job array
+  3983693, `RUN=v3_noise1pct`, `TARGET_NOISE=0.01`.
+- Both at commit `4b5e97d` (code identical to `e98e031` apart from the
+  dependency declaration).
