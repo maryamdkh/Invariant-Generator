@@ -527,3 +527,56 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
 - Cluster status shortly after submission: both arrays running
   (LLM-SRBench throttled by the 40-task cap, noise array by the account's
   GPU run-minutes limit `AssocGrpGRESRunMinutes`).
+
+## 31. Results: LLM-SRBench and noisy Feynman, v3, seed 42 (2026-10-17)
+
+LLM-SRBench LSR-Transform (`results/feynman_benchmark/llmsr_v3/`):
+- 91 positive-input problems (the comparison set): recovered (rel. L2 <
+  1e-6) pipeline 63, portfolio 63, PySR alone 57. Pairwise vs PySR alone:
+  pipeline +7/-1. Stage 1 reduced 83/91 (n = 1: 30, 2: 46, 3: 7), all 83
+  snapped. On the 52 recovered by both, PySR median 11 s on groups vs 8 s
+  raw (mean 33 vs 58 s); Stage 1+2 median 191 s.
+- Pipeline-only: I.32.17_2_0, II.11.27_3_0, II.11.3_4_1, II.13.23_1_0,
+  II.24.17_1_1, II.6.15a_1_0, III.4.33_3_0 (PySR alone near misses, rel. L2
+  2e-6 to 2e-2). PySR-only: II.36.38_7_0 (d = 8, Stage 1 chose n = 1).
+- First benchmark beyond Hill where the pipeline is ahead (+6 net), but one
+  seed; Feynman showed +-2 run-to-run variance. Needs seeds 43-46.
+- Bug: PySR alone crashed on the 20 non-positive-input problems (the run
+  applied the log feature map's positivity check to the raw-input arm).
+  Fixed in `run_pysr_baseline` (raw-input arm uses a neutral feature map;
+  data identical on positive problems, checked). The pipeline arm is skipped
+  on those 20, so the comparison set is unaffected. III.15.12_0_0: Stage 3
+  overflow (inf encoded feature); PySR alone also missed it.
+
+Noisy Feynman, 1% target noise (`results/feynman_benchmark/v3_noise1pct/`,
+scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
+
+| arm | exact 1e-6 | R2 > 0.999 | symbolic (3 digits) |
+|---|---|---|---|
+| pipeline | 7 | 102 | 55 |
+| portfolio | 17 | 108 | 72 |
+| PySR alone | 26 | 106 | 70 |
+
+- Under noise both arms mostly find the same structure with the same noisy
+  constants (e.g. 0.159139 h n for h n/(2 pi)); exact 1e-6 is not meaningful.
+- Stage 1 chose the same n as the noiseless run on 94/110; same snapped
+  exponents on 57/102.
+- Of the 21 symbolic losses vs PySR alone, 13 had the correct groups
+  (same exponents as the clean run): PySR returned the group plus a tiny
+  wiggle, e.g. `J1 - 0.11 sin(19.6 J1)`. Cause: PySR's model_selection
+  "best" picks max score -dlog(loss)/dcomplexity among loss <= 1.5 min, and
+  the first hall-of-fame entry (`J1`, complexity 1, here the truth) has
+  score 0 by definition, so it can never be picked; noise gives wiggles a
+  small positive score. Hits the pipeline only (raw inputs never have a
+  one-term answer). Other losses: 5 different n, 3 different exponents.
+- Offline re-pick (`experiments/probes/reselect_simplest.py`, same rule
+  for both arms, first entry scored against the constant model var(y)):
+  symbolic pipeline 55 -> 67, PySR alone 70 -> 70; R2 > 0.999 unchanged
+  (102 vs 106). With the fix the arms are level within single-seed noise:
+  no advantage from the pipeline under 1% noise on Feynman.
+- Decision: the selection fix is a real Stage 3 improvement (to add as an
+  opt-in `symbolic.model_selection` option, Hill default unchanged). Noise
+  alone is not where the pipeline wins on Feynman; next evidence comes from
+  LLM-SRBench seeds and the scaling experiment.
+- `cluster/make_tasks.py --positive-only` now also reads `inputs_positive`
+  (LLM-SRBench manifests have no input ranges).

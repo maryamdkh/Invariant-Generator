@@ -22,7 +22,11 @@ def main() -> None:
         wanted = set(args.equations.split(","))
         entries = [e for e in entries if e["equation_id"] in wanted]
     if args.positive_only:
-        entries = [e for e in entries if all(low > 0 for low, _ in e["input_ranges"].values())]
+        entries = [
+            e for e in entries
+            if e.get("inputs_positive", None) is True
+            or ("input_ranges" in e and all(low > 0 for low, _ in e["input_ranges"].values()))
+        ]
     seeds = [int(seed) for seed in args.seeds.split(",")]
     lines = [f"{entry['equation_id']} {seed}" for seed in seeds for entry in entries]
     args.output.write_text("\n".join(lines) + "\n", encoding="utf-8")

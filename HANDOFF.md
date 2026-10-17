@@ -63,19 +63,21 @@ Results are copied to the Mac with rsync (run on the Mac).
 - LLM-SRBench: integrated and smoke-tested (II.36.38_1_0 recovered, PySR 1.2 s
   on groups vs 33 s raw). 91/111 problems have positive inputs.
 
+## Latest results (RESEARCH_LOG 31)
+
+- LLM-SRBench seed 42, 91 positive-input problems: pipeline 63, PySR alone
+  57 (+7/-1). Promising, one seed only.
+- Feynman with 1% noise: no advantage; pipeline was behind because PySR's
+  "best" selection can never pick a one-term formula (`J1`); offline fix
+  brings symbolic recovery to 67 vs 70.
+
 ## Next steps (agreed)
 
-1. LLM-SRBench seed 42 on the cluster (~30 GPU-h): see `cluster/README.md`,
-   section LLM-SRBench (needs `data/llm_srbench/` copied to the cluster,
-   `RUN=llmsr_v3 CONFIG=configs/feynman_benchmark_v3.toml MANIFEST=data/llm_srbench_converted/manifest.json DATA_DIR=data/llm_srbench_converted`).
-2. Feynman with noise, seed 42: implemented (`data.target_noise`,
-   RESEARCH_LOG entry 28); submit with `TARGET_NOISE=0.01 RUN=v3_noise1pct`
-   (cluster/README.md, section "Feynman with target noise"). No early stop
-   with noise, so ~2-3x the noiseless cost. Still to write: post-hoc noisy
-   scoring (fresh R^2, 3-digit symbolic check) in the merge step.
-3. Scaling experiment (new code): synthetic equations with an increasing
-   number of inputs (e.g. 4 to 12) that depend on a few power-law groups;
-   expect PySR alone to degrade with d while the pipeline does not. Likely
-   the key figure for a CS venue.
-4. Then multi-seed runs where an effect shows; optional: joint constant
-   refit after Stage 3 (CB2001), Stage 1 overhead reduction.
+1. LLM-SRBench seeds 43-46 on the 91 positive-input problems, arms
+   pipeline,baseline (364 tasks) to confirm the +6.
+2. Opt-in Stage 3 selection that scores the simplest equation (from
+   `experiments/probes/reselect_simplest.py`), Hill default unchanged.
+3. Scaling experiment (new code): synthetic equations with 4-12 inputs that
+   depend on a few power-law groups; expect PySR alone to degrade with d.
+4. Optional: rerun PySR alone on the 20 non-positive LLM-SRBench problems
+   (bug fixed) for a complete benchmark table.

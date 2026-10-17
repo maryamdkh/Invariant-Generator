@@ -81,6 +81,10 @@ def run_pysr_baseline(config: Config, output_dir: Path) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     config = deepcopy(config)
     config.data.target_transform = "identity"  # PySR alone always fits y itself.
+    # PySR alone sees the raw inputs, so the encoder's feature map does not
+    # apply; log features would reject problems with non-positive inputs.
+    config.input_transform.kind = "pairwise"
+    config.input_transform.include_ratios = False
     data = prepare_training_data(config)
     config = _with_stop_condition(config, data.y_train)
     names = list(config.data.feature_names)
