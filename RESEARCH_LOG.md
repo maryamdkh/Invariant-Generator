@@ -443,3 +443,40 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
   groups (snapped refit 0.0196 vs unsnapped 0.0180, threshold 0.036; v2's
   fixed 0.01 rejected them); PySR reached 2.8e-5 in 15 min, not recovered
   (the pilot recovered it from the same groups in 35 s: PySR variance).
+
+## 26. Cluster dev run v3 (seed 42) and decision to freeze (2026-10-17)
+
+- Job array 3963382, `configs/feynman_benchmark_v3.toml`. Recovered: pipeline
+  12/21, portfolio 11/21, PySR alone 13/21.
+- The pipeline regained exactly the three equations targeted by the v3
+  fixes (II.6.15a, test_4, test_5); test_8 still missed (PySR variance, see
+  entry 25).
+- PySR alone, with identical settings and seed in all three runs, recovered
+  9 (pilot), 11 (v2) and 13 (v3) of the 21: multithreaded PySR is not
+  reproducible run to run, so single-seed differences of +-2 equations are
+  noise (e.g. test_9, test_12, test_19 flip between runs). Arms cannot be
+  ranked from one seed; the protocol's 5 seeds are required.
+- Decision: freeze v3 for the full runs (Feynman: 110 positive-input
+  equations x 5 seeds; LLM-SRBench LSR-Transform: 111 x 5), pending a check of
+  the remaining GPU-hour allocation (~0.5 GPU-h per task observed).
+
+## 27. Full Feynman run, v3, seed 42 (2026-10-17)
+
+- 110 positive-input AI Feynman equations, 110/110 tasks completed, ~30.5
+  GPU-hours (0.28 GPU-h/task). `experiments/outputs/v3_full_seed42_summary.json`.
+- Recovered: pipeline 85, portfolio 88, PySR alone 86 (dev 21: 10/14/11;
+  held-out 89: 75/74/75). Pairwise vs PySR alone: pipeline +6/-7,
+  portfolio +8/-6. No recovery difference beyond run-to-run noise.
+- Stage 1 structure discovery: n = n* on 93 of 102 reducible equations,
+  n < n* on 7, missed reduction on 2; correctly no reduction on all 8 with
+  n* = d.
+- Speed (73 equations recovered by both, pipeline reduced): PySR median 11 s
+  on groups vs 3 s on raw inputs (mean 44 s vs 75 s; groups faster on 18/73).
+  Stage 1+2 overhead median 192 s, so wall-clock favours PySR alone on these.
+- Interpretation: at a 15-minute budget, PySR alone already solves ~78% of
+  the AI Feynman set, mostly in seconds, so this benchmark leaves little room
+  for a front end; it does not support a claim of higher recovery. The
+  clearly positive result is unit-free structure discovery (n* found on 91%
+  of reducible equations, exact groups). Where the method should matter:
+  harder benchmarks (LLM-SRBench), noise, small budgets, and many-variable
+  problems where SR's search space explodes.
