@@ -480,3 +480,24 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
   of reducible equations, exact groups). Where the method should matter:
   harder benchmarks (LLM-SRBench), noise, small budgets, and many-variable
   problems where SR's search space explodes.
+
+## 28. Target noise for supervised benchmarks (2026-10-17)
+
+- New opt-in `data.target_noise` (+ `target_noise_seed`, default 42): y +
+  N(0, (s std(y))^2) on the train and validation rows; test rows and fresh
+  recovery points stay noiseless; the draw is independent of the training
+  seed. Default 0 adds an exact zero, so v3 runs are unchanged; the surface
+  (Hill) path is not touched. CLI `--target-noise`, sbatch `TARGET_NOISE`.
+  Test: `test_target_noise_touches_train_and_validation_only`; full suite
+  passes.
+- Smoke run, I.40.1 `n_0 exp(-g m x/(T kb))`, s = 0.01, v3, 2-min PySR
+  budget, seed 42: Stage 1 n = 2, snapped exact groups (n_0, g m x/(T kb)),
+  Stage 2 val nrmse 0.00999 (at the noise floor); PySR on the groups
+  returned the exact formula (rel. L2 0). PySR alone returned
+  `n_0 exp(-1.000382 g m x/(T kb))` (rel. L2 3.5e-4), not recovered under
+  the 1e-6 criterion. One equation only, but this is the mechanism to test:
+  exact snapped exponents absorb the noise that otherwise lands in fitted
+  constants.
+- Scoring note: with noise the 1e-6 criterion mostly measures whether the
+  constants are exact; also report fresh-point R^2 and a symbolic check with
+  constants rounded to ~3 digits (post hoc from `expanded_equation`).

@@ -30,7 +30,7 @@ from invariant_generator.adaptive_symbolic import (
     train_encoded_symbolic_from_config,
 )
 from invariant_generator.config import Config
-from invariant_generator.data import prepare_training_data
+from invariant_generator.data import prepare_training_data, supervised_target_noise
 from invariant_generator.sparsify import sparsify_encoder_from_checkpoint
 from invariant_generator.symbolic import (
     _best_equation_text,
@@ -58,7 +58,9 @@ def problem_config(base: Config, entry: dict[str, Any], *, results_dir: Path) ->
         import h5py
 
         with h5py.File(config.data.data_dir / f"{entry['equation_id']}.h5", "r") as handle:
-            positive = bool(np.all(np.asarray(handle[config.data.target_key]) > 0))
+            y = np.asarray(handle[config.data.target_key], dtype=np.float64).reshape(-1)
+        # Checked with the noise on every row, a superset of the noisy rows.
+        positive = bool(np.all(y + supervised_target_noise(y, config) > 0))
         if not positive:
             config.data.target_transform = "identity"
             config.symbolic.target_transform = "identity"
@@ -261,6 +263,7 @@ def run_benchmark(
             "formula": entry["formula"],
             "n_inputs": len(entry["variables"]),
             "log_reducibility_analysis": entry.get("log_reducibility"),
+            "target_noise": float(base.data.target_noise),
         })
         config = problem_config(base, entry, results_dir=results_dir)
         for arm in arms:

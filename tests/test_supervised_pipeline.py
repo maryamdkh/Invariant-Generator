@@ -294,3 +294,37 @@ def test_known_formula_loads_for_dotted_names_and_eval_inputs(tmp_path):
     truth, info = known
     np.testing.assert_array_equal(info["X_fresh"], X_eval)
     assert info["positive"] and str(truth) == "a*b"
+
+
+def test_target_noise_touches_train_and_validation_only(tmp_path):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    rng = np.random.default_rng(0)
+    X = rng.uniform(1.0, 2.0, size=(400, 2))
+    y = X[:, 0] ** 2 / X[:, 1]
+    with h5py.File(data_dir / "case.h5", "w") as f:
+        f.create_dataset("X", data=X)
+        f.create_dataset("y", data=y)
+    config = Config()
+    config.data.kind = "supervised"
+    config.data.data_dir = data_dir
+    config.data.dataset_name = "case"
+    config.data.dataset_key = "X"
+    config.data.feature_names = ["a", "b"]
+    config.train.split_dir = tmp_path / "splits"
+    config.augmentation.enabled = False
+    config.input_transform.kind = "log"
+    clean = prepare_training_data(config)
+    config.data.target_noise = 0.01
+    noisy = prepare_training_data(config)
+    again = prepare_training_data(config)
+    # Same split and noiseless test rows; noise of the requested size elsewhere.
+    np.testing.assert_array_equal(clean.X_train, noisy.X_train)
+    np.testing.assert_array_equal(clean.y_test, noisy.y_test)
+    np.testing.assert_array_equal(noisy.y_train, again.y_train)
+    residual = np.concatenate([noisy.y_train - clean.y_train, noisy.y_validation - clean.y_validation])
+    assert np.all(residual != 0)
+    assert 0.7 < np.std(residual) / (0.01 * np.std(y)) < 1.3
+    config.data.target_noise = -0.1
+    with pytest.raises(ValueError, match="target_noise"):
+        prepare_training_data(config)

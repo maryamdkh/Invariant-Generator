@@ -68,10 +68,11 @@ Results are copied to the Mac with rsync (run on the Mac).
 1. LLM-SRBench seed 42 on the cluster (~30 GPU-h): see `cluster/README.md`,
    section LLM-SRBench (needs `data/llm_srbench/` copied to the cluster,
    `RUN=llmsr_v3 CONFIG=configs/feynman_benchmark_v3.toml MANIFEST=data/llm_srbench_converted/manifest.json DATA_DIR=data/llm_srbench_converted`).
-2. Feynman with noise, seed 42 (~30 GPU-h). Not implemented yet:
-   `prepare_supervised_data` raises for `[noise]` on supervised data; add
-   SRBench-style target noise (y + N(0, sigma * std(y)), sigma = 1e-2, fixed
-   seed, train/validation only) and score against the noiseless formula.
+2. Feynman with noise, seed 42: implemented (`data.target_noise`,
+   RESEARCH_LOG entry 28); submit with `TARGET_NOISE=0.01 RUN=v3_noise1pct`
+   (cluster/README.md, section "Feynman with target noise"). No early stop
+   with noise, so ~2-3x the noiseless cost. Still to write: post-hoc noisy
+   scoring (fresh R^2, 3-digit symbolic check) in the merge step.
 3. Scaling experiment (new code): synthetic equations with an increasing
    number of inputs (e.g. 4 to 12) that depend on a few power-law groups;
    expect PySR alone to degrade with d while the pipeline does not. Likely

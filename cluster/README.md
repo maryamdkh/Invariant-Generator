@@ -62,10 +62,30 @@ approved on Hugging Face) to the cluster, then on the login node:
 
 ```bash
 .venv-$(uname -m)/bin/python scripts/prepare_llm_srbench.py
-.venv-$(uname -m)/bin/python cluster/make_tasks.py --manifest data/llm_srbench_converted/manifest.json --seeds 42,43,44,45,46 --output cluster/tasks_llmsr.txt
-RUN=llmsr_v2 MANIFEST=data/llm_srbench_converted/manifest.json DATA_DIR=data/llm_srbench_converted TASKS=cluster/tasks_llmsr.txt \
+.venv-$(uname -m)/bin/python cluster/make_tasks.py --manifest data/llm_srbench_converted/manifest.json --seeds 42 --output cluster/tasks_llmsr.txt
+RUN=llmsr_v3 CONFIG=configs/feynman_benchmark_v3.toml MANIFEST=data/llm_srbench_converted/manifest.json DATA_DIR=data/llm_srbench_converted TASKS=cluster/tasks_llmsr.txt \
   sbatch -A <project-account> --array=1-$(wc -l < cluster/tasks_llmsr.txt)%40 cluster/feynman_array.sbatch
 ```
 
 All 111 problems are included; the 20 with non-positive inputs run the
-pipeline arm as PySR alone (reported as `skipped`).
+pipeline arm as PySR alone (reported as `skipped`). Start with seed 42 and
+add seeds 43-46 (new task file) only where an effect shows.
+
+## Feynman with target noise
+
+`TARGET_NOISE=0.01` adds y + N(0, (0.01 std(y))^2) to the train and
+validation rows (test rows and the fresh recovery points stay noiseless;
+the draw is fixed, independent of the seed). The v3 config is unchanged.
+
+```bash
+.venv-$(uname -m)/bin/python cluster/make_tasks.py --positive-only --seeds 42 --output cluster/tasks_noise.txt
+RUN=v3_noise1pct CONFIG=configs/feynman_benchmark_v3.toml TARGET_NOISE=0.01 TASKS=cluster/tasks_noise.txt \
+  sbatch -A <project-account> --array=1-$(wc -l < cluster/tasks_noise.txt)%40 cluster/feynman_array.sbatch
+```
+
+With noise PySR's early stop (nrmse 1e-6) cannot trigger, so every arm uses
+its full 15 minutes: expect about 50 min per task (Stage 1-2 plus three
+PySR runs), roughly 2-3x the noiseless cost. Exact recovery (relative L2
+< 1e-6) is out of reach with noisy constants; score afterwards from each
+arm's `expanded_equation` (fresh-point R^2, symbolic check with constants
+rounded to fewer digits).

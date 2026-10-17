@@ -29,6 +29,8 @@ def main() -> None:
                         help="Override [data].data_dir, e.g. data/llm_srbench_converted.")
     parser.add_argument("--numprocs", type=int, default=None,
                         help="Override [symbolic].numprocs (PySR threads), e.g. the SLURM core count.")
+    parser.add_argument("--target-noise", type=float, default=None,
+                        help="Override [data].target_noise (noise std as a fraction of std(y)).")
     args = parser.parse_args()
 
     # PySR's Julia runtime must initialize before Torch is imported.
@@ -39,6 +41,8 @@ def main() -> None:
     base = load_config(args.config)
     if args.timeout_minutes is not None:
         base.symbolic.timeout_hours = args.timeout_minutes / 60.0
+    if args.target_noise is not None:
+        base.data.target_noise = args.target_noise
     if args.numprocs is not None:
         base.symbolic.numprocs = args.numprocs
     if args.data_dir is not None:

@@ -3,7 +3,8 @@
 # Submit from the repository root, e.g.
 #   sbatch -A <project> --array=1-$(wc -l < cluster/tasks.txt) cluster/feynman_array.sbatch
 # Optional environment: CONFIG (default configs/feynman_benchmark_v2.toml),
-# RUN (results subfolder name), ARMS, TIMEOUT_MINUTES, and for other
+# RUN (results subfolder name), ARMS, TIMEOUT_MINUTES, TARGET_NOISE (e.g.
+# 0.01 for 1% target noise; default 0), and for other
 # benchmarks MANIFEST, DATA_DIR and TASKS (e.g. LLM-SRBench, see README).
 #SBATCH -J feynman-bench
 #SBATCH -N 1
@@ -21,6 +22,7 @@ TIMEOUT_MINUTES="${TIMEOUT_MINUTES:-15}"
 MANIFEST="${MANIFEST:-data/feynman/manifest.json}"
 DATA_DIR="${DATA_DIR:-data/feynman}"
 TASKS="${TASKS:-cluster/tasks.txt}"
+TARGET_NOISE="${TARGET_NOISE:-0}"
 # Login and GPU nodes can differ in CPU architecture (x86_64 vs aarch64),
 # so keep one environment and Julia depot per architecture.
 ARCH="$(uname -m)"
@@ -55,4 +57,5 @@ echo "task ${SLURM_ARRAY_TASK_ID}: ${EQUATION} seed ${SEED} -> ${OUT} ($(hostnam
     --seed "$SEED" \
     --arms "$ARMS" \
     --timeout-minutes "$TIMEOUT_MINUTES" \
+    --target-noise "$TARGET_NOISE" \
     --numprocs "${SLURM_CPUS_PER_TASK:-16}"

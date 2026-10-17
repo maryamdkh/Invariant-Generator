@@ -35,6 +35,12 @@ class DataConfig:
     # The map is monotone, so the groups the target depends on are unchanged;
     # set [symbolic].target_transform = "exp" so PySR still fits y.
     target_transform: str = "identity"
+    # Supervised data only: SRBench-style target noise y + N(0, (s * std(y))^2)
+    # with s = target_noise, added to the train and validation rows (test rows
+    # stay noiseless). The draw depends only on target_noise_seed, not on the
+    # training seed, so every seed sees the same noisy dataset. 0 disables it.
+    target_noise: float = 0.0
+    target_noise_seed: int = 42
 
 
 @dataclass(slots=True)

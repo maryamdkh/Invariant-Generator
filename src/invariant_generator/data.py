@@ -475,6 +475,20 @@ def prepare_training_data(config: Config) -> PreparedData:
     )
 
 
+def supervised_target_noise(y: np.ndarray, config: Config) -> np.ndarray:
+    """Noise added to every row of the raw target (zeros when disabled).
+
+    prepare_supervised_data adds it to the train and validation rows only.
+    """
+    scale = float(config.data.target_noise)
+    if scale < 0:
+        raise ValueError("data.target_noise must be >= 0.")
+    if scale == 0:
+        return np.zeros_like(y)
+    rng = np.random.default_rng(config.data.target_noise_seed)
+    return rng.normal(0.0, scale * float(np.std(y)), size=y.shape)
+
+
 def prepare_supervised_data(config: Config) -> PreparedData:
     """Load paired X/y data and reuse a verified train/validation/test split."""
     if config.input_transform.kind not in {"pairwise", "log"}:
@@ -546,6 +560,9 @@ def prepare_supervised_data(config: Config) -> PreparedData:
     if len(combined) != len(y) or not np.array_equal(np.sort(combined), np.arange(len(y))):
         raise ValueError(f"Saved supervised split indices are invalid: {split_path}")
     # Applied after the split, which is defined on the raw data.
+    noise = supervised_target_noise(y, config)
+    noise[test_idx] = 0.0
+    y = y + noise
     target_transform = config.data.target_transform.lower()
     if target_transform == "log":
         if np.any(y <= 0):
