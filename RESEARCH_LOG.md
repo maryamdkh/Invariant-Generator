@@ -512,3 +512,18 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
   3983693, `RUN=v3_noise1pct`, `TARGET_NOISE=0.01`.
 - Both at commit `4b5e97d` (code identical to `e98e031` apart from the
   dependency declaration).
+
+## 30. Project rules file and reusable Hill check (2026-10-17)
+
+- `CLAUDE.md` at the repo root: project goal, the rule that rotated Hill
+  must stay unchanged, workflow (research log, cluster steps, seeds).
+  Loaded automatically by every Claude Code session on this folder.
+- `experiments/probes/hill_old_vs_new.py [OLD_REF]`: runs a tiny rotated
+  Hill Stage 1 + Stage 2 on OLD_REF (git worktree) and on the working tree,
+  compares data hash, Stage 1 weights/metrics and Stage 2 S/mask/metrics.
+  Against `afbee09` (before target noise): IDENTICAL on all keys.
+- `reports/claude_project_brief.md`: one-page summary for the author's
+  claude.ai project instructions.
+- Cluster status shortly after submission: both arrays running
+  (LLM-SRBench throttled by the 40-task cap, noise array by the account's
+  GPU run-minutes limit `AssocGrpGRESRunMinutes`).
