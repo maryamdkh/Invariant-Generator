@@ -17,6 +17,11 @@ dependencies = [
 symbolic = [
     "pysr",
 ]
+# Reading external benchmark files (LLM-SRBench parquet tables).
+benchmarks = [
+    "pandas",
+    "pyarrow",
+]
 
 [dependency-groups]
 dev = [

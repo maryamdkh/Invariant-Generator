@@ -30,7 +30,7 @@ if ! "$UV_DIR/uv" --version >/dev/null 2>&1; then
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$UV_DIR" UV_NO_MODIFY_PATH=1 sh
 fi
 
-"$UV_DIR/uv" sync --extra symbolic
+"$UV_DIR/uv" sync --extra symbolic --extra benchmarks
 
 # The first import downloads Julia into the environment; it may fail on the
 # old system libstdc++ before the bundled copy exists, so preload and retry.
