@@ -372,18 +372,12 @@ def _snap_encoder_from_checkpoint(
                 torch.as_tensor(data.X_train, dtype=torch.float32, device=device)
             ).cpu().numpy().astype(np.float64)
 
-    for denominator, snapped, residual in candidate_bases():
-        if method == "graded":
-            # Row scale is free; unit spread keeps J of different degrees on a
-            # comparable scale for the refit MLP.
-            snapped = snapped / (raw_features @ snapped.T).std(axis=0).clip(1e-300)[:, None]
-        if snapped.tobytes() in seen:
-            continue
-        seen.add(snapped.tobytes())
+    def frozen_refit(rows: np.ndarray, label: object):
+        """Freeze the encoder at `rows` (raw coefficients) and refit the MLP."""
         model.load_state_dict(source_state)
         with torch.no_grad():
             model.encoder.raw_weight.copy_(
-                torch.as_tensor(snapped * std[None, :], dtype=model.encoder.raw_weight.dtype)
+                torch.as_tensor(rows * std[None, :], dtype=model.encoder.raw_weight.dtype)
             )
         model.encoder.raw_weight.requires_grad_(False)
         history = _train_sparse_epochs(
@@ -395,12 +389,40 @@ def _snap_encoder_from_checkpoint(
             learning_rate=config.sparsification.masked_refit_learning_rate,
             batch_size=config.sparsification.batch_size,
             method="masked_refit",
-            desc=f"stage2 frozen-basis refit ({denominator})",
+            desc=f"stage2 frozen-basis refit ({label})",
             schedule=config.sparsification.masked_refit_schedule,
             min_learning_rate=config.sparsification.masked_refit_min_learning_rate,
         )
         model.encoder.raw_weight.requires_grad_(True)
-        train_metrics, test_metrics = evaluate()
+        return (*evaluate(), history)
+
+    acceptance = config.sparsification.snap_acceptance.lower()
+    if acceptance not in {"absolute", "relative_to_dense"}:
+        raise ValueError("sparsification.snap_acceptance must be 'absolute' or 'relative_to_dense'.")
+    dense_refit: dict[str, object] | None = None
+    if acceptance == "relative_to_dense":
+        # Refit the unsnapped rows with the same frozen procedure, so the test
+        # isolates the effect of snapping from how well the refit converges.
+        dense_rows = canonical
+        if method == "graded":
+            dense_rows = canonical / (raw_features @ canonical.T).std(axis=0).clip(1e-300)[:, None]
+        dense_train, dense_test, _ = frozen_refit(dense_rows, "unsnapped reference")
+        attainable = max(float(dense_train[metric]), float(dense_test[metric]))
+        metric_threshold = max(
+            float(config.adaptive.relative_factor) * attainable, float(config.adaptive.relative_floor),
+        )
+        dense_refit = {"train_metrics": dense_train, "test_metrics": dense_test,
+                       "acceptance_threshold": metric_threshold}
+
+    for denominator, snapped, residual in candidate_bases():
+        if method == "graded":
+            # Row scale is free; unit spread keeps J of different degrees on a
+            # comparable scale for the refit MLP.
+            snapped = snapped / (raw_features @ snapped.T).std(axis=0).clip(1e-300)[:, None]
+        if snapped.tobytes() in seen:
+            continue
+        seen.add(snapped.tobytes())
+        train_metrics, test_metrics, history = frozen_refit(snapped, denominator)
         passes = adaptive_run_passes(
             train_metrics,
             test_metrics,
@@ -467,6 +489,8 @@ def _snap_encoder_from_checkpoint(
             "source_train_metrics": source_train,
             "source_test_metrics": source_test,
             "snapped": selected is not None,
+            "snap_acceptance": acceptance,
+            "dense_refit": dense_refit,
             "selected_denominator": None if selected is None else selected["denominator"],
             "exact_raw_coefficients": exact,
             "candidate_results": candidate_results,

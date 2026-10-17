@@ -278,6 +278,10 @@ class SparsificationConfig:
     # Basis of the snapped row space handed to Stage 3: "rref" (canonical
     # echelon rows) or "sparsest" (fewest variables per group).
     snap_basis: str = "rref"
+    # absolute: a snapped basis must meet the adaptive metric threshold.
+    # relative_to_dense: it must be within adaptive.relative_factor of the
+    # unsnapped rows refit with the same frozen procedure.
+    snap_acceptance: str = "absolute"
     lambda_encoder_l1: float = 1e-3
     lambda_gate: float = 1e-3
     gate_init_probability: float = 0.95

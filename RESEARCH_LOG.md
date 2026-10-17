@@ -384,3 +384,62 @@ formula (analysis only). `nrmse` = rmse / std(y). "Recovered" (from entry 9 on)
   with the pilot's y-based group) and PySR reaches only 1.3e-5 in 15 min.
   With one seed this is not separable from PySR run-to-run variance, which
   is why the protocol needs several seeds.
+
+## 24. Move to the cluster (2026-10-16)
+
+- Commit `6ac3eae` on branch `feynman-generalization`, pushed to GitHub
+  (origin maryamdkh/Invariant-Generator). Publisher PDFs in `references/` are
+  git-ignored (kept local for copyright reasons).
+- Plan: the author pulls the branch on Arrhenius, runs `cluster/setup_env.sh`
+  and submits the 21-equation seed-42 dev run as a SLURM array (CPU only; no
+  GPU needed: small MLPs, PySR is CPU-bound). The local dev run keeps going
+  until the cluster jobs are confirmed running.
+- Cluster bring-up issues and fixes: (1) an old `.venv` copied between
+  machines failed with "Exec format error"; (2) PySR/Julia failed with
+  `GLIBCXX_3.4.30 not found` (old /lib64/libstdc++): fixed by putting Julia's
+  bundled lib directory first on LD_LIBRARY_PATH (`450dd52`); (3) first array
+  (job 3921807) failed in 4 s on node n48: Arrhenius GPU nodes are aarch64
+  while the login node is x86_64; scripts now keep per-architecture uv, venv
+  and Julia depot (`4ef3288`) and the GPU-node environment is built inside an
+  interactive GPU job.
+- (4) With Julia's lib directory on LD_LIBRARY_PATH, Julia's loader failed
+  with `libLLVM.so.20.1jl: cannot open` on both architectures (the file
+  exists; the folder rename away from a space in the path did not help).
+  Replaced by LD_PRELOAD of Julia's bundled libstdc++.so.6 only.
+- Cluster dev run (job array 3927133, 21 tasks, Arrhenius GPU partition,
+  account naiss2026-4-599-gpu) started successfully: tasks running Stage 1 at
+  ~85 epochs/s on CPU. Local seed-42 dev run stopped (its partial results for
+  6 equations remain in `results/feynman_benchmark/v2_dev_seed42/`).
+- Job array 3927133 finished: 20/21 tasks COMPLETED (5-57 min each); task 10
+  (feynman_test_12) OUT_OF_MEMORY after 41 min under the default memory
+  limit. Rerun with --mem=64G; `#SBATCH --mem=64G` added to the array script.
+
+## 25. Cluster dev run (v2, seed 42) results and diagnosis (2026-10-17)
+
+- Recovered (relative L2 < 1e-6 on fresh points): pipeline 9/21, portfolio
+  13/21, PySR alone 11/21 (`experiments/outputs/v2_dev_seed42_cluster_summary.json`).
+  Portfolio >= PySR alone on every equation; adds I.32.17 and test_17.
+- Stage 1 picks n = n* on 16/19 reducible equations (pilot: 10/19) and
+  correctly finds no reduction on test_3, test_11. Misses: III.9.52, test_12,
+  test_19 (n = 2 < n* = 3).
+- Regressions vs the pilot where both chose the same, correct n:
+  II.6.15a, test_4, test_5 (sparsest basis gave equivalent but less natural,
+  sometimes inverted groups: test_5 `d^3/(G m1)`, `m1/m2` instead of
+  `G m2/d^3`, `m1/m2`; test_4 `m/E_n` instead of `m/U`; II.6.15a x-based
+  inverted group) and test_8 (snapping found the exact groups theta, E_n,
+  m c^2, but the frozen refit reached val nrmse 0.0144 > the fixed 0.01, so
+  Stage 2 fell back to dense float rows; Stage 1 fit was 0.0019).
+- Decision (v3, `configs/feynman_benchmark_v3.toml`): `snap_basis = "rref"`
+  (sparsest-basis hypothesis rejected: 3 regressions, no gains) and
+  `snap_acceptance = "relative_to_dense"` (accept a snapped basis when its
+  frozen refit is within 2x of the unsnapped rows' frozen refit, which
+  isolates snapping from refit convergence). Check running locally on test_8
+  and test_5 from the cluster's Stage 1 checkpoints
+  (`experiments/probes/stage23_from_checkpoint.py`).
+- v3 local check from the cluster Stage 1 checkpoints
+  (`experiments/outputs/v3_check_test8_test5.log`): test_5 snapped to the
+  natural rref groups `G m2/d^3`, `m1/m2` and was recovered in 18 s of PySR
+  (rel. L2 1.8e-11; v2 failed). test_8: the relative rule accepted the exact
+  groups (snapped refit 0.0196 vs unsnapped 0.0180, threshold 0.036; v2's
+  fixed 0.01 rejected them); PySR reached 2.8e-5 in 15 min, not recovered
+  (the pilot recovered it from the same groups in 35 s: PySR variance).

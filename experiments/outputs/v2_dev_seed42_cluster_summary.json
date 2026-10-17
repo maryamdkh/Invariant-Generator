@@ -1,0 +1,2517 @@
+[
+  {
+    "equation_id": "feynman_III_9_52",
+    "formula": "8*pi*Ef*p_d*sin(t*(omega - omega_0)/2)**2/(h*t*(omega - omega_0)**2)",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 184.862867019001,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.7271951349049067
+        },
+        {
+          "n": 2,
+          "val_metric": 0.33961015802952593
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 16.94755842199993,
+      "snapped": false,
+      "exponents": null,
+      "stage2_val_metric": 0.33961015802952593,
+      "pysr_seconds": 910.6501815259999,
+      "best_equation_in_groups": "25.438944964400136 - sqrt(square(log(square(J1 * J2))))",
+      "validation_rmse": 10.096440630057735,
+      "expanded_equation": "25.438944964400136 - Abs(log(0.0220774361425134*Ef**0.0721819036036144*omega**21.5657350973264*t**2.51571977825155/(h**0.0646648602022148*omega_0**18.9401330200132*p_d**0.152958037289479)))",
+      "truth_expression": "8*pi*Ef*p_d*sin(t*(omega - omega_0)/2)**2/(h*t*(omega - omega_0)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.5588057858659168,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.5593107410523162,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "((x2 * x1) * (square((exp(cos(x5 - x4)) * ((x2 + -2.3799226432173337) * 0.37752375977682257)) + ((3.4193991509445945 - x2) + cos(x4 - x5))) / x3)) * (x0 * 1.5091716516255083)",
+      "pysr_seconds": 450.5489430400012,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.174236e-10",
+      "validation_rmse": 0.6889302479791779,
+      "expanded_equation": "1.5091716516255083*Ef*p_d*t*(-t + 0.37752375977682257*(t - 2.3799226432173337)*exp(cos(omega - omega_0)) + cos(omega - omega_0) + 3.4193991509445945)**2/h",
+      "truth_expression": "8*pi*Ef*p_d*sin(t*(omega - omega_0)/2)**2/(h*t*(omega - omega_0)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.033371417165368636,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.039961184475278126,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.6227313874328505,
+        "validation_rmse": 11.480197324903976,
+        "pysr_seconds": 451.06515894899894,
+        "expanded_equation": "19.85956605723763 - log(27.8324049611379*Ef**0.0515706927245551*omega**2.1577019724485*p_d**0.0352643514978865/(h**0.0630554374021439*omega_0**4.18498910036097*t**1.92524395684566))**2"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.033371417165368636,
+        "validation_rmse": 0.6889302479791779,
+        "pysr_seconds": 450.5489430400012,
+        "expanded_equation": "1.5091716516255083*Ef*p_d*t*(-t + 0.37752375977682257*(t - 2.3799226432173337)*exp(cos(omega - omega_0)) + cos(omega - omega_0) + 3.4193991509445945)**2/h"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": null
+    },
+    "baseline": {
+      "best_equation_raw_names": "(((square(((cos((x5 - x4) / -1.110142295834048) * (x2 - 1.0766319560980095)) + 3.589292352985139) - x2) * x2) * x0) / x3) * (x1 * cos((x4 - x5) / -2.4807713877842836))",
+      "pysr_seconds": 900.6462821000023,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.174236e-10",
+      "validation_rmse": 0.5086303468300644,
+      "expanded_equation": "Ef*p_d*t*(-t + (t - 1.0766319560980095)*cos(0.9007854252131721*omega - 0.9007854252131721*omega_0) + 3.589292352985139)**2*cos(0.40310042470022045*omega - 0.40310042470022045*omega_0)/h",
+      "truth_expression": "8*pi*Ef*p_d*sin(t*(omega - omega_0)/2)**2/(h*t*(omega - omega_0)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.02218952841626187,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.02585068763041443,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_II_36_38",
+    "formula": "H*mom/(T*kb) + M*alpha*mom/(T*c**2*epsilon*kb)",
+    "n_inputs": 8,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 196.20195249599965,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.15906417042210047
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0006573859573530912
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 16.78808672700052,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "1",
+          "-1",
+          "-1",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "-1",
+          "1",
+          "2",
+          "-1"
+        ]
+      ],
+      "stage2_val_metric": 0.0011843304440677155,
+      "pysr_seconds": 10.642198659999849,
+      "best_equation_in_groups": "(J1 / J2) + (J1 - 1.3669073595655077e-17)",
+      "validation_rmse": 3.66205343881779e-16,
+      "expanded_equation": "H*mom/(T*kb) + M*alpha*mom/(T*c**2*epsilon*kb) - 1.3669073595655077e-17",
+      "truth_expression": "H*mom/(T*kb) + M*alpha*mom/(T*c**2*epsilon*kb)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 0.0,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.7537210894010768e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "(x0 * (((((x7 / (x5 / x4)) / x6) / x6) + x1) / x3)) / x2",
+      "pysr_seconds": 33.253396284999326,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.260188e-12",
+      "validation_rmse": 2.256922576632916e-16,
+      "expanded_equation": "mom*(H + M*alpha/(c**2*epsilon))/(T*kb)",
+      "truth_expression": "H*mom/(T*kb) + M*alpha*mom/(T*c**2*epsilon*kb)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": true,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.2432344697794044e-16,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.1919946985329718e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 0.0,
+        "validation_rmse": 3.66205343881779e-16,
+        "pysr_seconds": 0.7247418669994659,
+        "expanded_equation": "H*mom/(T*kb) + M*alpha*mom/(T*c**2*epsilon*kb)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 1.2432344697794044e-16,
+        "validation_rmse": 2.256922576632916e-16,
+        "pysr_seconds": 33.253396284999326,
+        "expanded_equation": "mom*(H + M*alpha/(c**2*epsilon))/(T*kb)"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": [
+        [
+          "1",
+          "1",
+          "-1",
+          "-1",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "-1",
+          "1",
+          "2",
+          "-1"
+        ]
+      ]
+    },
+    "baseline": {
+      "best_equation_raw_names": "(((x1 + ((((x4 * x7) / x5) / x6) / x6)) / x3) * x0) / x2",
+      "pysr_seconds": 12.41689623900038,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.260188e-12",
+      "validation_rmse": 2.0797552414730153e-16,
+      "expanded_equation": "mom*(H + M*alpha/(c**2*epsilon))/(T*kb)",
+      "truth_expression": "H*mom/(T*kb) + M*alpha*mom/(T*c**2*epsilon*kb)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": true,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.2432344697794044e-16,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.3477178054969903e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_II_6_15a",
+    "formula": "3*p_d*z*sqrt(x**2 + y**2)/(4*pi*epsilon*r**5)",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 190.8756711290007,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.02981594436811807
+        },
+        {
+          "n": 2,
+          "val_metric": 0.00022391540700987636
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 18.84853736199875,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "-1",
+          "0"
+        ],
+        [
+          "1",
+          "-1",
+          "5",
+          "-1",
+          "0",
+          "-1"
+        ]
+      ],
+      "stage2_val_metric": 0.0013180423582419526,
+      "pysr_seconds": 1031.9062612119997,
+      "best_equation_in_groups": "square(sqrt((((((exp(0.6236290973322434 - (J1 * 1.4692064295489469)) + 0.8079212713157872) / J1) + (((exp(J1) * (0.9567410308102007 - J1)) + exp(square(cos(2.5055075076374282 / J1)))) * -0.000271422213845822)) - -2.495213702738697) / J2) * 0.09046781721615908))",
+      "validation_rmse": 4.569213244688526e-06,
+      "expanded_equation": "0.09046781721615908*p_d*x*z*(-0.000271422213845822*(-x/y + 0.9567410308102007)*exp(x/y) - 0.000271422213845822*exp(cos(2.5055075076374282*y/x)**2) + 2.495213702738697 + y*(0.8079212713157872 + 1.865686528829746*exp(-1.4692064295489469*x/y))/x)/(epsilon*r**5)",
+      "truth_expression": "3*p_d*z*sqrt(x**2 + y**2)/(4*pi*epsilon*r**5)",
+      "numerical_recovery": false,
+      "symbolic_recovery": null,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 2.2018522990107383e-05,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.3789899461801687e-05,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 2,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "-1",
+          "0"
+        ],
+        [
+          "1",
+          "-1",
+          "5",
+          "-1",
+          "0",
+          "-1"
+        ]
+      ],
+      "stage2_val_metric": 0.0013180423582419526,
+      "pysr_seconds": 690.8840647220004,
+      "best_equation_in_groups": "0.23729418557956075 / (J2 / exp(0.6518057024500291 / square((J1 + 0.3409843310409575) - (-0.027852818384647766 / (square(sin((((0.21413278385915618 / J1) - square(square(J1 * 0.32920786711374334))) + 0.815130044878838) * (0.23749968342637237 - square(J1)))) + J1)))))",
+      "validation_rmse": 1.5546207465841903e-05,
+      "expanded_equation": "0.23729418557956075*p_d*x*z*exp(0.6518057024500291/(x/y + 0.3409843310409575 + 0.027852818384647766/(x/y + sin((-x**2/y**2 + 0.23749968342637237)*(-0.011745751818007586*x**4/y**4 + 0.815130044878838 + 0.21413278385915618*y/x))**2))**2)/(epsilon*r**5)",
+      "truth_expression": "3*p_d*z*sqrt(x**2 + y**2)/(4*pi*epsilon*r**5)",
+      "numerical_recovery": false,
+      "symbolic_recovery": null,
+      "exact_symbolic_recovery": null,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 5.1577706843240085e-05,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 4.333387283814508e-05,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 5.1577706843240085e-05,
+        "validation_rmse": 1.5546207465841903e-05,
+        "pysr_seconds": 690.8840647220004,
+        "expanded_equation": "0.23729418557956075*p_d*x*z*exp(0.6518057024500291/(x/y + 0.3409843310409575 + 0.027852818384647766/(x/y + sin((-x**2/y**2 + 0.23749968342637237)*(-0.011745751818007586*x**4/y**4 + 0.815130044878838 + 0.21413278385915618*y/x))**2))**2)/(epsilon*r**5)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.00248207856078044,
+        "validation_rmse": 0.0009052077559863458,
+        "pysr_seconds": 450.4939856760011,
+        "expanded_equation": "7.224081009654103*p_d*z/(epsilon*r*(r + 3.696472912945626*r/(1.1391984074773146*x*exp(-(0.5877147272508951*y + 0.20172550035800524)/sqrt(x)) + y + 1.714801139055019))**4)"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "(((((x4 + (0.5087975787540384 / (0.06053013658506287 + ((x3 + (0.0731759240659297 + x4)) / square(x4 - x3))))) + x3) / (x2 * 5.923819054968856)) / x0) * x1) * (x5 / square(square(x2)))",
+      "pysr_seconds": 900.4813024140021,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.182432e-13",
+      "validation_rmse": 1.4837097618144835e-05,
+      "expanded_equation": "0.1688100177808786*p_d*z*(x + y + 0.5087975787540384/(0.06053013658506287 + (x + y + 0.0731759240659297)/(-x + y)**2))/(epsilon*r**5)",
+      "truth_expression": "3*p_d*z*sqrt(x**2 + y**2)/(4*pi*epsilon*r**5)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "(254400*(x - y)**2 + (x + y)*(500000*x + 500000*y + 30265*(x - y)**2 + 36588))**2/(2*(x**2 + y**2)*(500000*x + 500000*y + 30265*(x - y)**2 + 36588)**2)",
+      "fresh_sample_relative_l2": 3.707322362676403e-05,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 3.2540183573199234e-05,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_I_11_19",
+    "formula": "x1*y1 + x2*y2 + x3*y3",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 177.2262744869995,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.2866988523647147
+        },
+        {
+          "n": 2,
+          "val_metric": 0.20256603456969044
+        },
+        {
+          "n": 3,
+          "val_metric": 0.001679307173807381
+        }
+      ],
+      "selected_n": 3,
+      "reduction": true,
+      "stage2_seconds": 18.466911247999633,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "1",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "1",
+          "0"
+        ],
+        [
+          "1",
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.002559691563864987,
+      "pysr_seconds": 13.78441447500063,
+      "best_equation_in_groups": "((((J2 + J3) - J3) + J1) - ((J3 + J3) * -0.4999999999999997)) + 7.194609680703849e-15",
+      "validation_rmse": 6.93537878761325e-15,
+      "expanded_equation": "0.9999999999999994*x1*y1 + x2*y2 + x3*y3 + 7.194609680703849e-15",
+      "truth_expression": "x1*y1 + x2*y2 + x3*y3",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.562848717301358e-16,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.4031920959178595e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "(cos((x1 + -0.8120663057494228) + (x1 * -1.0000005499355358)) + (((x0 * x3) + (x1 * x4)) + -0.6880018479219308)) + ((x2 * x5) * 1.0000002338853795)",
+      "pysr_seconds": 10.91070548099924,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 7.760294e-11",
+      "validation_rmse": 1.4068323445155183e-06,
+      "expanded_equation": "x1*y1 + x2*y2 + 1.0000002338853795*x3*y3 + cos(5.4993553580059973e-7*x2 + 0.8120663057494228) - 0.6880018479219308",
+      "truth_expression": "x1*y1 + x2*y2 + x3*y3",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "(5000000000*x1*y1 + 5000000000*x2*y2 + 5000000000*x3*y3 - 7423)**2/(25000000000000000000*(x1*y1 + x2*y2 + x3*y3)**2)",
+      "fresh_sample_relative_l2": 4.9295911475061295e-08,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 5.113776868747536e-08,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 1.6942809119510428e-07,
+        "validation_rmse": 4.800658018636572e-06,
+        "pysr_seconds": 1.070051164000688,
+        "expanded_equation": "0.99999922048618566*x1*y1 + 0.9999996566115851*x2*y2 + 0.9999996566115851*x3*y3 + 1.432324296366299e-5"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 4.9295911475061295e-08,
+        "validation_rmse": 1.4068323445155183e-06,
+        "pysr_seconds": 10.91070548099924,
+        "expanded_equation": "x1*y1 + x2*y2 + 1.0000002338853795*x3*y3 + cos(5.4993553580059973e-7*x2 + 0.8120663057494228) - 0.6880018479219308"
+      },
+      "reduction": true,
+      "selected_n": 3,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "1",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0",
+          "1",
+          "0"
+        ],
+        [
+          "1",
+          "0",
+          "0",
+          "1",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    "baseline": {
+      "best_equation_raw_names": "((x0 * x3) + (x1 * x4)) + (x5 * x2)",
+      "pysr_seconds": 12.5233248250006,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 7.760294e-11",
+      "validation_rmse": 0.0,
+      "expanded_equation": "x1*y1 + x2*y2 + x3*y3",
+      "truth_expression": "x1*y1 + x2*y2 + x3*y3",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": true,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 0.0,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_I_32_17",
+    "formula": "4*pi*Ef**2*c*epsilon*omega**4*r**2/(3*(omega**2 - omega_0**2)**2)",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 194.7821308700004,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.033345090743854305
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0009826997069300996
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 16.89908093899976,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "1",
+          "-1"
+        ],
+        [
+          "1",
+          "1",
+          "2",
+          "2",
+          "0",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.004335427020318756,
+      "pysr_seconds": 29.817616291000377,
+      "best_equation_in_groups": "J1 + (((square(J1 / (J1 - (((square(J1) * 0.11082318206578784) - -0.8891776846229265) / J1))) * 3.3118129515954986) * J2) - J1)",
+      "validation_rmse": 5.408709684990327e-06,
+      "expanded_equation": "3.3118129515954986*Ef**2*c*epsilon*omega**2*r**2/(omega_0**2*(omega/omega_0 - omega_0*(0.11082318206578784*omega**2/omega_0**2 + 0.8891776846229265)/omega)**2)",
+      "truth_expression": "4*pi*Ef**2*c*epsilon*omega**4*r**2/(3*(omega**2 - omega_0**2)**2)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 8.177171000270697e-07,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 7.459474639321326e-07,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 2,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "1",
+          "-1"
+        ],
+        [
+          "1",
+          "1",
+          "2",
+          "2",
+          "0",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.004335427020318756,
+      "pysr_seconds": 237.55565497899988,
+      "best_equation_in_groups": "(J2 * square(J1 * (J1 / (square(J1) - 1.0000000053744065)))) * 4.188790267211315",
+      "validation_rmse": 1.2906230562710905e-08,
+      "expanded_equation": "4.188790267211315*Ef**2*c*epsilon*omega**4*r**2/(omega_0**4*(omega**2/omega_0**2 - 1.0000000053744065)**2)",
+      "truth_expression": "4*pi*Ef**2*c*epsilon*omega**4*r**2/(3*(omega**2 - omega_0**2)**2)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.9644018553824098e-09,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.6334185726614447e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 1.9644018553824098e-09,
+        "validation_rmse": 1.2906230562710905e-08,
+        "pysr_seconds": 237.55565497899988,
+        "expanded_equation": "4.188790267211315*Ef**2*c*epsilon*omega**4*r**2/(omega_0**4*(omega**2/omega_0**2 - 1.0000000053744065)**2)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.020173363848619324,
+        "validation_rmse": 0.09051599657621806,
+        "pysr_seconds": 450.5771539749985,
+        "expanded_equation": "Ef**2*c*epsilon*r**2*(-0.28374592187833648*exp(1.3879990087727878*omega + sin(omega_0)) + cos(omega_0 - 1.029000864976025) + 1.020865987128509)**2/(omega_0 + 5.4049545028718144)"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "square((x2 * (0.28298013877229244 - (((-1.8467844346850582 - x4) / (((x5 + cos(x4)) + -1.6336099035326115) * -2.5766213502387774)) + ((cos(x4) + x5) * 0.02146518105953186)))) * x3) * ((x0 * (x4 + -0.5182477881439631)) * x1)",
+      "pysr_seconds": 900.4853227289987,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.946496e-11",
+      "validation_rmse": 0.019637639979301506,
+      "expanded_equation": "Ef**2*c*epsilon*r**2*(omega - 0.5182477881439631)*(-0.02146518105953186*omega_0 + 0.38810514393483903*(-omega - 1.8467844346850582)/(omega_0 + cos(omega) - 1.6336099035326115) - 0.02146518105953186*cos(omega) + 0.28298013877229244)**2",
+      "truth_expression": "4*pi*Ef**2*c*epsilon*omega**4*r**2/(3*(omega**2 - omega_0**2)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": null,
+      "candidate_over_truth": "28853*(4000*omega - 2073)**2*(omega**2 - omega_0**2)**4*(80856000*omega + 3*(625*omega_0 + 625*cos(omega) - 1021)*(2385*omega_0 + 2385*cos(omega) - 31442) + 149320000)**4/(100000000000000000000000000000000000*omega**8*(625*omega_0 + 625*cos(omega) - 1021)**4)",
+      "fresh_sample_relative_l2": 0.002566510875861448,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0030107084878642737,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_I_40_1",
+    "formula": "n_0*exp(-g*m*x/(T*kb))",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 253.57158578400004,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.05470327685531272
+        },
+        {
+          "n": 2,
+          "val_metric": 0.008400297407750276
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 17.019625994999842,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "1",
+          "-1",
+          "1",
+          "-1"
+        ]
+      ],
+      "stage2_val_metric": 0.0021308161543834294,
+      "pysr_seconds": 10.501556786000037,
+      "best_equation_in_groups": "J1 / exp(J2)",
+      "validation_rmse": 1.7415182503764032e-16,
+      "expanded_equation": "n_0*exp(-g*m*x/(T*kb))",
+      "truth_expression": "n_0*exp(-g*m*x/(T*kb))",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": true,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 0.0,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.1302565198181219e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 2,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "1",
+          "-1",
+          "1",
+          "-1"
+        ]
+      ],
+      "stage2_val_metric": 0.0021308161543834294,
+      "pysr_seconds": 0.7751024609999604,
+      "best_equation_in_groups": "J1 / exp(J2)",
+      "validation_rmse": 1.7415182503764032e-16,
+      "expanded_equation": "n_0*exp(-g*m*x/(T*kb))",
+      "truth_expression": "n_0*exp(-g*m*x/(T*kb))",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": true,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 0.0,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.1302565198181219e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 0.0,
+        "validation_rmse": 1.7415182503764032e-16,
+        "pysr_seconds": 0.7751024609999604,
+        "expanded_equation": "n_0*exp(-g*m*x/(T*kb))"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 5.102076952083969e-12,
+        "validation_rmse": 4.034044498805848e-12,
+        "pysr_seconds": 16.350397302000147,
+        "expanded_equation": "n_0*exp(-1.0000000000055689*g*m*x/(T*kb))"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "(exp((x1 / 1.3648279142305775) * (((x2 / (x5 * -0.7326930864650566)) * x4) / x3)) / (0.999999988112791 / x0)) - -7.770667737407197e-9",
+      "pysr_seconds": 36.07755139799997,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 3.774749e-13",
+      "validation_rmse": 7.649670678445531e-09,
+      "expanded_equation": "1.00000001188721*n_0*exp(-1.0000000230287332*g*m*x/(T*kb)) + 7.770667737407197e-9",
+      "truth_expression": "n_0*exp(-g*m*x/(T*kb))",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "exp(-230287331*g*m*x/(5000000000000000*T*kb))",
+      "fresh_sample_relative_l2": 9.533012013263926e-09,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 9.858250761972018e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_I_9_18",
+    "formula": "G*m1*m2/((-x1 + x2)**2 + (-y1 + y2)**2 + (-z1 + z2)**2)",
+    "n_inputs": 9,
+    "log_reducibility_analysis": 6,
+    "pipeline": {
+      "stage1_seconds": 389.0303495200001,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.08414706847534738
+        },
+        {
+          "n": 2,
+          "val_metric": 0.06515368241439085
+        },
+        {
+          "n": 3,
+          "val_metric": 0.04925260716644183
+        },
+        {
+          "n": 4,
+          "val_metric": 0.02352526964683744
+        },
+        {
+          "n": 5,
+          "val_metric": 0.01717364143555689
+        },
+        {
+          "n": 6,
+          "val_metric": 0.003475506936898476
+        }
+      ],
+      "selected_n": 6,
+      "reduction": true,
+      "stage2_seconds": 21.855759845999955,
+      "snapped": false,
+      "exponents": null,
+      "stage2_val_metric": 0.003475506936898476,
+      "pysr_seconds": 910.0973085509997,
+      "best_equation_in_groups": "(sqrt(sqrt(sqrt(J3 / sqrt(((J5 + J1) * J4) * ((sqrt(J1) + J4) + (J2 / exp(J6))))))) * 0.24570525823952225) + 0.04677480886736855",
+      "validation_rmse": 0.008296277597122757,
+      "expanded_equation": "2.1679130159467666*G**0.884154224630201*m1**0.884542155876117*m2**0.884813744140659*x2**0.429631912353479*y2**0.233344129489251*z2**0.506231554130132/(x1**0.576032204731356*y1**1.07526146169784*z1**1.28163079737461*(4.6762241263613e-5*x1**14.3160085536908*z1**1.00105055138681/(G**2.54805583681301*m1**2.55105513297397*m2**2.5355328251732*x2**4.27340130133022*y1**2.66723348500264*y2**2.40254356163775*z2**0.850212274150523) + 0.000804496918402456*x1**2.63784607587507*x2**1.03397557744564*y1**7.76911750622925/(G**1.32171026746279*m1**1.32040772423731*m2**1.32621441080954*y2**4.34717517885403*z1**1.61014395463716*z2**2.71555323419758))**(1/16)*(0.000105940140626937*x2**0.51341563056411*y1**3.9669756924277*z1**9.24164648649474/(G**4.45087798658142*m1**4.44520774593911*m2**4.4448880698984*x1**0.548252826287251*y2**3.34332543229905*z2**0.863006897829825) + 1.28251694490179*x1**3.14226303724438*x2**0.831103159281036*y1**5.641066584674*z2**4.55204329326011*exp(-1524.3508837382*G**0.940784226131045*m1**0.946298784645698*m2**0.920978522482106*x2**5.04778022813843*y2**3.38477216366204*z1**1.03792761720702/(x1**5.18716154205887*y1**4.70381885980538*z2**1.49068922581685))/(G**3.25421347314841*m1**3.2469942351541*m2**3.25551615618131*y2**0.188811290368338*z1**7.52663149561679) + 0.00683829227684903*x1**7.1580042768454*z1**0.500525275693404/(G**1.27402791840651*m1**1.27552756648698*m2**1.2677664125866*x2**2.13670065066511*y1**1.33361674250132*y2**1.20127178081887*z2**0.425106137075262))**(1/16)) + 0.04677480886736855",
+      "truth_expression": "G*m1*m2/((-x1 + x2)**2 + (-y1 + y2)**2 + (-z1 + z2)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.030554937989250477,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.032436745735884495,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "(((x6 * (x8 * x4)) + x3) / (((x7 * x5) + -1.9315400034414132) / x2)) * (x1 * (x0 * ((0.7512944402940044 / x3) + -0.09076353447108852)))",
+      "pysr_seconds": 450.4648552970002,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.541417e-14",
+      "validation_rmse": 0.009309291189082762,
+      "expanded_equation": "G*m1*m2*(-0.09076353447108852 + 0.7512944402940044/x1)*(x1 + x2*y2*z2)/(y1*z1 - 1.9315400034414132)",
+      "truth_expression": "G*m1*m2/((-x1 + x2)**2 + (-y1 + y2)**2 + (-z1 + z2)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.033121033906265765,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.031070607116353795,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.033922328982032735,
+        "validation_rmse": 0.01003244958429007,
+        "pysr_seconds": 450.61905909000006,
+        "expanded_equation": "2.3479258267143835*G**0.884154224630201*m1**0.884542155876117*m2**0.884813744140659*x2**0.429631912353479*y2**0.233344129489251*z2**0.506231554130132*(0.001222216300968746*x1**0.870060506875045*y1**0.488768631347445*z1**6.57942731568315/(G**0.796790665301245*m1**0.803369569442641*m2**0.80027488099738*x2**2.26243313669546*y2**0.00313951469807026*z2**4.08519613869313) + 1524.3508837382*G**0.940784226131045*m1**0.946298784645698*m2**0.920978522482106*x2**5.04778022813843*y2**3.38477216366204*z1**1.03792761720702/(x1**5.18716154205887*y1**4.70381885980538*z2**1.49068922581685))**(1/16)/(x1**0.576032204731356*y1**1.07526146169784*z1**1.28163079737461*(0.0712820637957677*x1**9.12884701163192*x2**0.774378926808201*y2**0.982228602024288*z1**2.03897816859383/(G**1.60727161068197*m1**1.60475634832827*m2**1.6145543026911*y1**7.37105234480803*z2**2.34090149996737) + 0.000804496918402456*x1**2.63784607587507*x2**1.03397557744564*y1**7.76911750622925/(G**1.32171026746279*m1**1.32040772423731*m2**1.32621441080954*y2**4.34717517885403*z1**1.61014395463716*z2**2.71555323419758))**(1/16))"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.033121033906265765,
+        "validation_rmse": 0.009309291189082762,
+        "pysr_seconds": 450.4648552970002,
+        "expanded_equation": "G*m1*m2*(-0.09076353447108852 + 0.7512944402940044/x1)*(x1 + x2*y2*z2)/(y1*z1 - 1.9315400034414132)"
+      },
+      "reduction": true,
+      "selected_n": 6,
+      "exponents": null
+    },
+    "baseline": {
+      "best_equation_raw_names": "((x2 * x0) / (x5 / x1)) * ((-0.3585408419514005 / x5) + (1.6018619820125208 / (x3 - (x6 + ((x8 + (x5 * -0.47064916532383316)) - (x7 - x4))))))",
+      "pysr_seconds": 900.4299789359998,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.541417e-14",
+      "validation_rmse": 0.008961862796873386,
+      "expanded_equation": "G*m1*m2*(1.6018619820125208/(x1 - x2 + 0.47064916532383316*y1 - y2 + z1 - z2) - 0.3585408419514005/y1)/y1",
+      "truth_expression": "G*m1*m2/((-x1 + x2)**2 + (-y1 + y2)**2 + (-z1 + z2)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.025759212786033114,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.024992110763791493,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_1",
+    "formula": "Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(16*E_n**2*sin(theta/2)**4)",
+    "n_inputs": 7,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 184.80031419800002,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.09379052704128486
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0015509181740213129
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 17.008963718000132,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "-1",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.0016548467520478647,
+      "pysr_seconds": 427.57634613699975,
+      "best_equation_in_groups": "square((J2 * 0.500000001761099) / (cos(J1) + -1.0000000019674815)) + -9.922502580946347e-9",
+      "validation_rmse": 1.917630507969486e-08,
+      "expanded_equation": "-9.922502580946347e-9 + 0.250000001761099*Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(E_n**2*(cos(theta) - 1.0000000019674815)**2)",
+      "truth_expression": "Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(16*E_n**2*sin(theta/2)**4)",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "16*sin(theta/2)**8/(cos(theta) - 1)**4",
+      "fresh_sample_relative_l2": 1.6022438139447125e-09,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.1049395074332147e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "square(((x1 * x4) * ((x2 / (x5 / x3)) / (sin(-1.5707964250320001 - x6) + 0.9999999274903328))) * x0) * 0.2500000133935273",
+      "pysr_seconds": 69.11853021599973,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.429535e-10",
+      "validation_rmse": 1.958168275794671e-07,
+      "expanded_equation": "0.2500000133935273*Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(E_n**2*(0.9999999274903328 - sin(theta + 1.5707964250320001))**2)",
+      "truth_expression": "Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(16*E_n**2*sin(theta/2)**4)",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "16*sin(theta/2)**8/(sin(theta + 15707964250320001/10000000000000000) - 1)**4",
+      "fresh_sample_relative_l2": 1.38436509963763e-08,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 9.053857187893736e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 1.2650657198903532e-06,
+        "validation_rmse": 1.4354958980566696e-05,
+        "pysr_seconds": 125.72843219700007,
+        "expanded_equation": "(Z_1*Z_2*alpha*c*hbar*(0.00390812722170581 - 0.015096708123029431*theta)/E_n - 0.6082028079402775*Z_1*Z_2*alpha*c*hbar/(E_n*theta))**2/sin(0.6046763884333018*theta - 0.00066064464311755268*(theta - 1.3096722420264872)**4 + 0.001184693242783942)**2"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 1.38436509963763e-08,
+        "validation_rmse": 1.958168275794671e-07,
+        "pysr_seconds": 69.11853021599973,
+        "expanded_equation": "0.2500000133935273*Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(E_n**2*(0.9999999274903328 - sin(theta + 1.5707964250320001))**2)"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "1"
+        ],
+        [
+          "1",
+          "1",
+          "1",
+          "1",
+          "1",
+          "-1",
+          "0"
+        ]
+      ]
+    },
+    "baseline": {
+      "best_equation_raw_names": "square(x4 * (x1 * (((x0 / -1.999999943897983) / (-0.9999999220678807 - sin(x6 + -1.5707962209877273))) * (x2 / (x5 / x3)))))",
+      "pysr_seconds": 363.2183332229997,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.429535e-10",
+      "validation_rmse": 2.074015237287399e-07,
+      "expanded_equation": "0.2500000140255048*Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(E_n**2*(-sin(theta - 1.5707962209877273) - 0.9999999220678807)**2)",
+      "truth_expression": "Z_1**2*Z_2**2*alpha**2*c**2*hbar**2/(16*E_n**2*sin(theta/2)**4)",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "16*sin(theta/2)**8/(sin(theta - 15707962209877273/10000000000000000) + 1)**4",
+      "fresh_sample_relative_l2": 1.4818224714940908e-08,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 9.572071406439769e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_11",
+    "formula": "4*I_0*sin(alpha/2)**2*sin(delta*n/2)**2/(alpha**2*sin(delta/2)**2)",
+    "n_inputs": 4,
+    "log_reducibility_analysis": 4,
+    "pipeline": {
+      "stage1_seconds": 249.6931994749998,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.5259683840465769
+        },
+        {
+          "n": 2,
+          "val_metric": 0.10329549062465881
+        },
+        {
+          "n": 3,
+          "val_metric": 0.045386019023797755
+        }
+      ],
+      "selected_n": null,
+      "reduction": false
+    },
+    "portfolio": {
+      "best_equation_raw_names": "(sin((x1 * -0.2779386931923817) + 1.2293194467467348) * x3) * (x0 * ((((cos(((x3 * x2) * 0.38360904238703614) + 0.8637460795272296) + 1.0614718017402682) * x3) / (1.315240069643723 - (x2 * 0.2801902807632606))) + -0.19387065300374126))",
+      "pysr_seconds": 909.5499407710001,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.021571e-12",
+      "validation_rmse": 0.010358046807353574,
+      "expanded_equation": "-I_0*n*(n*(cos(0.38360904238703614*delta*n + 0.8637460795272296) + 1.0614718017402682)/(1.315240069643723 - 0.2801902807632606*delta) - 0.19387065300374126)*sin(0.2779386931923817*alpha - 1.2293194467467348)",
+      "truth_expression": "4*I_0*sin(alpha/2)**2*sin(delta*n/2)**2/(alpha**2*sin(delta/2)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "alpha**4*n**2*(13580*delta + 250000*n*cos(19180452119351807*delta*n/50000000000000000 + 86374607952722959/100000000000000000) + 265370*n - 63747)**2*sin(delta/2)**4*sin(3474233664904771*alpha/12500000000000000 - 3073298616866837/2500000000000000)**2/(1600*(7005*delta - 32881)**2*sin(alpha/2)**4*sin(delta*n/2)**4)",
+      "fresh_sample_relative_l2": 0.005343091325197932,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.004742923913905061,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "reduction": false
+    },
+    "baseline": {
+      "best_equation_raw_names": "(x0 / square((exp(square(x1 / 4.749066639427791)) * 0.5621432713909407) / sin((x2 * 0.49991081179473357) * x3))) / ((1.5347550093342845 + ((x2 * 0.020625953998186407) / sin(0.9000202402481168 * x1))) + (-1.5471388534876689 * cos(x2)))",
+      "pysr_seconds": 900.6492390600001,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.021571e-12",
+      "validation_rmse": 0.001897513871415332,
+      "expanded_equation": "3.164506314200811*I_0*exp(-0.08867750557683456*alpha**2)*sin(0.49991081179473357*delta*n)**2/(0.020625953998186407*delta/sin(0.9000202402481168*alpha) - 1.5471388534876689*cos(delta) + 1.5347550093342845)",
+      "truth_expression": "4*I_0*sin(alpha/2)**2*sin(delta*n/2)**2/(alpha**2*sin(delta/2)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "156470000000*alpha**4*exp(-22169376394208639*alpha**2/125000000000000000)*sin(45001012012405839*alpha/50000000000000000)**2*sin(delta/2)**4*sin(49991081179473357*delta*n/100000000000000000)**4/((10313*delta - 150*(5157*cos(delta) - 5116)*sin(45001012012405839*alpha/50000000000000000))**2*sin(alpha/2)**4*sin(delta*n/2)**4)",
+      "fresh_sample_relative_l2": 0.0009651327862036258,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0008859992045927573,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_12",
+    "formula": "q*(4*pi*Volt*d*epsilon - d*q*y**3/(-d**2 + y**2)**2)/(4*pi*epsilon*y**2)",
+    "n_inputs": 5,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 194.6360494419987,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.0018832975431260191
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0006022405363751373
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 84.92636229600066,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "-2",
+          "1",
+          "1",
+          "0"
+        ],
+        [
+          "18",
+          "0",
+          "7",
+          "-26",
+          "-6"
+        ]
+      ],
+      "stage2_val_metric": 0.001492009913250521,
+      "pysr_seconds": 1031.0159708459996,
+      "best_equation_in_groups": "(J1 + -0.0014680379530568487) - ((4.226523857235335 / J1) * sqrt(sqrt(J2 / ((sqrt(J2) + sqrt(sqrt(J2))) * J1))))",
+      "validation_rmse": 0.002116450110552867,
+      "expanded_equation": "-4.226523857235335*sqrt(Volt)*q**(13/4)*y**(5/2)/(d**(31/4)*epsilon**(3/2)*(Volt**(7/4)*q**(9/2)/(d**(13/2)*epsilon**(3/2)) + Volt**(7/2)*q**9/(d**13*epsilon**3))**(1/4)) + Volt*d*q/y**2 - 0.0014680379530568487",
+      "truth_expression": "q*(4*pi*Volt*d*epsilon - d*q*y**3/(-d**2 + y**2)**2)/(4*pi*epsilon*y**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": null,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.0001060106851145065,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.00013925135263610864,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "(((x0 / square(x1)) * (((x0 * -2.810565924410728e-5) / (x1 * x4)) + x2)) * x3) - ((((x3 / x1) * -0.002957912976929807) + 0.023521578845475136) * (square(x0 / (x1 - x3)) / x4))",
+      "pysr_seconds": 450.9485055699988,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.023184e-10",
+      "validation_rmse": 3.371763623796157e-05,
+      "expanded_equation": "d*q*(Volt - 2.810565924410728e-5*q/(epsilon*y))/y**2 - q**2*(-0.002957912976929807*d/y + 0.023521578845475136)/(epsilon*(-d + y)**2)",
+      "truth_expression": "q*(4*pi*Volt*d*epsilon - d*q*y**3/(-d**2 + y**2)**2)/(4*pi*epsilon*y**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "15791*(d**2 - y**2)**4*(d*(d - y)**2*(500000000*Volt*epsilon*y - 14053*q) + 50*q*y**2*(29579*d - 235220*y))**2/(100000000000000*d**2*y**2*(d - y)**4*(6283*Volt*epsilon*(d**2 - y**2)**2 - 500*q*y**3)**2)",
+      "fresh_sample_relative_l2": 1.599275840748153e-06,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.855082324537943e-06,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.00012029091393133227,
+        "validation_rmse": 0.0023013634043658657,
+        "pysr_seconds": 581.05683967,
+        "expanded_equation": "sqrt(Volt**(3/2)*q**(17/4)*sqrt(y)*(log(Volt**7*q**18/(d**26*epsilon**6)) - 5.837670549340044)/(d**(27/4)*epsilon**(3/2)) + (Volt*d*q/y**2 - 0.0019733383938498102)**2)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 1.599275840748153e-06,
+        "validation_rmse": 3.371763623796157e-05,
+        "pysr_seconds": 450.9485055699988,
+        "expanded_equation": "d*q*(Volt - 2.810565924410728e-5*q/(epsilon*y))/y**2 - q**2*(-0.002957912976929807*d/y + 0.023521578845475136)/(epsilon*(-d + y)**2)"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": [
+        [
+          "1",
+          "-2",
+          "1",
+          "1",
+          "0"
+        ],
+        [
+          "18",
+          "0",
+          "7",
+          "-26",
+          "-6"
+        ]
+      ]
+    },
+    "baseline": {
+      "best_equation_raw_names": "(x0 / x1) * ((((x2 - 5.314497072869786e-5) * (x3 / x1)) - (((x3 * -0.002711964748127694) + (x1 * 0.02318098227460889)) / ((square(x3 - x1) * x4) / x0))) + 0.00016590881050951352)",
+      "pysr_seconds": 902.8764720479994,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.023184e-10",
+      "validation_rmse": 6.345733985752027e-05,
+      "expanded_equation": "q*(d*(Volt - 5.314497072869786e-5)/y + 0.00016590881050951352 - q*(-0.002711964748127694*d + 0.02318098227460889*y)/(epsilon*(d - y)**2))/y",
+      "truth_expression": "q*(4*pi*Volt*d*epsilon - d*q*y**3/(-d**2 + y**2)**2)/(4*pi*epsilon*y**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "12633*(d**2 - y**2)**4*(2*d*epsilon*(125000000*Volt - 6643)*(d - y)**2 + 41477*epsilon*y*(d - y)**2 + 1000*q*y*(678*d - 5795*y))**2/(20000000000000*d**2*(d - y)**4*(6283*Volt*epsilon*(d**2 - y**2)**2 - 500*q*y**3)**2)",
+      "fresh_sample_relative_l2": 3.794594816134274e-06,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 3.4123230614694185e-06,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_16",
+    "formula": "Volt*q + sqrt(c**4*m**2 + c**2*(-A_vec*q + p)**2)",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 4,
+    "pipeline": {
+      "stage1_seconds": 278.9868937470003,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.29082146408128134
+        },
+        {
+          "n": 2,
+          "val_metric": 0.11232019563409082
+        },
+        {
+          "n": 3,
+          "val_metric": 0.036062254802889486
+        },
+        {
+          "n": 4,
+          "val_metric": 0.0037292088838352857
+        }
+      ],
+      "selected_n": 4,
+      "reduction": true,
+      "stage2_seconds": 17.36607458399976,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "1",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "0",
+          "-2",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "-1",
+          "-1",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.009282507659104464,
+      "pysr_seconds": 996.3241519349999,
+      "best_equation_in_groups": "(J3 * square(J2)) + (J1 + (square(1.0047408386544068 - square(J4)) / ((J4 / J2) + (J3 * square(square(0.5037460697112109 - (J4 / -0.8211336665788961)) - 0.2570792375428651)))))",
+      "validation_rmse": 0.2623529073656337,
+      "expanded_equation": "Volt*q + c**2*m + (1.0047408386544068 - p**2/(A_vec**2*q**2))**2/(m*((0.5037460697112109 + 1.217828522567243*p/(A_vec*q))**2 - 0.2570792375428651)**2/p**2 + 1/(A_vec*c*q))",
+      "truth_expression": "Volt*q + sqrt(c**4*m**2 + c**2*(-A_vec*q + p)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "(10000000000*c*p**2*(25119*A_vec**2*q**2 - 25000*p**2)**2 + (Volt*q + c**2*m)*(6250000000000000000*A_vec**3*p**2*q**3 + c*m*(642700000*A_vec**2*q**2 - (25187*A_vec*q + 60891*p)**2)**2))**2/((Volt*q + c*sqrt(c**2*m**2 + (A_vec*q - p)**2))**2*(6250000000000000000*A_vec**3*p**2*q**3 + c*m*(642700000*A_vec**2*q**2 - (25187*A_vec*q + 60891*p)**2)**2)**2)",
+      "fresh_sample_relative_l2": 0.00474265776869633,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0046532431964285605,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 4,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "0",
+          "1"
+        ],
+        [
+          "0",
+          "1",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "0",
+          "-2",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "-1",
+          "-1",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.009282507659104464,
+      "pysr_seconds": 450.5908094759998,
+      "best_equation_in_groups": "J1 + ((J3 * square(J2 + -0.10304261642470623)) + ((((-0.23577377350062595 / J4) + 0.20013147550027693) * square(log((J2 / J3) + 6.631533021474202) - (0.9598099807258299 / J2))) * log(J4)))",
+      "validation_rmse": 1.0024783941794029,
+      "expanded_equation": "Volt*q + m*(c*p - 0.10304261642470623)**2/p**2 + (-0.23577377350062595*A_vec*q/p + 0.20013147550027693)*(log(c*p**3/m + 6.631533021474202) - 0.9598099807258299/(c*p))**2*log(p/(A_vec*q))",
+      "truth_expression": "Volt*q + sqrt(c**4*m**2 + c**2*(-A_vec*q + p)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.019287114063211243,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.016938542668690815,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.019287114063211243,
+        "validation_rmse": 1.0024783941794029,
+        "pysr_seconds": 450.5908094759998,
+        "expanded_equation": "Volt*q + m*(c*p - 0.10304261642470623)**2/p**2 + (-0.23577377350062595*A_vec*q/p + 0.20013147550027693)*(log(c*p**3/m + 6.631533021474202) - 0.9598099807258299/(c*p))**2*log(p/(A_vec*q))"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.03678222003530432,
+        "validation_rmse": 1.9092821112991523,
+        "pysr_seconds": 450.54101197800037,
+        "expanded_equation": "-A_vec + c**2*m + q*(1.067767315102847*Volt + 0.2383943213302453*(A_vec - log(m))*(A_vec + c - p + q))"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "(square(x1) * x0) + ((log(x3) * ((x4 - log(3.3984964778684428 / x5)) * (1.3246397365325997 * (x3 + ((x1 / x0) - log(x2)))))) + x5)",
+      "pysr_seconds": 900.628017778,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 8.299370e-10",
+      "validation_rmse": 2.2235727222367863,
+      "expanded_equation": "Volt + c**2*m + (A_vec - log(3.3984964778684428/Volt))*(1.3246397365325997*c/m + 1.3246397365325997*q - 1.3246397365325997*log(p))*log(q)",
+      "truth_expression": "Volt*q + sqrt(c**4*m**2 + c**2*(-A_vec*q + p)**2)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.040209059520329014,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.04039771875024618,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_17",
+    "formula": "(m**2*omega**2*x**2*(alpha*x/y + 1) + p**2)/(2*m)",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 221.73886160100028,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.047217632867390946
+        },
+        {
+          "n": 2,
+          "val_metric": 0.019826089377292706
+        },
+        {
+          "n": 3,
+          "val_metric": 0.0020330539796424383
+        }
+      ],
+      "selected_n": 3,
+      "reduction": true,
+      "stage2_seconds": 17.620343222999963,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "0",
+          "-2",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "-1",
+          "-1"
+        ],
+        [
+          "0",
+          "1",
+          "1",
+          "0",
+          "1",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.002861375386294892,
+      "pysr_seconds": 16.651084095999977,
+      "best_equation_in_groups": "(square(J3) * ((J1 + (J1 / J2)) * 0.5)) - (((J2 * 9.833703078268018e-16) - 0.4999999999999994) / J1)",
+      "validation_rmse": 9.041153739078005e-13,
+      "expanded_equation": "0.5*omega**2*p**2*x**2*(alpha*m*x/(p**2*y) + m/p**2) - p**2*(-0.4999999999999994 + 9.833703078268018e-16*y/(alpha*x))/m",
+      "truth_expression": "(m**2*omega**2*x**2*(alpha*x/y + 1) + p**2)/(2*m)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.9072431910725882e-16,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 6.860748018379654e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 3,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "0",
+          "-2",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "1",
+          "-1",
+          "-1"
+        ],
+        [
+          "0",
+          "1",
+          "1",
+          "0",
+          "1",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.002861375386294892,
+      "pysr_seconds": 4.714204495000104,
+      "best_equation_in_groups": "(((((exp(-2.5754561283094323e-12 / J3) * J1) / J2) + J1) * 0.5000000000000334) * square(J3)) + ((1.000000000001024 - ((-3.3575773158140607e-12 / J3) * -19.866027687860473)) / (J1 + J1))",
+      "validation_rmse": 5.4547776663492566e-11,
+      "expanded_equation": "0.5000000000000334*omega**2*p**2*x**2*(alpha*m*x*exp(-2.5754561283094323e-12/(omega*p*x))/(p**2*y) + m/p**2) + p**2*(1.000000000001024 - 6.6701723920094377e-11/(omega*p*x))/(2*m)",
+      "truth_expression": "(m**2*omega**2*x**2*(alpha*x/y + 1) + p**2)/(2*m)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 3.443580741937571e-14,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 3.611619043318923e-14,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 3.443580741937571e-14,
+        "validation_rmse": 5.4547776663492566e-11,
+        "pysr_seconds": 4.714204495000104,
+        "expanded_equation": "0.5000000000000334*omega**2*p**2*x**2*(alpha*m*x*exp(-2.5754561283094323e-12/(omega*p*x))/(p**2*y) + m/p**2) + p**2*(1.000000000001024 - 6.6701723920094377e-11/(omega*p*x))/(2*m)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 1.0260633543860071e-13,
+        "validation_rmse": 1.7374496056485218e-10,
+        "pysr_seconds": 43.438357198000176,
+        "expanded_equation": "m*omega**2*x**2*(alpha*x/(2*y) + 0.4999999999999893) + 0.4999999999432615*(p**2 + 1.1438020941852958e-9)/m"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "square(((x1 + x3) + (x1 * ((cos(x4) + (((x0 + (square((x0 - (x3 / x4)) - x5) * -0.07551777103896928)) + x5) * (x4 + -0.9771353852609214))) / sqrt(x3)))) - 2.312106839410031) * 0.9530675866362874",
+      "pysr_seconds": 900.6365053029995,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.077042e-06",
+      "validation_rmse": 39.81238728187712,
+      "expanded_equation": "0.9530675866362874*(omega + omega*((x - 0.9771353852609214)*(alpha + m - 0.07551777103896928*(-alpha + m - y/x)**2) + cos(x))/sqrt(y) + y - 2.312106839410031)**2",
+      "truth_expression": "(m**2*omega**2*x**2*(alpha*x/y + 1) + p**2)/(2*m)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.022450199438414368,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.02484346094456341,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_18",
+    "formula": "3*(H_G**2 + c**2*k_f/r**2)/(8*pi*G)",
+    "n_inputs": 5,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 177.24224281099987,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.3172689622476091
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0009480224058159325
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 17.02054294799973,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "0",
+          "0",
+          "-2",
+          "0"
+        ],
+        [
+          "1",
+          "-1",
+          "2",
+          "0",
+          "-2"
+        ]
+      ],
+      "stage2_val_metric": 0.001795226615916796,
+      "pysr_seconds": 16.428590772000007,
+      "best_equation_in_groups": "sqrt(0.22573078047261133 / square((J2 / ((J2 + 0.32015078944236974) - J2)) * -1.2742908761250216)) + ((0.23873241455423483 / square(sqrt(J1 + J1))) - -1.9392653819399906e-10)",
+      "validation_rmse": 1.500292020801853e-10,
+      "expanded_equation": "1.9392653819399906e-10 + 0.11936620727711741*H_G**2/G + 0.11936620732745547*c**2*k_f/(G*r**2)",
+      "truth_expression": "(3*H_G**2 + 3*c**2*k_f/r**2)/(8*pi*G)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.456188022209065e-10,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.332773083871474e-10,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 2,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "0",
+          "0",
+          "-2",
+          "0"
+        ],
+        [
+          "1",
+          "-1",
+          "2",
+          "0",
+          "-2"
+        ]
+      ],
+      "stage2_val_metric": 0.001795226615916796,
+      "pysr_seconds": 4.090786567000123,
+      "best_equation_in_groups": "(0.39140272627153805 / (J2 / 0.304970301189955)) + (0.18170406931885713 / (J1 * 1.5222404513931092))",
+      "validation_rmse": 2.7430944827441318e-11,
+      "expanded_equation": "0.11936620732458329*H_G**2/G + 0.11936620731760047*c**2*k_f/(G*r**2)",
+      "truth_expression": "(3*H_G**2 + 3*c**2*k_f/r**2)/(8*pi*G)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 2.6645671819753615e-11,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.435552011728259e-11,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 2.6645671819753615e-11,
+        "validation_rmse": 2.7430944827441318e-11,
+        "pysr_seconds": 4.090786567000123,
+        "expanded_equation": "0.11936620732458329*H_G**2/G + 0.11936620731760047*c**2*k_f/(G*r**2)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 2.3598744215740653e-11,
+        "validation_rmse": 2.8169594952398554e-11,
+        "pysr_seconds": 14.993748748000144,
+        "expanded_equation": "(0.119366207318332*H_G**2 + 0.11936620732416062*c**2*k_f/r**2)/G"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "sqrt(square(((square(((x4 / (7.387852176919671e-8 - x2)) / x3) / (1.432716772815849 / sqrt(x1))) + 0.48716867945234793) * 0.24386244389847547) * square((x3 / sqrt(x0)) / ((x4 - x4) - 0.9976344669235383))))",
+      "pysr_seconds": 146.54005950400006,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 4.442409e-13",
+      "validation_rmse": 2.2944895895495525e-08,
+      "expanded_equation": "1.004747906497834*H_G**2*sqrt((0.11880214476204258 + 0.11880213116146052*c**2*k_f/(H_G**2*(7.387852176919671e-8 - r)**2))**2)/G",
+      "truth_expression": "(3*H_G**2 + 3*c**2*k_f/r**2)/(8*pi*G)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 2.056956772920678e-08,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.205177595346263e-08,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_19",
+    "formula": "-(H_G**2*c**2*(1 - 2*alpha) + c**4*k_f/r**2)/(8*pi*G)",
+    "n_inputs": 6,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 218.08420314500017,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.1798135939490103
+        },
+        {
+          "n": 2,
+          "val_metric": 0.01599009214655702
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 72.4841738210007,
+      "snapped": false,
+      "exponents": null,
+      "stage2_val_metric": 0.01599009214655702,
+      "pysr_seconds": 915.8802468690001,
+      "best_equation_in_groups": "((log(sqrt(J1)) + ((4.512672834852757 / sqrt(J1)) + ((-0.5572148947486104 / sqrt(J2 / J1)) + -0.46821755765541456))) / (sqrt(J2 - -0.006305190700734366) + -0.04425863212991347)) + -0.30480046598541033",
+      "validation_rmse": 0.21244466351148208,
+      "expanded_equation": "-0.30480046598541033 + (0.5695882405771232*H_G**1.24853868777161*alpha**0.777693550639351*c**0.0932106335570385*r**0.566986802040143/(G**0.336863347927846*k_f**0.292224900937099) - 0.7001872446702246*c**1.67743675918565*k_f**0.584455414893372/(G**0.252839568069764*H_G**0.659524074442509*alpha**0.446812835130262*r**1.13919353145948) + log(7.92269311999909*G**0.336863347927846*k_f**0.292224900937099/(H_G**1.24853868777161*alpha**0.777693550639351*c**0.0932106335570385*r**0.566986802040143)) - 0.46821755765541456)/(sqrt(39.7523412795995*G**1.17940583199522*r**1.14441345883867/(H_G**1.1780292266582*alpha**0.661761431018177*c**3.54129478548538*k_f**0.584461027912546) + 0.006305190700734366) - 0.04425863212991347)",
+      "truth_expression": "(-H_G**2*c**2*(1 - 2*alpha) - c**4*k_f/r**2)/(8*pi*G)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.022520380570862114,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.016649067987211424,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "square(x5 / ((x0 * 3.544907709660158) / x3)) * (x0 * ((x4 + -0.5000000068176567) - (x1 * square(((x5 / x3) / 1.4142135739751542) / x2))))",
+      "pysr_seconds": 102.55614239299939,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.438671e-10",
+      "validation_rmse": 8.930677600769553e-08,
+      "expanded_equation": "0.07957747119354718*H_G**2*c**2*(alpha - 0.5000000068176567 - 0.4999999917961054*c**2*k_f/(H_G**2*r**2))/G",
+      "truth_expression": "(-H_G**2*c**2*(1 - 2*alpha) - c**4*k_f/r**2)/(8*pi*G)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 7.218260688609696e-09,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 5.891297307377284e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.02365930781466639,
+        "validation_rmse": 0.2564249557406434,
+        "pysr_seconds": 453.72698281999965,
+        "expanded_equation": "-sqrt(0.003896251510202343*c**6.89616830385669*k_f**1.75337185769929/(G**1.68508496813475*H_G**0.141018922226823*alpha**0.231864239242347*r**3.42280052175762) + 1.916178341653907)/sqrt(39.7523412795995*G**1.17940583199522*r**1.14441345883867/(H_G**1.1780292266582*alpha**0.661761431018177*c**3.54129478548538*k_f**0.584461027912546) + 0.2280411018355776) + 4.406876763534671/(49.9521505474305*G**0.926566263925457*r**0.00521992737919019/(H_G**1.8375533011007*alpha**1.10857426614844*c**1.86385802629973*k_f**5.61301917412216e-6) - 0.0030225759510735363)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 7.218260688609696e-09,
+        "validation_rmse": 8.930677600769553e-08,
+        "pysr_seconds": 102.55614239299939,
+        "expanded_equation": "0.07957747119354718*H_G**2*c**2*(alpha - 0.5000000068176567 - 0.4999999917961054*c**2*k_f/(H_G**2*r**2))/G"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": null
+    },
+    "baseline": {
+      "best_equation_raw_names": "x5 * (x5 * ((((x4 + -0.4999999939980567) * square(x3 / -0.7071067838290216)) - (x1 * square(x5 / x2))) * (0.03978873600644685 / x0)))",
+      "pysr_seconds": 33.64325794399883,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.438671e-10",
+      "validation_rmse": 1.651754748709008e-08,
+      "expanded_equation": "0.03978873600644685*c**2*(1.999999985051909*H_G**2*(alpha - 0.4999999939980567) - c**2*k_f/r**2)/G",
+      "truth_expression": "(-H_G**2*c**2*(1 - 2*alpha) - c**4*k_f/r**2)/(8*pi*G)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.7472600599875483e-09,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.0475785281283906e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_3",
+    "formula": "d*(1 - alpha**2)/(alpha*cos(theta1 - theta2) + 1)",
+    "n_inputs": 4,
+    "log_reducibility_analysis": 4,
+    "pipeline": {
+      "stage1_seconds": 240.21048710299988,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.24293729066477518
+        },
+        {
+          "n": 2,
+          "val_metric": 0.03237093745415584
+        },
+        {
+          "n": 3,
+          "val_metric": 0.010997556710742007
+        }
+      ],
+      "selected_n": null,
+      "reduction": false
+    },
+    "portfolio": {
+      "best_equation_raw_names": "(cos(((-0.3860580194687321 - square(square(x2 - x3) / (2.089224976817636 + square((x3 - x2) / log(x1))))) * (x3 - x2)) * (x1 + 0.21093578030026783)) - x1) * x0",
+      "pysr_seconds": 909.4195519090003,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 3.553436e-12",
+      "validation_rmse": 0.008042546297234448,
+      "expanded_equation": "d*(-alpha + cos((alpha + 0.21093578030026783)*(-theta1 + theta2)*(-(theta1 - theta2)**4/((-theta1 + theta2)**2/log(alpha)**2 + 2.089224976817636)**2 - 0.3860580194687321)))",
+      "truth_expression": "d*(1 - alpha**2)/(alpha*cos(theta1 - theta2) + 1)",
+      "numerical_recovery": false,
+      "symbolic_recovery": null,
+      "exact_symbolic_recovery": null,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.0014374573481904316,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0012395970657202288,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "reduction": false
+    },
+    "baseline": {
+      "best_equation_raw_names": "(((-1.1415383107131896 + (-0.023754895321103982 / cos(x1))) * (x1 + -0.6157321692428338)) * x0) / (((0.024693395156089006 / cos(-0.039781935350056814 + x1)) + (0.39279104877790416 / log(x1))) + cos(x2 - x3))",
+      "pysr_seconds": 900.8350116750003,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 3.553436e-12",
+      "validation_rmse": 0.0006626549897883161,
+      "expanded_equation": "d*(-1.1415383107131896 - 0.023754895321103982/cos(alpha))*(alpha - 0.6157321692428338)/(cos(theta1 - theta2) + 0.024693395156089006/cos(alpha - 0.039781935350056814) + 0.39279104877790416/log(alpha))",
+      "truth_expression": "d*(1 - alpha**2)/(alpha*cos(theta1 - theta2) + 1)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "(50000*alpha - 30787)**2*(alpha*cos(theta1 - theta2) + 1)**2*(570770*cos(alpha) + 11877)**2*log(alpha)**2*cos(alpha - 19890967675028407/500000000000000000)**2/(2500000000*(alpha**2 - 1)**2*((500000*cos(alpha - 19890967675028407/500000000000000000)*cos(theta1 - theta2) + 12347)*log(alpha) + 196400*cos(alpha - 19890967675028407/500000000000000000))**2*cos(alpha)**2)",
+      "fresh_sample_relative_l2": 0.00014653965208950438,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.00014897088855632927,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_4",
+    "formula": "sqrt(2)*sqrt(E_n - L**2/(2*m*r**2) - U)/sqrt(m)",
+    "n_inputs": 5,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 231.6450129140012,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.09885715314593763
+        },
+        {
+          "n": 2,
+          "val_metric": 0.049262399858977034
+        },
+        {
+          "n": 3,
+          "val_metric": 0.0016786942486280024
+        }
+      ],
+      "selected_n": 3,
+      "reduction": true,
+      "stage2_seconds": 16.925612351999007,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "1",
+          "-1",
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "-1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "-1",
+          "1"
+        ]
+      ],
+      "stage2_val_metric": 0.005285635040408042,
+      "pysr_seconds": 942.6640979650001,
+      "best_equation_in_groups": "(((-0.652004625898474 / ((((-0.5655389765423582 / sqrt(J2)) + (J1 * -0.43062354770153)) / ((J2 + J3) - -0.21687390140465662)) + J1)) + 1.446167746337118) / sqrt(J2 - -0.0026296207317243487)) + (J3 * -0.01338207539278997)",
+      "validation_rmse": 0.0047202099974226275,
+      "expanded_equation": "(1.446167746337118 - 0.652004625898474/(E_n/U + (-0.5655389765423582*sqrt(E_n)/sqrt(m) - 0.43062354770153*E_n/U)/(0.21687390140465662 + U*r/L + m/E_n)))/sqrt(0.0026296207317243487 + m/E_n) - 0.01338207539278997*U*r/L",
+      "truth_expression": "sqrt(2)*sqrt(E_n - L**2/(2*m*r**2) - U)/sqrt(m)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "-m*((7231/5000 - 163/(250*(E_n/U - (28277*sqrt(E_n)/(50000*sqrt(m)) + 21531*E_n/(50000*U))/(21687/100000 + U*r/L + m/E_n))))/sqrt(3287/1250000 + m/E_n) - 6691*U*r/(500000*L))**2/(2*(-E_n + L**2/(2*m*r**2) + U))",
+      "fresh_sample_relative_l2": 0.002678926969026313,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0015349611800394415,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "sqrt((((x1 + ((square(x3 / x4) / -2.000000000114698) / x0)) - x2) / x0) * 2.635902612078511) * 0.8710645061234011",
+      "pysr_seconds": 24.793883524000194,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.359554e-13",
+      "validation_rmse": 5.244729870162003e-12,
+      "expanded_equation": "1.4142135623719*sqrt(E_n - 0.4999999999713255*L**2/(m*r**2) - U)/sqrt(m)",
+      "truth_expression": "sqrt(2)*sqrt(E_n - L**2/(2*m*r**2) - U)/sqrt(m)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "99999/100000",
+      "fresh_sample_relative_l2": 2.2332200264793245e-12,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.0715621219864774e-12,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": NaN,
+        "validation_rmse": 0.010234307161578905,
+        "pysr_seconds": 450.7450749620002,
+        "expanded_equation": "1.1062820861798203*sqrt(E_n)*log(-1.0258692162031409*sqrt(E_n)*L/(U*sqrt(m)*r) + E_n/U + sin(0.2996261610796616*E_n/U))**(1/4)/sqrt(m)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 2.2332200264793245e-12,
+        "validation_rmse": 5.244729870162003e-12,
+        "pysr_seconds": 24.793883524000194,
+        "expanded_equation": "1.4142135623719*sqrt(E_n - 0.4999999999713255*L**2/(m*r**2) - U)/sqrt(m)"
+      },
+      "reduction": true,
+      "selected_n": 3,
+      "exponents": [
+        [
+          "0",
+          "1",
+          "-1",
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "-1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "-1",
+          "1"
+        ]
+      ]
+    },
+    "baseline": {
+      "best_equation_raw_names": "sqrt(((((-0.49999999959936736 / square(x4 / x3)) / x0) + x1) - x2) / x0) * 1.4142135622247185",
+      "pysr_seconds": 25.658688134999466,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.359554e-13",
+      "validation_rmse": 2.5052975202386915e-10,
+      "expanded_equation": "1.4142135622247185*sqrt(E_n - 0.49999999959936736*L**2/(m*r**2) - U)/sqrt(m)",
+      "truth_expression": "sqrt(2)*sqrt(E_n - L**2/(2*m*r**2) - U)/sqrt(m)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "99999/100000",
+      "fresh_sample_relative_l2": 8.677842409754229e-11,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 8.788448031256343e-11,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_5",
+    "formula": "2*pi*d**(3/2)/(sqrt(G)*sqrt(m1 + m2))",
+    "n_inputs": 4,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 181.7781484799998,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.027890326865524655
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0002895574279003131
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 16.83987069700015,
+      "snapped": true,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "1",
+          "-1"
+        ],
+        [
+          "3",
+          "-1",
+          "-1",
+          "0"
+        ]
+      ],
+      "stage2_val_metric": 0.0005416307484099951,
+      "pysr_seconds": 916.4581058520002,
+      "best_equation_in_groups": "((sin(sqrt(log((J1 * 1.0404658444322585) + 0.9710240766196917))) / 0.18491809056817113) + (0.4276517473871754 - (cos((log(J1) * (square(J1 / exp(square(J1))) + 1.3468984817692176)) + J1) * -0.005304678800557436))) * sqrt(J2)",
+      "validation_rmse": 3.0533350016821984e-05,
+      "expanded_equation": "d**(3/2)*(5.4077997286660506*sin(sqrt(log(1.0404658444322585*m1/m2 + 0.9710240766196917))) + 0.005304678800557436*cos(m1/m2 + (m1**2*exp(-2*m1**2/m2**2)/m2**2 + 1.3468984817692176)*log(m1/m2)) + 0.4276517473871754)/(sqrt(G)*sqrt(m1))",
+      "truth_expression": "2*pi*d**(3/2)/(sqrt(G)*sqrt(m1 + m2))",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "31663*(m1 + m2)*(10816000*sin(sqrt(log((10404658444322585*m1 + 9710240766196917*m2)/(10000000000000000*m2)))) + 10609*cos(m1/m2 + log(m1**(m1**2*exp(-2*m1**2/m2**2)/m2**2 + 841811551105761/625000000000000)*m2**(-m1**2*exp(-2*m1**2/m2**2)/m2**2 - 841811551105761/625000000000000))) + 855300)**2/(5000000000000000000*m1)",
+      "fresh_sample_relative_l2": 3.931219885686975e-06,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 4.491521319799225e-06,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "sqrt(x0 / (x1 * (x3 + (x2 + -1.5504124929591628e-7)))) * ((x0 + 3.542583574423701e-8) / 0.15915494921234924)",
+      "pysr_seconds": 109.65187309999965,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 9.787860e-12",
+      "validation_rmse": 5.0481568304190035e-08,
+      "expanded_equation": "sqrt(d)*(6.2831850655537606*d + 2.2258708208295057e-7)*sqrt(1/(m1 + m2 - 1.5504124929591628e-7))/sqrt(G)",
+      "truth_expression": "2*pi*d**(3/2)/(sqrt(G)*sqrt(m1 + m2))",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 6.611408569854188e-09,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 6.604487012635597e-09,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 5.704706951600564e-07,
+        "validation_rmse": 4.251781748623062e-06,
+        "pysr_seconds": 467.32119916400006,
+        "expanded_equation": "5.5744001851213443*d**(3/2)*sqrt(-0.19072044166697413*m1/m2 + sqrt(m1*(0.0013457502833971432*cos(log(m1/m2)**2)**2 + 0.032282588526268426*cos(log(m1**2/m2**2)))/m2 + m1/m2) - 0.19072043629493424)/(sqrt(G)*sqrt(m1))"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 6.611408569854188e-09,
+        "validation_rmse": 5.0481568304190035e-08,
+        "pysr_seconds": 109.65187309999965,
+        "expanded_equation": "sqrt(d)*(6.2831850655537606*d + 2.2258708208295057e-7)*sqrt(1/(m1 + m2 - 1.5504124929591628e-7))/sqrt(G)"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": [
+        [
+          "0",
+          "0",
+          "1",
+          "-1"
+        ],
+        [
+          "3",
+          "-1",
+          "-1",
+          "0"
+        ]
+      ]
+    },
+    "baseline": {
+      "best_equation_raw_names": "x0 * sqrt((19.739208803144848 / (x1 / x0)) / sqrt(square((x2 - x3) / ((((-0.8344941439081299 - (x0 / x0)) / 1.2336699209004949) * -0.009578090259997816) + 1.9857571695346647)) + (x2 * x3)))",
+      "pysr_seconds": 28.989445757000794,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 9.787860e-12",
+      "validation_rmse": 1.3958331447164415e-10,
+      "expanded_equation": "4.4428829382670942*d**(3/2)/(sqrt(G)*(m1*m2 + (0.50000000021111398*m1 - 0.50000000021111398*m2)**2)**(1/4))",
+      "truth_expression": "2*pi*d**(3/2)/(sqrt(G)*sqrt(m1 + m2))",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "(m1 + m2)/sqrt(4*m1*m2 + (m1 - m2)**2)",
+      "fresh_sample_relative_l2": 1.858242075107449e-11,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.860921066844916e-11,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_6",
+    "formula": "sqrt(2*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 1)",
+    "n_inputs": 7,
+    "log_reducibility_analysis": 1,
+    "pipeline": {
+      "stage1_seconds": 143.5756416610002,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.0005884799314636718
+        }
+      ],
+      "selected_n": 1,
+      "reduction": true,
+      "stage2_seconds": 16.71637853900029,
+      "snapped": true,
+      "exponents": [
+        [
+          "2",
+          "2",
+          "-1",
+          "-2",
+          "-2",
+          "-4",
+          "1"
+        ]
+      ],
+      "stage2_val_metric": 0.00046896330275506085,
+      "pysr_seconds": 10.487491297000815,
+      "best_equation_in_groups": "sqrt(((J1 + (J1 + 0.6471169220735009)) / 1.000000000284726) + 0.3528830775623469)",
+      "validation_rmse": 2.90435477075206e-10,
+      "expanded_equation": "sqrt(1.999999999430548*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 0.9999999994515968)",
+      "truth_expression": "sqrt(2*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 1)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 2.2238174169065515e-10,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.2434352155157226e-10,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 1,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "2",
+          "2",
+          "-1",
+          "-2",
+          "-2",
+          "-4",
+          "1"
+        ]
+      ],
+      "stage2_val_metric": 0.00046896330275506085,
+      "pysr_seconds": 0.7561061270007485,
+      "best_equation_in_groups": "sqrt(((J1 + (J1 + 0.6471169220735009)) / 1.000000000284726) + 0.3528830775623469)",
+      "validation_rmse": 2.90435477075206e-10,
+      "expanded_equation": "sqrt(1.999999999430548*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 0.9999999994515968)",
+      "truth_expression": "sqrt(2*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 1)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 2.2238174169065515e-10,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 2.2434352155157226e-10,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 2.2238174169065515e-10,
+        "validation_rmse": 2.90435477075206e-10,
+        "pysr_seconds": 0.7561061270007485,
+        "expanded_equation": "sqrt(1.999999999430548*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 0.9999999994515968)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 2.7903487779843206e-10,
+        "validation_rmse": 3.6566589417197107e-10,
+        "pysr_seconds": 106.14668262300074,
+        "expanded_equation": "sqrt(1.9999999993903637*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 0.9999999992838514)"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "sqrt((((x6 * (square((x0 * x1) / (x5 * (x3 * x4))) / x5)) * 1.999999952694467) / sqrt((x5 * (x2 * x5)) * x2)) - -1.000000032488034)",
+      "pysr_seconds": 11.744607525999527,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.975608e-13",
+      "validation_rmse": 1.3324037375474564e-08,
+      "expanded_equation": "sqrt(1.999999952694467*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 1.000000032488034)",
+      "truth_expression": "sqrt(2*E_n*L**2*epsilon**2/(Z_1**2*Z_2**2*m*q**4) + 1)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.0475176472602949e-08,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.010909090464233e-08,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_7",
+    "formula": "sqrt(8*pi*G*rho/3 - alpha*c**2/d**2)",
+    "n_inputs": 5,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 167.42944664700008,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.04951030389941607
+        },
+        {
+          "n": 2,
+          "val_metric": 0.0024648455476628892
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 16.60727802400106,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "2",
+          "-2"
+        ]
+      ],
+      "stage2_val_metric": 0.002297343776647024,
+      "pysr_seconds": 15.29593221399955,
+      "best_equation_in_groups": "sqrt(((J1 * 8.377580410493167) - J2) - (sin(log(J1) + -0.3653313918339341) * 7.326846237495433e-9))",
+      "validation_rmse": 1.7996025849136038e-10,
+      "expanded_equation": "sqrt(8.377580410493167*G*rho - alpha*c**2/d**2 - 7.326846237495433e-9*sin(log(G*rho) - 0.3653313918339341))",
+      "truth_expression": "sqrt(8*pi*G*rho/3 - alpha*c**2/d**2)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 3.219336493020756e-11,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 3.364466640864879e-11,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 2,
+      "reduction": true,
+      "snapped": true,
+      "exponents": [
+        [
+          "1",
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "1",
+          "2",
+          "-2"
+        ]
+      ],
+      "stage2_val_metric": 0.002297343776647024,
+      "pysr_seconds": 2.6642227329994057,
+      "best_equation_in_groups": "sqrt((J1 * 8.377580409650816) - J2)",
+      "validation_rmse": 2.7538977796610373e-11,
+      "expanded_equation": "sqrt(8.377580409650816*G*rho - alpha*c**2/d**2)",
+      "truth_expression": "sqrt(8*pi*G*rho/3 - alpha*c**2/d**2)",
+      "numerical_recovery": true,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "24*(5236*G*d**2*rho - 625*alpha*c**2)/(5*(25133*G*d**2*rho - 3000*alpha*c**2))",
+      "fresh_sample_relative_l2": 4.830222815700793e-12,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 4.823323245905443e-12,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 4.830222815700793e-12,
+        "validation_rmse": 2.7538977796610373e-11,
+        "pysr_seconds": 2.6642227329994057,
+        "expanded_equation": "sqrt(8.377580409650816*G*rho - alpha*c**2/d**2)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 2.0600543442324005e-10,
+        "validation_rmse": 1.1543201865335783e-09,
+        "pysr_seconds": 38.127696264000406,
+        "expanded_equation": "sqrt(8.37758040506236*G*rho - 0.99999999431735563*alpha*c**2/d**2)"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "sqrt(((x1 / 0.11936620752373096) * x0) - square(sqrt(x2) * (x3 / x4)))",
+      "pysr_seconds": 68.68793811400064,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 1.564955e-12",
+      "validation_rmse": 5.072758797312321e-09,
+      "expanded_equation": "sqrt(8.377580395198465*G*rho - alpha*c**2/d**2)",
+      "truth_expression": "sqrt(8*pi*G*rho/3 - alpha*c**2/d**2)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 8.897398034719812e-10,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 8.884678896962685e-10,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_8",
+    "formula": "E_n/(E_n*(1 - cos(theta))/(c**2*m) + 1)",
+    "n_inputs": 4,
+    "log_reducibility_analysis": 3,
+    "pipeline": {
+      "stage1_seconds": 200.29335845200012,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.25661208681184294
+        },
+        {
+          "n": 2,
+          "val_metric": 0.050662916702399925
+        },
+        {
+          "n": 3,
+          "val_metric": 0.0019306906788734632
+        }
+      ],
+      "selected_n": 3,
+      "reduction": true,
+      "stage2_seconds": 16.811631663999833,
+      "snapped": false,
+      "exponents": null,
+      "stage2_val_metric": 0.0019306906788734632,
+      "pysr_seconds": 909.7312655859996,
+      "best_equation_in_groups": "sqrt(sqrt(sqrt((2.5731718450220007 / (((J2 / sqrt((J2 / J3) / J1)) + (0.40259413341421657 / J2)) * J1)) / ((0.10882356708968831 / (J3 + 0.25111383046809505)) + 0.0019060446748721573))) + -0.1183290276659446)",
+      "validation_rmse": 0.01909336317596801,
+      "expanded_equation": "sqrt(0.35781981364455261*E_n**1.01450098706755*c**0.638020607398273*m**0.318523514219586/(theta**0.0385505280710586*(0.0019060446748721573 + 0.10882356708968831/(7.71170511594336*E_n**0.595631277448213*c**1.33625017303613*m**0.675252163610865/theta**5.74220319816984 + 0.25111383046809505))**(1/4)*(7.14935362831641*c**1.66133368345435*m**0.834754624894426/(E_n**2.24986828856982*theta**3.26362531422827) + 9.534447865787674*E_n**1.03736390631764*theta**0.939249542570934/(c**4.53849962346567*m**2.26835114305633))**(1/4)) - 0.1183290276659446)",
+      "truth_expression": "E_n/(E_n*(1 - cos(theta))/(c**2*m) + 1)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.014181449373466045,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.014732629909250283,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "stage1_reused": true,
+      "selected_n": 3,
+      "reduction": true,
+      "snapped": false,
+      "exponents": null,
+      "stage2_val_metric": 0.0019306906788734632,
+      "pysr_seconds": 450.5560661489999,
+      "best_equation_in_groups": "sqrt((2.39836279627341 / sqrt(sqrt((sqrt((J2 * J1) / sqrt(J3)) + ((0.634215721427671 / (J3 + 0.28898620325041663)) / J2)) * J1))) - 0.10893972875608518)",
+      "validation_rmse": 0.019080701469108775,
+      "expanded_equation": "sqrt(0.677582321070127*E_n**1.01450098706755*c**0.638020607398273*m**0.318523514219586/(theta**0.0385505280710586*(1.54491278873053*c**0.659146053677254*m**0.328315502186276*theta**1.04302708439911/E_n**2.69659174665598 + 15.0198332010804*E_n**1.03736390631764*theta**0.939249542570934/(c**4.53849962346567*m**2.26835114305633*(7.71170511594336*E_n**0.595631277448213*c**1.33625017303613*m**0.675252163610865/theta**5.74220319816984 + 0.28898620325041663)))**(1/4)) - 0.10893972875608518)",
+      "truth_expression": "E_n/(E_n*(1 - cos(theta))/(c**2*m) + 1)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.01373656106289383,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.014367121714297897,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "groups",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.01373656106289383,
+        "validation_rmse": 0.019080701469108775,
+        "pysr_seconds": 450.5560661489999,
+        "expanded_equation": "sqrt(0.677582321070127*E_n**1.01450098706755*c**0.638020607398273*m**0.318523514219586/(theta**0.0385505280710586*(1.54491278873053*c**0.659146053677254*m**0.328315502186276*theta**1.04302708439911/E_n**2.69659174665598 + 15.0198332010804*E_n**1.03736390631764*theta**0.939249542570934/(c**4.53849962346567*m**2.26835114305633*(7.71170511594336*E_n**0.595631277448213*c**1.33625017303613*m**0.675252163610865/theta**5.74220319816984 + 0.28898620325041663)))**(1/4)) - 0.10893972875608518)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.024483267076823086,
+        "validation_rmse": 0.03372971504641738,
+        "pysr_seconds": 450.525832843,
+        "expanded_equation": "sqrt(E_n)*sqrt(E_n*(0.323222545092932*c + 0.323222545092932*log(m) + 0.323222545092932*cos(theta + 0.30256034741816556) - 0.52291117173690447) + 1.4837138553028362) - 0.40653507821145846/sin(0.7307080438283683*c)"
+      }
+    },
+    "baseline": {
+      "best_equation_raw_names": "(sin(((x2 * 0.8487983870562928) / sqrt(square(x2 * -0.5817741911286672) + ((x0 * ((x3 / exp(square(square(sqrt(x3) + -1.1046806250931744)))) + -0.5518275164261063)) / x1))) + -0.28574893767646) + 0.07071722997515466) * x0",
+      "pysr_seconds": 900.687084612,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 2.126994e-13",
+      "validation_rmse": 0.002208735027897628,
+      "expanded_equation": "E_n*(sin(0.8487983870562928*c/sqrt(E_n*(theta*exp(-(sqrt(theta) - 1.1046806250931744)**4) - 0.5518275164261063)/m + 0.338461209463415*c**2) - 0.28574893767646) + 0.07071722997515466)",
+      "truth_expression": "E_n/(E_n*(1 - cos(theta))/(c**2*m) + 1)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "(E_n*(cos(theta) - 1)/(c**2*m) - 1)**2*(sin(16975967741125857*c/(20000000000000000*sqrt(E_n*(theta*exp(-(sqrt(theta) - 345212695341617/312500000000000)**4) - 13795687910652657/25000000000000000)/m + 33846120946341501*c**2/100000000000000000)) - 14287446883822999/50000000000000000) + 70717/1000000)**2",
+      "fresh_sample_relative_l2": 0.001859035203764573,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.0017736438296507672,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  },
+  {
+    "equation_id": "feynman_test_9",
+    "formula": "-32*G**4*m1**2*m2**2*(m1 + m2)/(5*c**5*r**5)",
+    "n_inputs": 5,
+    "log_reducibility_analysis": 2,
+    "pipeline": {
+      "stage1_seconds": 254.45496670099988,
+      "stage1_runs": [
+        {
+          "n": 1,
+          "val_metric": 0.00839447609245466
+        },
+        {
+          "n": 2,
+          "val_metric": 0.007994037652357289
+        }
+      ],
+      "selected_n": 2,
+      "reduction": true,
+      "stage2_seconds": 66.21206859800009,
+      "snapped": false,
+      "exponents": null,
+      "stage2_val_metric": 0.007994037652357289,
+      "pysr_seconds": 915.6827924669999,
+      "best_equation_in_groups": "((((((J2 * 0.0021273891319504457) - 3.0691936464993628) * J1) + -158.1149882600418) + (-47.04058443752491 / J1)) * J2) + ((sqrt(J2) * ((J1 * -43.559080377378045) + 54.237250954225274)) - (-0.20432709440963026 / (3.2407368480192407 - J1)))",
+      "validation_rmse": 17.963190339569163,
+      "expanded_equation": "0.249445962975107*G**2.04111386349244*m1**1.26153005285726*m2**1.26781635867258*(-25.505266565483916*G**0.942416479674218*m1**1.39398561213836/(c**1.16419766555429*m2**0.381357819817979*r**1.0485406745206) + 54.237250954225274)/(c**2.55508075896571*r**2.55532510586588) + 0.0622232884445784*G**4.08222772698489*m1**2.52306010571453*m2**2.53563271734516*(-80.33809775138531*c**1.16419766555429*m2**0.381357819817979*r**1.0485406745206/(G**0.942416479674218*m1**1.39398561213836) + 0.585532714293248*G**0.942416479674218*m1**1.39398561213836*(0.00013237314759121385*G**4.08222772698489*m1**2.52306010571453*m2**2.53563271734516/(c**5.11016151793142*r**5.11065021173176) - 3.0691936464993628)/(c**1.16419766555429*m2**0.381357819817979*r**1.0485406745206) - 158.1149882600418)/(c**5.11016151793142*r**5.11065021173176) + 0.20432709440963026/(-0.585532714293248*G**0.942416479674218*m1**1.39398561213836/(c**1.16419766555429*m2**0.381357819817979*r**1.0485406745206) + 3.2407368480192407)",
+      "truth_expression": "-32*G**4*m1**2*m2**2*(m1 + m2)/(5*c**5*r**5)",
+      "numerical_recovery": false,
+      "symbolic_recovery": false,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": null,
+      "fresh_sample_relative_l2": 0.013059937520596115,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 0.006817419169983547,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "portfolio": {
+      "best_equation_raw_names": "square((x2 * (x3 + -1.726121146153361e-10)) / square(x1 / (x0 / x4))) * (((((((8.76563954780469 - x3) + -8.765639548811373) - x2) / x1) / x4) - (square(x1 - x1) * -0.34823390042136376)) * 6.399999999782791)",
+      "pysr_seconds": 370.74330172500004,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 3.038330e-05",
+      "validation_rmse": 6.230522917844635e-08,
+      "expanded_equation": "6.399999999782791*G**4*m1**2*(m2 - 1.726121146153361e-10)**2*(-1*0*1 + (-m1 - m2 - 1.006682293080985e-9)/(c*r))/(c**4*r**4)",
+      "truth_expression": "-32*G**4*m1**2*m2**2*(m1 + m2)/(5*c**5*r**5)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 1.3205673252800871e-11,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 1.9958273482531803e-11,
+      "criterion": "SymPy simplification of candidate minus truth equals zero",
+      "portfolio_choice": "raw",
+      "portfolio_groups": {
+        "numerical_recovery": false,
+        "fresh_sample_relative_l2": 0.0059557918482064775,
+        "validation_rmse": 20.867208979519273,
+        "pysr_seconds": 573.3264725220001,
+        "expanded_equation": "(0.0622232884445784*G**4.08222772698489*m1**2.52306010571453*m2**2.53563271734516/(c**5.11016151793142*r**5.11065021173176) + 0.1775226136307458*G**5.02464420665911*m1**3.91704571785289*m2**2.15427489752718/(c**6.27435918348571*r**6.15919088625236))*(-2.34733289450622*c**1.39088309341142*m1**0.132455559281098*r**1.50678443134528/(G**1.09869738381823*m2**1.64917417849056) - 58.12036039499638*c**1.16419766555429*m2**0.381357819817979*r**1.0485406745206/(G**0.942416479674218*m1**1.39398561213836) + 0.1521608577771319*log(0.0622232884445784*G**4.08222772698489*m1**2.52306010571453*m2**2.53563271734516/(c**5.11016151793142*r**5.11065021173176)) - 1.212556519345143)"
+      },
+      "portfolio_raw": {
+        "numerical_recovery": true,
+        "fresh_sample_relative_l2": 1.3205673252800871e-11,
+        "validation_rmse": 6.230522917844635e-08,
+        "pysr_seconds": 370.74330172500004,
+        "expanded_equation": "6.399999999782791*G**4*m1**2*(m2 - 1.726121146153361e-10)**2*(-1*0*1 + (-m1 - m2 - 1.006682293080985e-9)/(c*r))/(c**4*r**4)"
+      },
+      "reduction": true,
+      "selected_n": 2,
+      "exponents": null
+    },
+    "baseline": {
+      "best_equation_raw_names": "(((x2 * ((x2 * ((x3 * (((x3 + x2) * -6.399999999999955) + -4.4319601847969035e-13)) + 4.464438196646726e-14)) + 1.0518888579560384e-12)) * x3) * square(square((x0 / x4) / x1) / sqrt(x1))) / x4",
+      "pysr_seconds": 665.4162411909997,
+      "early_stop_condition": "stop_if(loss, complexity) = loss < 3.038330e-05",
+      "validation_rmse": 2.5559600711374434e-12,
+      "expanded_equation": "G**4*m1*m2*(m1*(m2*(-6.399999999999955*m1 - 6.399999999999955*m2 - 4.4319601847969035e-13) + 4.464438196646726e-14) + 1.0518888579560384e-12)/(c**5*r**5)",
+      "truth_expression": "-32*G**4*m1**2*m2**2*(m1 + m2)/(5*c**5*r**5)",
+      "numerical_recovery": true,
+      "symbolic_recovery": true,
+      "exact_symbolic_recovery": false,
+      "candidate_over_truth": "1",
+      "fresh_sample_relative_l2": 6.176140140299224e-16,
+      "fresh_samples": 10000,
+      "numerical_criterion": "relative L2 on fresh samples < 1e-06",
+      "symbolic_criterion": "candidate constants below 1e-06 dropped; candidate/truth (or its square) simplifies to a nonzero constant after rounding floats to 5 significant digits",
+      "test_relative_l2": 7.192015563129341e-16,
+      "criterion": "SymPy simplification of candidate minus truth equals zero"
+    },
+    "seed": 42
+  }
+]
