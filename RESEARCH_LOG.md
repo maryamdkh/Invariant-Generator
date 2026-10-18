@@ -580,3 +580,43 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   LLM-SRBench seeds and the scaling experiment.
 - `cluster/make_tasks.py --positive-only` now also reads `inputs_positive`
   (LLM-SRBench manifests have no input ranges).
+
+## 32. LLM-SRBench, 5 seeds (2026-10-18)
+
+- Seeds 43-46: job array 4018521 (364 tasks = 91 positive-input problems x
+  4 seeds, arms pipeline + PySR alone, v3 config, commit `37b71cb`). All
+  tasks returned results; merged with seed 42 in
+  `results/feynman_benchmark/llmsr_v3/merged_summary.json`.
+- Recovered (rel. L2 < 1e-6), 91 problems:
+
+  | seed | 42 | 43 | 44 | 45 | 46 | mean +- sd |
+  |---|---|---|---|---|---|---|
+  | pipeline | 63 | 66 | 59 | 58 | 60 | 61.2 +- 2.9 |
+  | PySR alone | 57 | 59 | 57 | 55 | 58 | 57.2 +- 1.3 |
+  | difference | +6 | +7 | +2 | +3 | +2 | +4.0 |
+
+- Pipeline ahead on all 5 seeds. Paired over the 455 problem x seed pairs:
+  pipeline-only 34, PySR-only 14 (exact binomial p = 0.0055; treats pairs
+  as independent, so optimistic). Per-problem recovery rate (problem as
+  unit): 13 problems better, 5 worse, 73 tied; Wilcoxon p = 0.058. Mean
+  recovery rate 0.673 vs 0.629. Solved on all 5 seeds: 54 vs 50; on at
+  least one: 69 vs 67.
+- Consistent pipeline gains: II.11.3_4_1 (5/5 vs 0/5), III.4.33_3_0 (5/5 vs
+  0/5), I.24.6_0_0 (5/5 vs 2/5), I.32.17_2_0 (5/5 vs 2/5), II.24.17_1_1 (4/5
+  vs 1/5), II.11.27_3_0, I.34.14_2_0 (4/5 vs 2/5).
+- Consistent loss: II.36.38_7_0 (0/5 vs 5/5): y = c^2 eps (H mom - T f kb)
+  /(alpha mom) has two groups, but Stage 1 accepted n = 1 at val nrmse 0.048
+  on every seed (same snapped row each time): the acceptance threshold was
+  too loose here; a systematic Stage 1 failure. I.32.17_4_3 (0/5 vs 2/5):
+  n = 2 groups plausible, PySR cannot assemble the nested square roots from
+  them.
+- Stability: Stage 1 chose the same n on all 5 seeds for 81/91 problems.
+- Speed (259 problem x seed pairs recovered by both, reduced): PySR median
+  11 s on groups vs 7 s raw (mean 29 vs 45 s); Stage 1+2 median 194 s.
+- Interpretation: on the harder LLM-SRBench problems the pipeline gives a
+  consistent gain of ~4 problems (~4.4 points, 61.2 vs 57.2 of 91) over PySR
+  alone at the same PySR budget, on every seed; the gain comes from a set of
+  problems where PySR alone gets close but not exact. Borderline under the
+  conservative per-problem test (p = 0.058), clear under the paired-trials
+  test. Contrast with AI Feynman (no difference: PySR alone already solves
+  ~78% in seconds).

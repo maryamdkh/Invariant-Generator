@@ -65,16 +65,16 @@ Results are copied to the Mac with rsync (run on the Mac).
 
 ## Latest results (RESEARCH_LOG 31)
 
-- LLM-SRBench seed 42, 91 positive-input problems: pipeline 63, PySR alone
-  57 (+7/-1). Promising, one seed only.
+- LLM-SRBench, 5 seeds, 91 positive-input problems: pipeline 61.2 +- 2.9,
+  PySR alone 57.2 +- 1.3; pipeline ahead on every seed (+6, +7, +2, +3, +2);
+  paired p = 0.0055 (trials) / 0.058 (per problem). RESEARCH_LOG 32.
 - Feynman with 1% noise: no advantage; pipeline was behind because PySR's
   "best" selection can never pick a one-term formula (`J1`); offline fix
   brings symbolic recovery to 67 vs 70.
 
 ## Next steps (agreed)
 
-1. LLM-SRBench seeds 43-46 on the 91 positive-input problems, arms
-   pipeline,baseline (364 tasks) to confirm the +6.
+1. Done: LLM-SRBench 5 seeds (entry 32).
 2. Opt-in Stage 3 selection that scores the simplest equation (from
    `experiments/probes/reselect_simplest.py`), Hill default unchanged.
 3. Scaling experiment (new code): synthetic equations with 4-12 inputs that
