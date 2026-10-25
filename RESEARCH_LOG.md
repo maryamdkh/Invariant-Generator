@@ -620,3 +620,29 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   conservative per-problem test (p = 0.058), clear under the paired-trials
   test. Contrast with AI Feynman (no difference: PySR alone already solves
   ~78% in seconds).
+
+## 33. Positioning and comparison methods for the paper (2026-10-25)
+
+- Goal: fix the core contribution and the baselines before writing.
+- Read Cranmer et al. 2020 (arXiv:2006.11287, symbolic distillation) and the
+  PySR v2.7.2 docs/README. Finding: "NN with a compact latent, then SR on the
+  latent" is already published (Cranmer 2020; its raw-Eureqa experiment shows
+  raw SR failing on high-D), and the PySR README recommends it for high-D
+  data. PySR's own tools (`select_k_features`, units, templates) select or
+  constrain inputs but never combine them.
+- Core contribution, as agreed with the author: (1) a latent space that is
+  closed form by construction (sparse combination of a feature library), so
+  only one SR step z -> y is needed; (2) learnable physical structure
+  (PSD structural tensors a, A) inside the library, which makes 6D rotated
+  Hill solvable for PySR; (3) automatic choice of n (weakest; Cranmer's L1
+  model also finds the latent size). Differs from SINDy: the library is a
+  bottleneck in front of a nonlinear regressor, not the final model.
+- Reviewer risk noted: Hill is sigma:A:sigma, which is in the library, so
+  CB2001/Yld2004 (answer not a single library term) must sit next to Hill.
+- Comparison methods decided: A ours, B PySR alone, C distillation, D SINDy
+  on the same library, E PySR on the full library, F' learned vs true A,
+  I Operon +- encoder (run last) required; G `select_k_features` and H AI
+  Feynman optional. Fixed A = I ablation dropped (predictable failure).
+  Table in `PAPER_PLAN.md`.
+- Missing and critical: B on rotated Hill (multi-seed), C everywhere,
+  synthetic scaling experiment.

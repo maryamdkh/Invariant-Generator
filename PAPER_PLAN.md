@@ -45,9 +45,38 @@ few variables. At matched compute this recovers more equations, faster, and
 | Benchmarks: SRBench (La Cava et al. 2021), SRSD-Feynman (Matsubara et al.), LLM-SRBench (ICML 2025) | Evaluate on all three; LLM-SRBench addresses memorized textbook equations |
 | ML yield functions (application): convex neural yield discovery (arXiv:2606.19375, 2026), neural-polynomial + SR (CMAME 2024), EUCLID (2022-2025), survey "AI Meets Plasticity" (arXiv:2602.01215, 2026) | Black-box or fixed libraries; ours learns the invariants and returns closed forms |
 
+Closest prior method (added 2026-10-25, must be discussed): symbolic
+distillation, Cranmer et al. 2020 (NeurIPS, arXiv:2006.11287): NN with an
+L1/bottleneck latent, then SR on the latent; its latent is a black box, so it
+needs a second SR step (inputs -> latent). Ours is closed form by
+construction. Also SINDy (Brunton et al. 2016) and SINDy-autoencoder
+(Champion et al. 2019): sparse linear library regression is the final model
+there; ours uses the library as a bottleneck before a nonlinear regressor.
+
 Classic yield criteria are used as ground truths, as in the recent ML
 papers above: Hill (1948), Cazacu & Barlat (2001) CB2001, Barlat et al.
 (2005) Yld2004-18p; PDFs in `references/`.
+
+## Comparison methods (agreed 2026-10-25, RESEARCH_LOG 33)
+
+Chosen to test the core contributions: closed-form latent, learnable
+physical structure (a, A) in the library, automatic n. Supersedes "Arms" below.
+
+| | Method | Tests | Status |
+|---|---|---|---|
+| A | Ours + PySR | - | required |
+| B | PySR alone, raw inputs | does the front end help | required |
+| C | Symbolic distillation (Cranmer 2020): MLP with L1 latent, PySR on latent | closed-form latent vs black-box latent | required |
+| D | SINDy on the same feature library (linear, no network) | need for bottleneck + nonlinear step | required |
+| E | PySR on the full feature library, no encoder | features alone vs encoder | required |
+| F' | Learned A vs true Hill tensor (up to scale) | anisotropy is actually learned | required (replaces fixed A = I ablation) |
+| G | PySR `select_k_features` | selecting vs combining inputs; only meaningful with distractor inputs | optional |
+| H | AI Feynman (cite reported numbers, do not run) | unit-based reduction vs unit-free groups | optional |
+| I | Operon with and without our encoder | front end helps a second SR backend | required, run last |
+
+Datasets: rotated Hill 6D (core; B on Hill is still missing, multi-seed),
+CB2001 / Yld2004-18p, synthetic scaling (4-12 inputs), Feynman, LLM-SRBench,
+noisy Hill/Feynman (short robustness section).
 
 ## Experiments
 
