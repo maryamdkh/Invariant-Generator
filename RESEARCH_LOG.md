@@ -665,3 +665,31 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Run order: B on Hill ladder; A + structure recovery on Hill ladder;
   synthetic generators; distillation baseline C; D, E; Feynman 5 seeds;
   noise; Operon.
+
+## 35. Yield datasets inventory and quadratic-fit check (2026-10-25)
+
+- `data/vonMises25.hdf`, `data/vonMises100.hdf`: same von Mises surface at
+  yield stress 25 and 100 (Mandel; sigma_eq exactly 25.000 / 100.000). Use
+  one in the Hill ladder and the other as a scale check.
+- `data/hill.hdf`, `data/rotatedhill.hdf`: 1000 Mandel points each; rotated
+  Hill has the same tensor eigenvalues as aligned Hill (a pure rotation).
+  All four files contain only points with every component >= 0 (positive
+  orthant); consider regenerating on the full sphere for the final runs.
+- `data/dx56d_miller.hdf` (402 pts, DX56D steel, CPFEM, Fraunhofer Fordatis
+  DOI 10.24406/fordatis/225.2) and `data/single_crystal_gold_ep002.hdf`
+  (294 pts, single-crystal gold CPFEM, Zenodo DOI 10.5281/zenodo.21981226,
+  yield at 0.2% plastic strain): added 2026-09-19/20, see
+  `EXTERNAL_DATASETS.md`. No known closed form; candidates for a realistic
+  data row. DOIs not yet verified.
+- Rotated Hill 2D (3 inputs) dataset no longer exists; regenerate from the
+  recovered tensor (plane-stress block s11, s22, s12).
+- Probe `experiments/probes/hill_quadratic_fit.py` (output
+  `experiments/outputs/hill_quadratic_fit.json`): linear least squares on the
+  21 quadratic stress monomials fits every file exactly (max residual
+  <= 2e-13); rotated Hill uses all 21 terms, aligned Hill and von Mises 9.
+- Consequence: a SINDy-style linear baseline solves rotated Hill exactly.
+  Rotated Hill alone cannot show that a nonlinear step is needed; it shows
+  PySR-on-raw-inputs failing and the learned tensor collapsing 21 terms into
+  one invariant. The "needs more than a linear library" argument must come
+  from CB2001, Yld2004 and the CPFEM data. The fitted M is the ground truth
+  for structure recovery (F').
