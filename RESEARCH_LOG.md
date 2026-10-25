@@ -646,3 +646,22 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   Table in `PAPER_PLAN.md`.
 - Missing and critical: B on rotated Hill (multi-seed), C everywhere,
   synthetic scaling experiment.
+
+## 34. Experiment matrix for the paper (2026-10-25)
+
+- Goal: one table of datasets x methods to run and analyse; in
+  `PAPER_PLAN.md` ("Experiment matrix").
+- Datasets agreed with the author: Hill ladder (von Mises, aligned Hill,
+  rotated Hill 2D with 3 inputs, rotated Hill 3D with 6 inputs; author
+  reports PySR alone recovers all but rotated 3D, results not yet in the
+  repo/report), CB2001, Yld2004-18p, synthetic (a) rotated quadratic forms
+  and (b) power-law groups, Feynman, LLM-SRBench, a small noise section.
+- Noise kept as a short robustness section: it tests our Stage 1 threshold
+  and Stage 2 snapping, and SR benchmarks report it; not a headline.
+- Risk noted: rotated Hill (y = sqrt(sigma:A:sigma)) is solvable by linear
+  regression of y^2 on the 21 quadratic stress monomials, so baseline D
+  (SINDy) may solve it. CB2001 and synthetic (a) with nonlinear outer
+  functions must carry the "needs a nonlinear step" argument.
+- Run order: B on Hill ladder; A + structure recovery on Hill ladder;
+  synthetic generators; distillation baseline C; D, E; Feynman 5 seeds;
+  noise; Operon.

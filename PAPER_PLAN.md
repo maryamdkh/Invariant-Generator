@@ -74,9 +74,37 @@ physical structure (a, A) in the library, automatic n. Supersedes "Arms" below.
 | H | AI Feynman (cite reported numbers, do not run) | unit-based reduction vs unit-free groups | optional |
 | I | Operon with and without our encoder | front end helps a second SR backend | required, run last |
 
-Datasets: rotated Hill 6D (core; B on Hill is still missing, multi-seed),
-CB2001 / Yld2004-18p, synthetic scaling (4-12 inputs), Feynman, LLM-SRBench,
-noisy Hill/Feynman (short robustness section).
+F' generalised to "structure recovery": learned A / encoder rows / exponents /
+n compared with the ground truth.
+
+## Experiment matrix (agreed 2026-10-25, RESEARCH_LOG 34)
+
+R = required, o = optional, - = not applicable, done = have results.
+All runs: 5 seeds, same PySR budget for every arm.
+
+| Dataset | A ours | B PySR | C distil | D SINDy | E PySR+lib | F' structure | G select_k | H AI Feyn | I Operon |
+|---|---|---|---|---|---|---|---|---|---|
+| Hill ladder: von Mises, aligned Hill, rotated Hill 2D (3 in), rotated Hill 3D (6 in) | R | R | R | R | R | R (A vs true) | - | - | o |
+| CB2001 (2090-T3) | R (1 seed done) | R | R | R | R | R (rows vs J2^0, J3^0) | - | - | o |
+| Yld2004-18p | R | R | R | o | o | - | - | - | o |
+| Synthetic (a): rotated quadratic forms, d = 2..12 | R | R | R | R | R | R (A vs true) | - | - | R |
+| Synthetic (b): power-law groups, d = 4..12, k = 1..3 | R | R | R | o | R | R (n, exponents) | o (distractors) | - | R |
+| Feynman (110) | done (1 seed) | done (1 seed) | R | o | o | done (n: 93/102, 8/8) | o | o (cite) | o |
+| LLM-SRBench LSR-Transform (91) | done (5 seeds) | done (5 seeds) | o | - | - | o | - | - | o |
+| Noise: rotated Hill 3D + Feynman subset, 1-2 levels | R | R | o | - | - | o | - | - | - |
+
+Notes:
+- Synthetic (a): y = sqrt(x^T A x) alone is solved by linear regression of
+  y^2 on quadratic monomials (SINDy), as is rotated Hill. Include outer
+  functions that break this (e.g. two quadratic forms combined
+  nonlinearly) so the family tests more than the SINDy case.
+- E on tensor inputs: structural tensors cannot be learned without the
+  encoder, so E uses the library with a, A fixed (identity).
+
+Run order: (1) B on the Hill ladder; (2) A + F' on the Hill ladder;
+(3) synthetic generators (a), (b) with A, B; (4) implement C, run on Hill,
+CB2001, synthetic; (5) D and E (cheap); (6) Feynman to 5 seeds + C;
+(7) noise; (8) I Operon.
 
 ## Experiments
 
