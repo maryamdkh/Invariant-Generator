@@ -49,11 +49,11 @@ structure_score, time_encoder_s, time_sr_s, notes`
 
 | Code | Dataset | Inputs | Source / generator | Status |
 |---|---|---|---|---|
-| VM25 | von Mises, yield stress 25 | 6 | `data/vonMises25.hdf` (positive orthant only) | regenerate full sphere (P1) |
-| VM100 | von Mises, yield stress 100 (scale check) | 6 | `data/vonMises100.hdf` (positive orthant only) | regenerate full sphere (P1) |
-| HILL | Hill, aligned axes | 6 | `data/hill.hdf` (positive orthant only) | regenerate full sphere (P1) |
-| RH2 | Rotated Hill, plane stress (s11, s22, s12) | 3 | from recovered tensor, `experiments/outputs/hill_quadratic_fit.json` | to generate (P1) |
-| RH3 | Rotated Hill, 3D | 6 | `data/rotatedhill.hdf` (positive orthant only) | regenerate full sphere (P1) |
+| VM25 | von Mises, yield stress 25 | 6 | `data/hill_ladder_full/vonMises25_full.hdf`, config `configs/hill_ladder/vm25.toml` | exists |
+| VM100 | von Mises, yield stress 100 (scale check) | 6 | `data/hill_ladder_full/vonMises100_full.hdf`, `configs/hill_ladder/vm100.toml` | exists |
+| HILL | Hill, aligned axes | 6 | `data/hill_ladder_full/hill_full.hdf`, `configs/hill_ladder/hill.toml` | exists |
+| RH2 | Rotated Hill, plane stress (s11, s22, s12) | 3 | `data/hill_ladder_full/rotatedhill2d_full.hdf` (plane-stress section of the RH3 tensor), `configs/hill_ladder/rh2.toml` | exists |
+| RH3 | Rotated Hill, 3D | 6 | `data/hill_ladder_full/rotatedhill_full.hdf`, `configs/hill_ladder/rh3.toml` | exists |
 | CB | CB2001, 2090-T3 | 6 | `scripts/prepare_yield_benchmark.py` | exists |
 | YLD | Yld2004-18p | 6 | `scripts/prepare_yield_benchmark.py` | exists |
 | DX | DX56D steel, CPFEM (proposed) | 6 | `data/dx56d_miller.hdf`, see `EXTERNAL_DATASETS.md` | exists; row not yet agreed |
@@ -66,14 +66,16 @@ structure_score, time_encoder_s, time_sr_s, notes`
 | NRH3 | Rotated Hill 3D with input noise, 1-2 levels | 6 | from RH3 | to generate |
 | NFEY | Feynman subset with target noise, 1-2 levels | 1-9 | `--target-noise` | exists |
 
-Note: the old Hill-family files and their results are kept untouched; the
-full-sphere files get new names.
+Note: the original Hill-family files (`data/vonMises25.hdf`, `vonMises100.hdf`,
+`hill.hdf`, `rotatedhill.hdf`) contain only points with every component >= 0.
+They are kept untouched (the reason for positive-only data is being checked
+with the supervisor). All paper experiments use the full-sphere files above.
 
 ## Prerequisites
 
 | ID | Task | Status |
 |---|---|---|
-| P1 | Generator for the Hill ladder on the full sphere (VM25, VM100, HILL, RH2, RH3) from the recovered tensors; new files | planned |
+| P1 | Generator for the Hill ladder on the full sphere (VM25, VM100, HILL, RH2, RH3) from the recovered tensors; new files | done: `scripts/prepare_hill_ladder.py`, `data/hill_ladder_full/`, `configs/hill_ladder/` (RESEARCH_LOG 37) |
 | P2 | Implement distillation baseline (C) | planned |
 | P3 | Implement sparse linear library baseline (D) | planned |
 | P4 | Opt-in "no encoder" mode: PySR on the feature library (E) | planned |
@@ -93,34 +95,34 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
-| VM25-A | von Mises 25 | Ours | R | blocked (P1) | | | | |
-| VM25-B | von Mises 25 | PySR alone | R | blocked (P1) | | | | |
-| VM25-C | von Mises 25 | Distillation | R | blocked (P1, P2) | | | | |
-| VM25-D | von Mises 25 | Sparse linear | R | blocked (P1, P3) | | | | |
-| VM25-E | von Mises 25 | PySR + library | R | blocked (P1, P4) | | | | |
+| VM25-A | von Mises 25 | Ours | R | planned | | | | |
+| VM25-B | von Mises 25 | PySR alone | R | planned | | | | |
+| VM25-C | von Mises 25 | Distillation | R | blocked (P2) | | | | |
+| VM25-D | von Mises 25 | Sparse linear | R | blocked (P3) | | | | |
+| VM25-E | von Mises 25 | PySR + library | R | blocked (P4) | | | | |
 | VM25-F | von Mises 25 | Structure recovery | R | blocked (VM25-A) | | | | |
 | VM25-I | von Mises 25 | Operon +- encoder | o | blocked (P6) | | | | |
-| VM100-A | von Mises 100 (scale check) | Ours | R | blocked (P1) | | | | |
-| VM100-B | von Mises 100 (scale check) | PySR alone | o | blocked (P1) | | | | |
-| HILL-A | Hill aligned | Ours | R | blocked (P1) | | | | |
-| HILL-B | Hill aligned | PySR alone | R | blocked (P1) | | | | |
-| HILL-C | Hill aligned | Distillation | R | blocked (P1, P2) | | | | |
-| HILL-D | Hill aligned | Sparse linear | R | blocked (P1, P3) | | | | |
-| HILL-E | Hill aligned | PySR + library | R | blocked (P1, P4) | | | | |
+| VM100-A | von Mises 100 (scale check) | Ours | R | planned | | | | |
+| VM100-B | von Mises 100 (scale check) | PySR alone | o | planned | | | | |
+| HILL-A | Hill aligned | Ours | R | planned | | | | |
+| HILL-B | Hill aligned | PySR alone | R | planned | | | | |
+| HILL-C | Hill aligned | Distillation | R | blocked (P2) | | | | |
+| HILL-D | Hill aligned | Sparse linear | R | blocked (P3) | | | | |
+| HILL-E | Hill aligned | PySR + library | R | blocked (P4) | | | | |
 | HILL-F | Hill aligned | Structure recovery | R | blocked (HILL-A) | | | | |
 | HILL-I | Hill aligned | Operon +- encoder | o | blocked (P6) | | | | |
-| RH2-A | Rotated Hill 2D | Ours | R | blocked (P1) | | | | |
-| RH2-B | Rotated Hill 2D | PySR alone | R | blocked (P1) | | | | |
-| RH2-C | Rotated Hill 2D | Distillation | R | blocked (P1, P2) | | | | |
-| RH2-D | Rotated Hill 2D | Sparse linear | R | blocked (P1, P3) | | | | |
-| RH2-E | Rotated Hill 2D | PySR + library | R | blocked (P1, P4) | | | | |
+| RH2-A | Rotated Hill 2D | Ours | R | planned | | | | |
+| RH2-B | Rotated Hill 2D | PySR alone | R | planned | | | | |
+| RH2-C | Rotated Hill 2D | Distillation | R | blocked (P2) | | | | |
+| RH2-D | Rotated Hill 2D | Sparse linear | R | blocked (P3) | | | | |
+| RH2-E | Rotated Hill 2D | PySR + library | R | blocked (P4) | | | | |
 | RH2-F | Rotated Hill 2D | Structure recovery | R | blocked (RH2-A) | | | | |
 | RH2-I | Rotated Hill 2D | Operon +- encoder | o | blocked (P6) | | | | |
-| RH3-A | Rotated Hill 3D | Ours | R | blocked (P1) | | | | |
-| RH3-B | Rotated Hill 3D | PySR alone | R | blocked (P1) | | | | |
-| RH3-C | Rotated Hill 3D | Distillation | R | blocked (P1, P2) | | | | |
-| RH3-D | Rotated Hill 3D | Sparse linear | R | blocked (P1, P3) | | | | |
-| RH3-E | Rotated Hill 3D | PySR + library | R | blocked (P1, P4) | | | | |
+| RH3-A | Rotated Hill 3D | Ours | R | planned | | | | |
+| RH3-B | Rotated Hill 3D | PySR alone | R | planned | | | | |
+| RH3-C | Rotated Hill 3D | Distillation | R | blocked (P2) | | | | |
+| RH3-D | Rotated Hill 3D | Sparse linear | R | blocked (P3) | | | | |
+| RH3-E | Rotated Hill 3D | PySR + library | R | blocked (P4) | | | | |
 | RH3-F | Rotated Hill 3D | Structure recovery | R | blocked (RH3-A) | | | | |
 | RH3-I | Rotated Hill 3D | Operon +- encoder | o | blocked (P6) | | | | |
 
@@ -207,9 +209,9 @@ the equation index (about 10 equations per d, 5 seeds).
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
-| NRH3-A | Rotated Hill 3D, noisy | Ours | R | blocked (P1) | | | | |
-| NRH3-B | Rotated Hill 3D, noisy | PySR alone | R | blocked (P1) | | | | |
-| NRH3-C | Rotated Hill 3D, noisy | Distillation | o | blocked (P1, P2) | | | | |
+| NRH3-A | Rotated Hill 3D, noisy | Ours | R | planned | | | | |
+| NRH3-B | Rotated Hill 3D, noisy | PySR alone | R | planned | | | | |
+| NRH3-C | Rotated Hill 3D, noisy | Distillation | o | blocked (P2) | | | | |
 | NRH3-F | Rotated Hill 3D, noisy | Structure recovery | o | blocked (NRH3-A) | | | | |
 | NFEY-A | Feynman subset, noisy | Ours | R | planned | | | | |
 | NFEY-B | Feynman subset, noisy | PySR alone | R | planned | | | | |

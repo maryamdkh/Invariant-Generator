@@ -704,3 +704,26 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   script, common `summary.csv` and table builder).
 - Each run will live in `experiments/runs/<ID>/` (README with command and
   commit, frozen config, `summary.csv` with fixed columns).
+
+## 37. P1: Hill ladder on the full sphere (2026-10-26)
+
+- The original Hill-family files contain only points with every component
+  >= 0 (entry 35). The author is checking with the supervisor why; until
+  then they stay untouched, and all paper experiments use new files with
+  points in all directions.
+- `scripts/prepare_hill_ladder.py`: recovers M (sigma^T M sigma = 1, Mandel)
+  from each original file by least squares on the 21 quadratic monomials
+  (residual <= 2e-13), samples 1000 directions uniform on the unit sphere
+  (seed 2026, as `prepare_yield_benchmark.py`) and scales them onto the
+  surface. Output `data/hill_ladder_full/<name>_full.hdf` + JSON with M:
+  vonMises25, vonMises100, hill, rotatedhill (mandel_3d) and rotatedhill2d
+  (plane_stress_2d, [s11, s22, s12]: plane-stress section of the rotated-Hill
+  tensor; the old 2D file is lost, so this is the same material, not
+  necessarily the old 2D data). Max |f - 1| <= 2e-15; 98% of 6D rows and 88%
+  of 2D rows have a negative entry. Same directions for all 6D files, so
+  vonMises100 = 4 x vonMises25 exactly (scale check).
+- Configs `configs/hill_ladder/{vm25,vm100,hill,rh2,rh3}.toml`: copies of
+  `configs/adaptive_encoder_rotated_hill.toml` with only data and output
+  paths changed. Smoke test (Stage 1, 300 epochs, CPU) runs on rh3 and rh2.
+  On this Mac `device = "auto"` picks MPS, which lacks eigh; use CPU locally.
+- No shared code changed (new script, data, configs).
