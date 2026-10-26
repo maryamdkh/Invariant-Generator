@@ -44,3 +44,4 @@ data/llm_srbench_converted/
 # Publisher PDFs stay local (copyright).
 references/*.pdf
 .DS_Store
+data/synthetic/

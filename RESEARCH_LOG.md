@@ -759,3 +759,57 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   pipeline 85: identical to entries 27 and 32.
 - Yield experiments (adaptive_encoder_pipeline.py) need their own converter;
   added with the yield runner.
+
+## 40. Comparison arms C, D, E; yield runner; synthetic data (P2-P5) (2026-10-26)
+
+- Yield runner (new): `src/invariant_generator/yield_benchmark.py`,
+  `scripts/run_yield_benchmark.py`, `cluster/yield_array.sbatch` (task
+  lines `<config> <seed>`, same KEEP_ARTIFACTS cleanup). One
+  `benchmark_summary.json` per task in the Feynman layout, so export and
+  merge scripts apply. Every arm is scored on 5000 fresh surface points
+  (new directions on the true surface, scaled by k in the augmentation range)
+  against the generating criterion: Hill ladder from the JSON tensor M,
+  CB2001/Yld2004 from `yield_criteria.CRITERIA`; recovered = relative L2 <
+  1e-6. Datasets without ground truth (DX, AU) are rejected for now.
+  Truth functions reproduce every data file (max |f - 1| ~1e-15).
+- Arms (opt-in, defaults unchanged): pipeline (A), baseline (B; zero
+  columns dropped, so RH2 PySR sees s11, s22, s12), distillation (C),
+  sparse_linear (D), library_pysr (E). The same arms exist for supervised
+  benchmarks via `run_feynman_benchmark.py --arms ...`
+  (`src/invariant_generator/supervised_baselines.py`; hook in
+  `feynman_benchmark.run_benchmark`).
+  - C (`src/invariant_generator/distillation.py`): MLP (2 x 128 ReLU) -> 8
+    latent -> MLP, L1 1e-2 on latent activations, keep up to 4 components
+    with std > 1% of the largest, PySR for each z_j = h_j(x) and for
+    y = g(z); PySR time split over the k + 1 searches; no constant refit.
+  - D: STLSQ on a degree-3 polynomial library of the raw inputs, target y^m
+    (m = 1, 2, 3), (m, threshold) chosen on a 10% holdout. Stronger than
+    "SINDy on our invariant library" (which, with fixed tensors, is
+    isotropic); chosen because it is the honest worst case for Hill.
+  - E: PySR on the pipeline's feature library without the encoder; for
+    stress invariants the structural tensors are fixed to identity and
+    vanishing/duplicate columns dropped, leaving I1, I2, I3, I13.
+- Smoke results (1-minute PySR budgets, not results):
+  - D recovers VM25, HILL, RH2, RH3 exactly (9, 9, 6, 21 active terms,
+    m = 2, fresh rel. L2 ~3e-11) and fails on CB2001 (2.1e-2); on SA it
+    recovers sqrt(q1) (d = 4) and fails on q1/(1 + q2) (7.6e-2).
+  - B on RH2 in ~4.5 min: 4.5e-2 (not recovered). E on RH3: 8.4e-2.
+  - C on RH3: all latent components shrank to std ~1e-3 (L1 scale
+    collapse); composed formula 0.30. C needs a dev run (e.g. normalise the
+    latent or L1 relative to decoder weight norms) before the experiment.
+  - A (pipeline) on RH2 with 500/300 epochs runs end to end (path check).
+  - Supervised on SB d = 4 (x1^2/x4 + x2^2 x3): E recovered; C 0.15; D 1.3e-2.
+- Synthetic data (P5): `scripts/prepare_synthetic_benchmark.py` ->
+  `data/synthetic/{sa,sb,sbd}` (gitignored, 37 MB; regenerate on the
+  cluster). SA: 70 problems, d = 2-12, sqrt(q1) (n* = 1, SINDy control),
+  q1/(1 + q2), sqrt(q1) + q2 (n* = 2). SB: 50 problems, d = 4-12, k = 1-3
+  power-law groups. SBD: SB + 3 distractors. `log_reducibility` = n*.
+  `configs/synthetic_sa.toml`: v3 with identity targets, product features
+  (x_i, x_i x_j) and gated Stage 2 with caps up to 90 (dense rows); first
+  version, needs a dev run. SB uses `configs/feynman_benchmark_v3.toml`.
+- Not done: P6 (Operon). Yld2004 has no config yet (data from
+  `prepare_yield_benchmark.py`). The PySR time limit overshoots (2 min
+  limit took ~4.5 min), so budgets are approximate.
+- Existing tests pass. No Hill-critical file changed (new modules; one new
+  opt-in branch in `feynman_benchmark.py`), so the Hill old-vs-new check was
+  not required.

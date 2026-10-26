@@ -283,6 +283,11 @@ def run_benchmark(
                     row[arm] = run_portfolio(
                         config, results_dir=results_dir, raw_share=portfolio_raw_share,
                     )
+                elif arm in {"distillation", "sparse_linear", "library_pysr"}:
+                    # Comparison arms (EXPERIMENTS.md methods C, D, E); opt-in.
+                    from invariant_generator import supervised_baselines
+
+                    row[arm] = getattr(supervised_baselines, f"run_{arm}")(config, results_dir / name / arm)
                 else:
                     raise ValueError(f"Unknown arm {arm!r}")
             except Exception as exc:

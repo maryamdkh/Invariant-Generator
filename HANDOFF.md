@@ -81,3 +81,17 @@ Results are copied to the Mac with rsync (run on the Mac).
    depend on a few power-law groups; expect PySR alone to degrade with d.
 4. Optional: rerun PySR alone on the 20 non-positive LLM-SRBench problems
    (bug fixed) for a complete benchmark table.
+
+## Paper experiments (2026-10-26, RESEARCH_LOG 33-40)
+
+- Positioning vs symbolic distillation (Cranmer 2020) and SINDy agreed;
+  plan in `PAPER_PLAN.md`, tracker in `EXPERIMENTS.md` (one row per dataset
+  x method, prerequisites P1-P8).
+- Done: P1 full-sphere Hill ladder (`data/hill_ladder_full/`,
+  `configs/hill_ladder/`; the original positive-orthant files stay untouched
+  until the supervisor explains them; paper runs use the new files), P2-P5
+  (arms C, D, E, yield runner, synthetic data), P7 (quota-safe jobs), P8
+  (`summary.csv`, table builder). Open: P6 Operon; dev runs for distillation
+  and the SA config; a Yld2004 config.
+- Arrhenius quota: 250,000 files for the whole project; jobs now keep 2
+  files per task. Only `.venv-aarch64` / `.julia_depot-aarch64` are needed.
