@@ -913,3 +913,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   the final hall of fame (full-data losses) is below the threshold; otherwise
   `time_to_recovery` is empty and `marker_ignored_minibatch` is true. With
   batching the recorded time is the first minibatch hit, so approximate.
+
+## 48. VM100-B (2026-10-26)
+
+- PySR alone on von Mises 100, stopped by hand after 222 s (loss 3.9e-12):
+  exact von Mises form with constants 1.7320542 (sqrt 3), 0.3333320 (1/3),
+  3333.37 (10000/3); fresh relative L2 2.2e-6, so not recovered under 1e-6.
+  At scale 25 (VM25-B) it reached 7e-8 in 136 s.
+- Observation: three of five yield runs so far have the exact structure with
+  errors between 2e-6 and 1.4e-5 (VM25-A, VM100-A, VM100-B). The 1e-6
+  threshold alone hides that; a "structure recovered" column (exact form up
+  to constants) would separate right-but-imprecise from wrong formulas. Kept
+  as is for now (author); revisit before the tables go into the paper.

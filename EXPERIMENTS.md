@@ -131,7 +131,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | VM25-F | von Mises 25 | Structure recovery | R | done | 1/5 (42) | `32a258a` | n = 1, I11, tensor cosine 0.9999999995 | 42 |
 | VM25-I | von Mises 25 | Operon +- encoder | o | blocked (P6) | | | | |
 | VM100-A | von Mises 100 (scale check) | Ours | R | done | 1/5 (42) | `2c33f0e` | same as VM25-A: n = 1, I11, cosine 0.9999999995, 1.35e-5 | 47 |
-| VM100-B | von Mises 100 (scale check) | PySR alone | o | planned | | | | |
+| VM100-B | von Mises 100 (scale check) | PySR alone | o | done | 1/5 (42) | `9248eab` | exact form, constants 2.2e-6: not < 1e-6; 222 s | 48 |
 | HILL-A | Hill aligned | Ours | R | planned | | | | |
 | HILL-B | Hill aligned | PySR alone | R | planned | | | | |
 | HILL-C | Hill aligned | Distillation | R | planned | | | | |
