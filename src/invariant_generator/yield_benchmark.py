@@ -38,6 +38,7 @@ from invariant_generator.config import Config
 from invariant_generator.data import _resolve_hdf_path, prepare_training_data
 from invariant_generator.input_features import input_feature_names
 from invariant_generator.model import InvariantYieldModel
+from invariant_generator.pysr_watch import LossWatcher, recovery_loss_threshold
 from invariant_generator.sparsify import load_model_for_checkpoint, sparsify_encoder_from_checkpoint
 from invariant_generator.symbolic import (
     _best_equation_text,
@@ -129,10 +130,14 @@ def run_baseline(config: Config, output_dir: Path, fresh: tuple[np.ndarray, np.n
     active = [j for j in range(data.X_train.shape[1]) if np.any(data.X_train[:, j] != 0)]
     names = [data.feature_names[j] for j in active]
     config = _with_stop_condition(config, data.y_train)
+    watch = LossWatcher(output_dir, recovery_loss_threshold(config.symbolic.weight_mode, data.y_train))
+    stop_rule = config.symbolic.early_stop_condition
+    config.symbolic.early_stop_condition = watch.julia_stop_condition(stop_rule)
     model = PySRRegressor(**pysr_regressor_options(config, output_directory=output_dir))
     started = time.perf_counter()
-    model.fit(data.X_train[:, active], data.y_train, variable_names=names,
-              **_pysr_fit_kwargs(config, data.y_train))
+    with watch:
+        model.fit(data.X_train[:, active], data.y_train, variable_names=names,
+                  **_pysr_fit_kwargs(config, data.y_train))
     elapsed = time.perf_counter() - started
     _save_equations_csv(model, output_dir / "equations.csv")
     X_fresh, y_fresh = fresh
@@ -140,7 +145,9 @@ def run_baseline(config: Config, output_dir: Path, fresh: tuple[np.ndarray, np.n
         "inputs": names,
         "expanded_equation": _best_equation_text(model),
         "pysr_seconds": elapsed,
-        "early_stop_condition": config.symbolic.early_stop_condition,
+        "time_to_recovery_s": watch.time_to_threshold,
+        **watch.report(),
+        "early_stop_condition": stop_rule,
         **_score(model.predict(X_fresh[:, active]), y_fresh,
                  model.predict(data.X_test[:, active]), data.y_test),
     }
@@ -189,9 +196,21 @@ def run_pipeline(config: Config, fresh: tuple[np.ndarray, np.ndarray]) -> dict[s
     symbolic_config.train.run_id = adaptive_sparsification_run_id(symbolic_config)
     data = prepare_training_data(symbolic_config)
     symbolic_config = _with_stop_condition(symbolic_config, data.y_train)
+    watch = LossWatcher(Path(symbolic_config.symbolic.output_directory),
+                        recovery_loss_threshold(symbolic_config.symbolic.weight_mode, data.y_train))
+    symbolic_config.symbolic.early_stop_condition = watch.julia_stop_condition(
+        symbolic_config.symbolic.early_stop_condition
+    )
     started = time.perf_counter()
-    stage3 = train_encoded_symbolic_from_config(symbolic_config, checkpoint_path=sparse.checkpoint_path)
+    with watch:
+        stage3 = train_encoded_symbolic_from_config(symbolic_config, checkpoint_path=sparse.checkpoint_path)
     result["pysr_seconds"] = time.perf_counter() - started
+    result.update(watch.report())
+    # Stages 1-2 run once before the search, so they count towards the time to recovery.
+    result["time_to_recovery_s"] = (
+        None if watch.time_to_threshold is None
+        else result["stage1_seconds"] + result["stage2_seconds"] + watch.time_to_threshold
+    )
     result["best_equation_in_groups"] = stage3.best_equation
     formulas = (summary.get("formulas") or {}).get("formulas") or []
     result["expanded_equation"] = stage3.best_equation + "".join(
@@ -258,9 +277,12 @@ def run_library_pysr(config: Config, output_dir: Path, fresh: tuple[np.ndarray, 
     F_train = features(data.X_train)
     variables = [f"F{i + 1}" for i in range(len(names))]  # neutral names for Julia/SymPy
     config = _with_stop_condition(config, data.y_train)
+    watch = LossWatcher(output_dir, recovery_loss_threshold(config.symbolic.weight_mode, data.y_train))
+    config.symbolic.early_stop_condition = watch.julia_stop_condition(config.symbolic.early_stop_condition)
     model = PySRRegressor(**pysr_regressor_options(config, output_directory=output_dir))
     started = time.perf_counter()
-    model.fit(F_train, data.y_train, variable_names=variables, **_pysr_fit_kwargs(config, data.y_train))
+    with watch:
+        model.fit(F_train, data.y_train, variable_names=variables, **_pysr_fit_kwargs(config, data.y_train))
     elapsed = time.perf_counter() - started
     _save_equations_csv(model, output_dir / "equations.csv")
     X_fresh, y_fresh = fresh
@@ -268,6 +290,8 @@ def run_library_pysr(config: Config, output_dir: Path, fresh: tuple[np.ndarray, 
         "library": dict(zip(variables, names)),
         "expanded_equation": _best_equation_text(model),
         "pysr_seconds": elapsed,
+        "time_to_recovery_s": watch.time_to_threshold,
+        **watch.report(),
         **_score(model.predict(features(X_fresh)), y_fresh,
                  model.predict(features(data.X_test)), data.y_test),
     }

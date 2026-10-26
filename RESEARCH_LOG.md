@@ -860,3 +860,22 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Von Mises so far: B and D recovered; A has the right structure but 1.3e-5
   (entry 42). Next on the cluster: VM25-E; VM25-C waits for the distillation
   dev fix.
+
+## 44. Time to recovery for hand-stopped PySR runs (2026-10-26)
+
+- Author's request: log when a run recovered, not only when it was stopped.
+- PySR 1.5.10 writes hall_of_fame.csv only at the end of the search (checked:
+  no file during a 3-min run), so polling it cannot time recovery. It does
+  evaluate the early-stop condition throughout the search, so
+  `invariant_generator.pysr_watch.LossWatcher` extends the config's rule: the
+  first time loss < threshold, Julia touches a marker file; the stop rule
+  itself (e.g. loss < 1e-17) is unchanged. Time to recovery = marker mtime -
+  start of fit (includes Julia start-up, as pysr_seconds does).
+- Threshold = PySR training loss equivalent to relative L2 1e-6: 1e-12 for
+  relative-squared weights (yield configs), 1e-12 * mean(y^2) for MSE.
+  It is the training loss, so it approximates the fresh-point criterion.
+- Wired into the yield arms baseline, pipeline (time to recovery includes
+  Stages 1-2) and library_pysr; new `summary.csv` column
+  `time_to_recovery_s`. Test: y = 2 x0 x1 with stop rule loss < 1e-30 and a
+  40 s limit: marker at 3.6 s, run returned at 43.6 s.
+- Not recorded for VM25-A/B (run before this change).

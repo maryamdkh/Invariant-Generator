@@ -23,11 +23,18 @@ Master table of every experiment for the paper. Plan and rationale:
 
 `experiment_id, dataset, instance, method, seed, commit, recovered,
 test_rel_l2, test_r2, equation, complexity, n_selected, n_true,
-structure_score, time_encoder_s, time_sr_s, notes`
+structure_score, time_encoder_s, time_sr_s, time_to_recovery_s, notes`
 
 - `instance`: surface name, equation name, or `d=6`, etc.
 - `recovered`: exact recovery (relative L2 < 1e-6 on fresh points, or
   symbolic match); for noisy runs, symbolic match only.
+- `time_sr_s`: PySR wall time until it returned (stopped by hand or by its
+  own limit). `time_to_recovery_s`: time until PySR's best training loss first
+  reached the recovery level (loss ~ (1e-6)^2 relative): the config's stop
+  rule is extended to drop a marker file at that level (the stop rule itself
+  is unchanged; `invariant_generator.pysr_watch`); for our
+  pipeline it includes Stages 1-2. Empty if never reached or not recorded
+  (runs before 2026-10-26 evening).
 - `structure_score`: F' metric (e.g. cosine of learned vs true tensor or
   rows; exponent match); empty if not applicable.
 

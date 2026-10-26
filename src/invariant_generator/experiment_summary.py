@@ -16,7 +16,7 @@ from typing import Any, Iterable
 COLUMNS = [
     "experiment_id", "dataset", "instance", "method", "seed", "commit", "recovered",
     "test_rel_l2", "test_r2", "equation", "complexity", "n_selected", "n_true",
-    "structure_score", "time_encoder_s", "time_sr_s", "notes",
+    "structure_score", "time_encoder_s", "time_sr_s", "time_to_recovery_s", "notes",
 ]
 
 
@@ -90,6 +90,7 @@ def benchmark_rows(
                 "n_true": entry.get("log_reducibility_analysis"),
                 "time_encoder_s": encoder_seconds,
                 "time_sr_s": result.get("pysr_seconds"),
+                "time_to_recovery_s": result.get("time_to_recovery_s"),
                 "notes": "; ".join(notes),
             })
     return rows
