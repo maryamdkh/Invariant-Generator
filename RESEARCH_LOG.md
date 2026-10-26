@@ -830,3 +830,22 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   overrides the config's PySR stop condition (it used var(y) * 1e-12).
   `cluster/interactive_env.sh` sets up the environment inside an interactive
   job. For the comparison, stopping times go in each run README.
+
+## 42. VM25-A: first paper run, von Mises 25 with our pipeline (2026-10-26)
+
+- Run folder `experiments/runs/VM25-A/` (README, config, summary.csv).
+  Arrhenius interactive node, seed 42; PySR stopped by hand after ~1 min.
+- Stage 1 n = 1; Stage 2 one active term J1 = -0.1626 * I11; Stage 3
+  y = -0.4256 * J1 (complexity 4, loss 2.1e-10). Learned A vs the true von
+  Mises tensor: cosine 0.9999999995; eigenvalues 5e-5 (true 0) and
+  0.99994-1.0 (true 1). Fresh relative L2 1.31e-5 (test 1.34e-5).
+- Not "recovered" under the 1e-6 threshold, although every structural
+  element is right. The error is the learned tensor's: the best constant times
+  sqrt(sigma:A_learned:sigma) is off by exactly 1.30e-5, so PySR stopping
+  time is irrelevant. PySR alone fits the 9 (or 21) quadratic coefficients
+  directly in float64, so the strict threshold favours it on the Hill ladder.
+- Decision needed (author): how to score yield recovery before more runs:
+  keep 1e-6 and add a structure criterion, or add an opt-in float64 refit of
+  the learned tensor at the end of Stage 2/3.
+- Code: `expanded_equation` now set for the yield pipeline arm; seed found
+  from the full path in `experiment_summary.benchmark_rows`.

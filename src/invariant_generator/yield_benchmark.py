@@ -193,6 +193,10 @@ def run_pipeline(config: Config, fresh: tuple[np.ndarray, np.ndarray]) -> dict[s
     stage3 = train_encoded_symbolic_from_config(symbolic_config, checkpoint_path=sparse.checkpoint_path)
     result["pysr_seconds"] = time.perf_counter() - started
     result["best_equation_in_groups"] = stage3.best_equation
+    formulas = (summary.get("formulas") or {}).get("formulas") or []
+    result["expanded_equation"] = stage3.best_equation + "".join(
+        f"; {f['raw_formula']}" for f in formulas if "raw_formula" in f
+    )
 
     device = resolve_device(config.train.device)
     model = load_model_for_checkpoint(stage_config, sparse.checkpoint_path).to(device)

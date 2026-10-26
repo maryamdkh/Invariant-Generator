@@ -56,7 +56,7 @@ def benchmark_rows(
     """
     rows = []
     for path in sorted(run_dir.rglob("benchmark_summary.json")):
-        match = re.search(r"seed(\d+)", str(path.relative_to(run_dir)))
+        match = re.search(r"seed(\d+)", str(path.relative_to(run_dir))) or re.search(r"seed(\d+)", str(path))
         seed = int(match.group(1)) if match else None
         for entry in json.loads(path.read_text(encoding="utf-8")):
             if arm not in entry:
