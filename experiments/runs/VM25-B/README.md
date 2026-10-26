@@ -18,8 +18,8 @@
             + (0.0282843 (s11 - s22))^2 + 0.0048 (s23^2 + s13^2 + s12^2) )
 
 Fresh-point relative L2 7.4e-8 (test 7.0e-8): **recovered**. This is the
-von Mises form 0.0016 * 1/2 * [(s11-s22)^2 + ...] * 2 + 3 * 0.0016 * shear^2
-= (sigma_eq / 25)^2 with sigma_eq^2 = 1/2 sum (si - sj)^2 + 3 sum tau^2.
+von Mises form: 0.0282843^2 = 0.0008 = (1/2)/25^2 and 0.0048 = 3/25^2, so
+y = sigma_eq / 25 with sigma_eq^2 = 1/2 sum (si - sj)^2 + 3 sum tau^2.
 The first exact form appeared at complexity 32 (loss 1.9e-13).
 
 ## Conclusion
