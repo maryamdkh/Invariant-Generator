@@ -727,3 +727,16 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   paths changed. Smoke test (Stage 1, 300 epochs, CPU) runs on rh3 and rh2.
   On this Mac `device = "auto"` picks MPS, which lacks eigh; use CPU locally.
 - No shared code changed (new script, data, configs).
+
+## 38. P7: job script within the file quota (2026-10-26)
+
+- Arrhenius project quota: 250,000 files (the old results directory held
+  ~51,000; one LLM-SRBench task left ~100 files).
+- `cluster/feynman_array.sbatch`: new `KEEP_ARTIFACTS` (default `pack`).
+  After a task, its folder keeps `benchmark_summary.json` and one
+  `artifacts.tar.gz` without `*.pt`, `*.pkl`, `*.bak`; `summary` keeps the
+  summary only, `full` keeps everything. Tested on a copy of a real task
+  folder: 2 files remain, archive has 51 entries, none of the excluded types.
+  The merge script reads only `benchmark_summary.json`, so it is unaffected.
+- `cluster/README.md`: quota note; only the aarch64 venv/depot are needed;
+  `make_tasks.py` runs with the system `python3` on the login node.

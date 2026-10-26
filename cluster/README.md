@@ -35,6 +35,15 @@ mkdir -p cluster/logs
 sbatch -A <project-account> --array=1-$(wc -l < cluster/tasks.txt)%40 cluster/feynman_array.sbatch
 ```
 
+File quota: the project allows 250,000 files. Each task keeps only
+`benchmark_summary.json` and one `artifacts.tar.gz` (no models or PySR
+checkpoints); set `KEEP_ARTIFACTS=summary` to keep only the summary or
+`KEEP_ARTIFACTS=full` to keep everything (debugging only). Only
+`.venv-aarch64` and `.julia_depot-aarch64` are needed (jobs run on the
+aarch64 GPU nodes); `cluster/make_tasks.py` needs only the standard library,
+so on the login node run it with the system `python3`, and run setup only via
+`srun ... --pty bash cluster/setup_env.sh`.
+
 `%40` caps concurrent tasks; adjust to your allocation. Each task asks for
 16 cores and at most 1.5 h (Stage 1-2 plus up to 15 min PySR per arm, with
 early stopping when the formula is found). Override with environment

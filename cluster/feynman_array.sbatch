@@ -6,6 +6,10 @@
 # RUN (results subfolder name), ARMS, TIMEOUT_MINUTES, TARGET_NOISE (e.g.
 # 0.01 for 1% target noise; default 0), and for other
 # benchmarks MANIFEST, DATA_DIR and TASKS (e.g. LLM-SRBench, see README).
+# KEEP_ARTIFACTS (file quota): pack (default) keeps benchmark_summary.json
+# plus one artifacts.tar.gz per task, without models (*.pt) and PySR
+# checkpoints (*.pkl, *.bak); summary keeps only benchmark_summary.json;
+# full keeps everything.
 #SBATCH -J feynman-bench
 #SBATCH -N 1
 #SBATCH -n 1
@@ -23,6 +27,7 @@ MANIFEST="${MANIFEST:-data/feynman/manifest.json}"
 DATA_DIR="${DATA_DIR:-data/feynman}"
 TASKS="${TASKS:-cluster/tasks.txt}"
 TARGET_NOISE="${TARGET_NOISE:-0}"
+KEEP_ARTIFACTS="${KEEP_ARTIFACTS:-pack}"
 # Login and GPU nodes can differ in CPU architecture (x86_64 vs aarch64),
 # so keep one environment and Julia depot per architecture.
 ARCH="$(uname -m)"
@@ -59,3 +64,19 @@ echo "task ${SLURM_ARRAY_TASK_ID}: ${EQUATION} seed ${SEED} -> ${OUT} ($(hostnam
     --timeout-minutes "$TIMEOUT_MINUTES" \
     --target-noise "$TARGET_NOISE" \
     --numprocs "${SLURM_CPUS_PER_TASK:-16}"
+
+# One task otherwise leaves ~100 files (models, PySR checkpoints, splits).
+case "$KEEP_ARTIFACTS" in
+    full) ;;
+    pack|summary)
+        if [ "$KEEP_ARTIFACTS" = pack ]; then
+            tar czf "$OUT.artifacts.tar.gz" -C "$OUT" \
+                --exclude ./benchmark_summary.json --exclude '*.pt' --exclude '*.pkl' --exclude '*.bak' .
+            mv "$OUT.artifacts.tar.gz" "$OUT/artifacts.tar.gz"
+        fi
+        find "$OUT" -mindepth 1 -maxdepth 1 ! -name benchmark_summary.json ! -name artifacts.tar.gz \
+            -exec rm -rf {} +
+        ;;
+    *) echo "Unknown KEEP_ARTIFACTS=$KEEP_ARTIFACTS (pack | summary | full)" >&2; exit 1 ;;
+esac
+echo "kept: $(ls "$OUT")"
