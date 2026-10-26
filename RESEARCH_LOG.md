@@ -891,3 +891,13 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   until then no time comparisons.
 - Von Mises row: A structure right (1.3e-5), B, D, E recovered; C waits for
   the distillation fix; I postponed.
+
+## 46. Hill ladder: early-stopping patience 100 -> 50 (2026-10-26)
+
+- Author's request: Stage 1/2 training waited too long before stopping.
+  Patience counts evaluations, one every log_every = 50 epochs, so 100 meant
+  5000 epochs without improvement; now 50 (2500 epochs; the LR plateau
+  patience of 20 evaluations still halves the LR first).
+- Changed only `configs/hill_ladder/*.toml`; `configs/adaptive_encoder_rotated_hill.toml`
+  (the Hill reference) is unchanged. VM25-A ran with 100; the author will
+  rerun it later.
