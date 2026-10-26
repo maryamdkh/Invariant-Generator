@@ -9,3 +9,6 @@ Probe scripts and saved outputs referenced in `RESEARCH_LOG.md`.
 
 Pipeline results live under `results/` (git-ignored, regenerable from the
 configs in `configs/`).
+
+Paper experiments are tracked in `EXPERIMENTS.md` (repository root); each
+run has a folder `runs/<ID>/` with README, frozen config and `summary.csv`.

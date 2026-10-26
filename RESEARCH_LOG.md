@@ -693,3 +693,14 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   one invariant. The "needs more than a linear library" argument must come
   from CB2001, Yld2004 and the CPFEM data. The fitted M is the ground truth
   for structure recovery (F').
+
+## 36. Experiment tracker (2026-10-26)
+
+- Added `EXPERIMENTS.md`: one row per (dataset, method), IDs
+  `<dataset>-<method>` (e.g. `RH3-B`), status, seeds, commit, result, log
+  entry. Hill ladder split into VM25, VM100 (scale check), HILL, RH2, RH3.
+  CPFEM rows (DX, AU) listed as proposed. Prerequisites P1-P8 (data
+  regeneration, baselines C/D/E, synthetic generators, Operon, quota-safe job
+  script, common `summary.csv` and table builder).
+- Each run will live in `experiments/runs/<ID>/` (README with command and
+  commit, frozen config, `summary.csv` with fixed columns).

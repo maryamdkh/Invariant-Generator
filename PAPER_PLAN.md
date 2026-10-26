@@ -79,6 +79,8 @@ n compared with the ground truth.
 
 ## Experiment matrix (agreed 2026-10-25, RESEARCH_LOG 34)
 
+Per-experiment tracking (IDs, status, results): `EXPERIMENTS.md`.
+
 R = required, o = optional, - = not applicable, done = have results.
 All runs: 5 seeds, same PySR budget for every arm.
 
