@@ -813,3 +813,20 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Existing tests pass. No Hill-critical file changed (new modules; one new
   opt-in branch in `feynman_benchmark.py`), so the Hill old-vs-new check was
   not required.
+
+## 41. Operon postponed; yield runs keep the author's PySR settings (2026-10-26)
+
+- pyoperon (0.6.0-0.6.2) has wheels for x86_64 Linux, macOS arm64 and
+  Windows only; none for Linux aarch64 (Arrhenius GPU nodes), not on
+  conda-forge either. The macOS wheels fail to import (they link to
+  libz/libxxhash in the maintainers' CI environment). Added an `operon`
+  extra (`pyoperon==0.6.1`, x86_64 Linux only) so the dependency is
+  recorded; the Operon arms are not written until there is an x86_64 Linux
+  machine to test on. P6 and all method-I rows postponed by the author.
+- `uv sync` with explicit extras removed two undeclared packages from the
+  local env (huggingface-hub, truststore); no project code imports them.
+- Author's workflow: PySR runs use the tuned yield configs and are stopped by
+  hand (q + Enter) when the loss has converged. The yield runner no longer
+  overrides the config's PySR stop condition (it used var(y) * 1e-12).
+  `cluster/interactive_env.sh` sets up the environment inside an interactive
+  job. For the comparison, stopping times go in each run README.

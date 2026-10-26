@@ -113,12 +113,12 @@ def _score(prediction_fresh: np.ndarray, y_fresh: np.ndarray,
 
 
 def _with_stop_condition(config: Config, y: np.ndarray) -> Config:
-    """Stop PySR once its MSE is below 1e-12 of the target variance, as in
-    the Feynman benchmark (weighted losses make this a loose guide only)."""
-    config = deepcopy(config)
-    threshold = max(float(np.var(y)) * 1e-12, 1e-300)
-    config.symbolic.early_stop_condition = f"stop_if(loss, complexity) = loss < {threshold:.6e}"
-    return config
+    """Copy of the config for one PySR search. The yield configs' own PySR
+    settings (stop condition, time limit) are kept: they were tuned on these
+    data, and runs are usually stopped by hand (q + Enter) once the loss
+    has converged."""
+    del y
+    return deepcopy(config)
 
 
 def run_baseline(config: Config, output_dir: Path, fresh: tuple[np.ndarray, np.ndarray]) -> dict[str, Any]:

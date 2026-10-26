@@ -641,6 +641,9 @@ benchmarks = [
     { name = "pandas" },
     { name = "pyarrow" },
 ]
+operon = [
+    { name = "pyoperon", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+]
 symbolic = [
     { name = "pysr" },
 ]
@@ -659,11 +662,12 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.0" },
     { name = "pandas", marker = "extra == 'benchmarks'" },
     { name = "pyarrow", marker = "extra == 'benchmarks'" },
+    { name = "pyoperon", marker = "platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'operon'", specifier = "==0.6.1" },
     { name = "pysr", marker = "extra == 'symbolic'" },
     { name = "torch", specifier = ">=2.4" },
     { name = "tqdm", specifier = ">=4.66" },
 ]
-provides-extras = ["symbolic", "benchmarks"]
+provides-extras = ["symbolic", "benchmarks", "operon"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1831,6 +1835,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f", size = 4955991, upload-time = "2026-03-29T13:29:33.898Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176", size = 1231151, upload-time = "2026-03-29T13:29:30.038Z" },
+]
+
+[[package]]
+name = "pyoperon"
+version = "0.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "pandas", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "scikit-learn", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e2/dc/1dc0c463848351b1de8ad84dbd13c7a9649b3e5f2b3faa4cdb49270cc0e6/pyoperon-0.6.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ebb292957d8ccb9ed5f066868a07bbd217bf8cb72fa6a3e23c63f5e6f88265f7", size = 1434061, upload-time = "2026-03-01T11:22:45.352Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/bf/aadb7a5efe883af3de385e3c340a038b39afa4c86c46f7e06a362b58be53/pyoperon-0.6.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:863854c519b84808edff15d42c80412bec0934d9ae00f3bc5ee5c2a7a56d4863", size = 1433625, upload-time = "2026-03-01T11:22:49.7Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/7f/73ad28e5c67b5dac0d226c8eeb7a96d815efa70cd2815b028cceb9c11a58/pyoperon-0.6.1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a3f15965ac3ec98f70b4ee86063230f351bfb9dedabc791f3eb8760e75ffeef7", size = 1433579, upload-time = "2026-03-01T11:22:53.961Z" },
 ]
 
 [[package]]

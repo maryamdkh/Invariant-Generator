@@ -22,6 +22,12 @@ benchmarks = [
     "pandas",
     "pyarrow",
 ]
+# Second symbolic-regression backend (EXPERIMENTS.md method I). pyoperon has
+# no Linux aarch64 wheels (Arrhenius GPU nodes) and its macOS wheels do not
+# load (they link to the build machine's libz/libxxhash), so x86_64 Linux only.
+operon = [
+    "pyoperon==0.6.1; sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
 
 [dependency-groups]
 dev = [

@@ -80,7 +80,7 @@ with the supervisor). All paper experiments use the full-sphere files above.
 | P3 | Implement sparse linear library baseline (D) | done: arm `sparse_linear` (STLSQ, y^m = polynomial of raw inputs, degree 3, m = 1, 2, 3) (RESEARCH_LOG 40) |
 | P4 | Opt-in "no encoder" mode: PySR on the feature library (E) | done: arm `library_pysr` (tensor library: a = A = identity, duplicates dropped) (RESEARCH_LOG 40) |
 | P5 | Synthetic generators SA, SB, SBD with ground truth metadata | done: `scripts/prepare_synthetic_benchmark.py`, `configs/synthetic_sa.toml` (SA config needs a dev run) (RESEARCH_LOG 40) |
-| P6 | Operon backend (I) | planned |
+| P6 | Operon backend (I) | postponed: pyoperon 0.6.x runs only on x86_64 Linux (no aarch64 build; macOS wheels do not load); `operon` extra added, arms not written (RESEARCH_LOG 41) |
 | P7 | Job script keeps only summaries; deletes models and PySR checkpoints (file quota) | done: `KEEP_ARTIFACTS` in `cluster/feynman_array.sbatch` (RESEARCH_LOG 38) |
 | P8 | Common `summary.csv` writer and a script that builds paper tables from `experiments/runs/` | done: `invariant_generator/experiment_summary.py`, `scripts/export_run_summary.py`, `scripts/build_tables.py` (RESEARCH_LOG 39) |
 
@@ -100,6 +100,13 @@ Any change to shared code passes `experiments/probes/hill_old_vs_new.py`
   and `scripts/build_tables.py`.
 - Every arm gets the same PySR time limit (`--timeout-minutes`); distillation
   splits it over its k + 1 searches.
+- Yield runs keep the config's own PySR settings (e.g. 24 h limit, stop at
+  loss < 1e-17) and are usually stopped by hand (`q` + Enter) once the loss
+  has converged. For the paper comparison, record in the run README when and
+  why each run was stopped; the PySR time is saved as `pysr_seconds`. A
+  hand-stopped arm must not get less time than the arm it is compared with.
+- Interactive runs on Arrhenius: inside `srun ... --pty bash`, run
+  `source cluster/interactive_env.sh`, then `"$PYTHON" scripts/...`.
 
 ## Experiments
 
