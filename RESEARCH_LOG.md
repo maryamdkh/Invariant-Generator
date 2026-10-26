@@ -849,3 +849,14 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   the learned tensor at the end of Stage 2/3.
 - Code: `expanded_equation` now set for the yield pipeline arm; seed found
   from the full path in `experiment_summary.benchmark_rows`.
+
+## 43. VM25-B and VM25-D (2026-10-26)
+
+- VM25-B (PySR alone, Arrhenius, stopped by hand after 136 s, loss 5.1e-15):
+  exact von Mises form found at complexity 32-36, fresh relative L2 7.4e-8,
+  recovered. Expected (ladder rung 1).
+- VM25-D (sparse linear, run locally, 0.03 s): y^2 = 9 quadratic terms,
+  fresh relative L2 2.9e-11, recovered.
+- Von Mises so far: B and D recovered; A has the right structure but 1.3e-5
+  (entry 42). Next on the cluster: VM25-E; VM25-C waits for the distillation
+  dev fix.

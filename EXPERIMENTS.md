@@ -117,9 +117,9 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
 | VM25-A | von Mises 25 | Ours | R | done | 1/5 (42) | `32a258a` | structure right (I11, tensor cosine 0.9999999995); rel. L2 1.3e-5, not < 1e-6 | 42 |
-| VM25-B | von Mises 25 | PySR alone | R | planned | | | | |
+| VM25-B | von Mises 25 | PySR alone | R | done | 1/5 (42) | 5d7c710+ | recovered (7.4e-8), 136 s PySR | 43 |
 | VM25-C | von Mises 25 | Distillation | R | planned | | | | |
-| VM25-D | von Mises 25 | Sparse linear | R | planned | | | | |
+| VM25-D | von Mises 25 | Sparse linear | R | done | 1/5 (42) | `bcd8e18` | recovered (2.9e-11), 9 terms | 43 |
 | VM25-E | von Mises 25 | PySR + library | R | planned | | | | |
 | VM25-F | von Mises 25 | Structure recovery | R | blocked (VM25-A) | | | | |
 | VM25-I | von Mises 25 | Operon +- encoder | o | blocked (P6) | | | | |

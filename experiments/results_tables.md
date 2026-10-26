@@ -8,7 +8,9 @@ Recovered = relative L2 < 1e-6 on fresh points. Structure = F' score
 | experiment | dataset | method | instances | recovered per seed | mean +- sd | median test rel. L2 | median structure |
 |---|---|---|---|---|---|---|---|
 | VM25-A | VM25 | A | 1 | [0] | 0.0 +- 0.0 | 1.34e-05 | 0.9999999995 |
+| VM25-B | VM25 | B | 1 | [1] | 1.0 +- 0.0 | 6.99e-08 | - |
+| VM25-D | VM25 | D | 1 | [1] | 1.0 +- 0.0 | 3.54e-11 | - |
 
-| dataset | A |
-|---|---|
-| VM25 | 0.0/1 |
+| dataset | A | B | D |
+|---|---|---|---|
+| VM25 | 0.0/1 | 1.0/1 | 1.0/1 |

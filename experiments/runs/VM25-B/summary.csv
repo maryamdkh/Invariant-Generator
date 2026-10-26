@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,notes
+VM25-B,VM25,vonMises25_full,B,42,5d7c710+,True,6.988367684726999e-08,,sqrt((square((s11 - s33) * 0.028284266255858535) + (square((s33 - s22) * 0.028284266255858535) + (((square(s23) + square(s13)) + square(s12)) * 0.004800001082489736))) + square((s11 - s22) * 0.028284266255858535)),36,,1,,,136.22632399798022,stopped by hand after 136 s PySR (loss 5.1e-15)
