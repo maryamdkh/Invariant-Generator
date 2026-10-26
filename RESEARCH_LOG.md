@@ -901,3 +901,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Changed only `configs/hill_ladder/*.toml`; `configs/adaptive_encoder_rotated_hill.toml`
   (the Hill reference) is unchanged. VM25-A ran with 100; the author will
   rerun it later.
+
+## 47. VM100-A (scale check) and a fix to the time-to-recovery marker (2026-10-26)
+
+- VM100-A (patience 50, PySR stopped by hand after 85 s): n = 1, J1 =
+  -0.0400 * I11, y = J1 / -2.2928; tensor cosine 0.9999999995 (as VM25-A);
+  fresh relative L2 1.35e-5 (VM25-A 1.31e-5). Scale check passed.
+- Bug found: the marker fired at 19 s although the final best loss was
+  2.2e-10. The Hill configs use batching = true, so the stop condition sees
+  minibatch losses. Fix in `pysr_watch.LossWatcher`: a marker counts only if
+  the final hall of fame (full-data losses) is below the threshold; otherwise
+  `time_to_recovery` is empty and `marker_ignored_minibatch` is true. With
+  batching the recorded time is the first minibatch hit, so approximate.

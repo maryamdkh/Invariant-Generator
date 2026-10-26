@@ -6,6 +6,11 @@ that, the first time the loss falls below `threshold`, Julia creates a marker
 file; the stop rule itself is unchanged. The marker's timestamp gives the
 time to recovery, separately from when the run was stopped (by hand or by
 the time limit).
+
+With batching = true the stop condition sees minibatch losses, which can dip
+below the threshold by chance. A marker therefore only counts when the final
+hall of fame (full-data losses) also reaches the threshold; it is then the
+first time a (minibatch) loss reached it, so an approximate time.
 """
 
 from __future__ import annotations
@@ -25,6 +30,7 @@ class LossWatcher:
         self.marker.unlink(missing_ok=True)
         self.time_to_threshold: float | None = None
         self.final_best_loss: float | None = None
+        self.marker_ignored = False
         self._started = 0.0
 
     def julia_stop_condition(self, original: str | None) -> str:
@@ -44,8 +50,9 @@ class LossWatcher:
         return self
 
     def __exit__(self, *exc: Any) -> None:
-        if self.marker.exists():
-            self.time_to_threshold = max(0.0, self.marker.stat().st_mtime - self._started)
+        marker_time = (
+            max(0.0, self.marker.stat().st_mtime - self._started) if self.marker.exists() else None
+        )
         for path in self.directory.rglob("hall_of_fame.csv"):
             try:
                 with path.open(newline="", encoding="utf-8") as handle:
@@ -55,12 +62,16 @@ class LossWatcher:
             if losses:
                 best = min(losses)
                 self.final_best_loss = best if self.final_best_loss is None else min(best, self.final_best_loss)
+        reached = self.final_best_loss is not None and self.final_best_loss < self.threshold
+        self.time_to_threshold = marker_time if reached else None
+        self.marker_ignored = marker_time is not None and not reached
 
     def report(self) -> dict[str, Any]:
         return {
             "loss_threshold": self.threshold,
             "pysr_time_to_threshold": self.time_to_threshold,
             "final_best_loss": self.final_best_loss,
+            "marker_ignored_minibatch": self.marker_ignored,
         }
 
 

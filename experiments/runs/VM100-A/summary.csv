@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+VM100-A,VM100,vonMises100_full,A,42,2c33f0e,False,1.3662761432534741e-05,,J1 / -2.2928156940280826; J1 = -0.0399949*I11,4,1,1,0.9999999995,1628.6388972089626,84.79168622900033,,"stopped by hand after 85 s (loss 2.2e-10); same structure and error as VM25-A; time marker came from a minibatch loss, ignored"
