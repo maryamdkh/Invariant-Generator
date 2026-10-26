@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+VM25-E,VM25,vonMises25_full,E,42,501c5f9+,True,1.8450724904260127e-08,,sqrt(((-0.0007999980341060726 * square(F1 + (F1 * 1.0816399843228118e-6))) + (0.0023999999505658655 * square(F2))) - square(square(-0.003578991293432362) * F1)),24,,1,,,61.73208474300918,,stopped by hand after 62 s; exact form at complexity 12 (loss 1.3e-13); timing to be rerun

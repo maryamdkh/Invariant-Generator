@@ -879,3 +879,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   `time_to_recovery_s`. Test: y = 2 x0 x1 with stop rule loss < 1e-30 and a
   40 s limit: marker at 3.6 s, run returned at 43.6 s.
 - Not recorded for VM25-A/B (run before this change).
+
+## 45. VM25-E and VM25-F (2026-10-26)
+
+- VM25-E (PySR on the fixed isotropic library I1, I2, I3, I13; stopped by
+  hand after 62 s): exact von Mises form sqrt(0.0024 F2^2 - 0.0008 F1^2) at
+  complexity 12 (loss 1.3e-13); selected equation fresh relative L2 1.7e-8,
+  recovered. Raw components (VM25-B) needed complexity 32-36.
+- VM25-F recorded from VM25-A (tensor cosine 0.9999999995).
+- Timing: the author will rerun these with the time-to-recovery logging;
+  until then no time comparisons.
+- Von Mises row: A structure right (1.3e-5), B, D, E recovered; C waits for
+  the distillation fix; I postponed.
