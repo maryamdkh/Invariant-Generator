@@ -740,3 +740,22 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   The merge script reads only `benchmark_summary.json`, so it is unaffected.
 - `cluster/README.md`: quota note; only the aarch64 venv/depot are needed;
   `make_tasks.py` runs with the system `python3` on the login node.
+
+## 39. P8: common summary format and table builder (2026-10-26)
+
+- `src/invariant_generator/experiment_summary.py` (new module, no existing
+  code changed): fixed `summary.csv` columns (as in `EXPERIMENTS.md`), a
+  writer that rejects unknown columns, a reader, and a converter from
+  `run_feynman_benchmark.py` output (one arm). Pipeline rows without a
+  reduction report the PySR-alone result, as the merge script does; with
+  target noise `recovered` is the symbolic match.
+- `scripts/export_run_summary.py <run_dir> --arm ... --experiment-id ...
+  --dataset ... --method ... --commit ...` writes
+  `experiments/runs/<ID>/summary.csv`.
+- `scripts/build_tables.py`: per-experiment recovered count per seed
+  (mean +- sd) and a dataset x method table from all `summary.csv` files.
+- Check on the old runs (scratch, not committed): LLM-SRBench pipeline
+  [63, 66, 59, 58, 60] = 61.2 +- 2.9, PySR alone 57.2 +- 1.3, Feynman v3
+  pipeline 85: identical to entries 27 and 32.
+- Yield experiments (adaptive_encoder_pipeline.py) need their own converter;
+  added with the yield runner.

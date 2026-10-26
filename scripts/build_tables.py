@@ -1,0 +1,61 @@
+"""Build result tables from every experiments/runs/<ID>/summary.csv.
+
+    uv run python scripts/build_tables.py            # print markdown
+    uv run python scripts/build_tables.py --output experiments/outputs/tables.md
+
+Table 1: per experiment, recovered count per seed and mean +- sd.
+Table 2: dataset x method, mean recovered count (a cell per experiment).
+"""
+
+from __future__ import annotations
+
+import argparse
+from collections import defaultdict
+from pathlib import Path
+
+import numpy as np
+
+from invariant_generator.experiment_summary import read_summaries
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--runs-dir", type=Path, default=Path("experiments/runs"))
+    parser.add_argument("--output", type=Path, default=None)
+    args = parser.parse_args()
+    rows = read_summaries(args.runs_dir)
+    if not rows:
+        raise SystemExit(f"No summary.csv files under {args.runs_dir}.")
+
+    per_experiment: dict[str, dict[str, list[bool]]] = defaultdict(lambda: defaultdict(list))
+    meta: dict[str, tuple[str, str]] = {}
+    for row in rows:
+        per_experiment[row["experiment_id"]][row["seed"]].append(row["recovered"] == "True")
+        meta[row["experiment_id"]] = (row["dataset"], row["method"])
+
+    lines = ["| experiment | dataset | method | instances | recovered per seed | mean +- sd |",
+             "|---|---|---|---|---|---|"]
+    cell: dict[tuple[str, str], str] = {}
+    for experiment_id in sorted(per_experiment):
+        seeds = per_experiment[experiment_id]
+        counts = [sum(seeds[seed]) for seed in sorted(seeds)]
+        instances = max(len(hits) for hits in seeds.values())
+        dataset, method = meta[experiment_id]
+        summary = f"{np.mean(counts):.1f} +- {np.std(counts):.1f}"
+        lines.append(f"| {experiment_id} | {dataset} | {method} | {instances} | {counts} | {summary} |")
+        cell[(dataset, method)] = f"{np.mean(counts):.1f}/{instances}"
+
+    datasets = sorted({d for d, _ in cell})
+    methods = sorted({m for _, m in cell})
+    lines += ["", "| dataset | " + " | ".join(methods) + " |", "|---|" + "---|" * len(methods)]
+    for dataset in datasets:
+        lines.append(f"| {dataset} | " + " | ".join(cell.get((dataset, m), "-") for m in methods) + " |")
+
+    text = "\n".join(lines) + "\n"
+    print(text)
+    if args.output is not None:
+        args.output.write_text(text, encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()

@@ -82,7 +82,7 @@ with the supervisor). All paper experiments use the full-sphere files above.
 | P5 | Synthetic generators SA, SB, SBD with ground truth metadata | planned |
 | P6 | Operon backend (I) | planned |
 | P7 | Job script keeps only summaries; deletes models and PySR checkpoints (file quota) | done: `KEEP_ARTIFACTS` in `cluster/feynman_array.sbatch` (RESEARCH_LOG 38) |
-| P8 | Common `summary.csv` writer and a script that builds paper tables from `experiments/runs/` | planned |
+| P8 | Common `summary.csv` writer and a script that builds paper tables from `experiments/runs/` | done: `invariant_generator/experiment_summary.py`, `scripts/export_run_summary.py`, `scripts/build_tables.py` (RESEARCH_LOG 39) |
 
 Any change to shared code passes `experiments/probes/hill_old_vs_new.py`
 (prints `IDENTICAL`) before it is committed.
