@@ -56,7 +56,7 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 |---|---|---|---|---|---|
 | A ours | 1.3e-5 | 1.4e-5 | 1.3e-5 | 1.1e-6 | 1.1e-5 |
 | B PySR alone | 7e-8 | 2.3e-6 | 7.4e-3 x | 1.5e-4 x | 5.8e-2 x |
-| C distillation | 3.9e-2 x | - | | | |
+| C distillation | 3.9e-2 x | - | 1.4e-2 x | | |
 | D sparse linear | 4e-11 | - | 5e-11 | 4e-11 | 4e-11 |
 | E fixed library | 2e-8 | - | 5.8e-2 x | 6.6e-2 x | 5.7e-2 x |
 | F' tensor cosine | 0.9999999995 | 0.9999999995 | 0.9999999996 | 0.99999999999 | 0.9999999997 |
@@ -101,6 +101,22 @@ quadratic.
   latents shrank, decoder weights grew); fixed with the scale-invariant
   penalty |z_j| * ||W_j|| (RESEARCH_LOG 58). Describe this in the baselines
   section so the comparison is seen as fair.
+
+### HILL-C (distillation, aligned Hill)
+
+- One latent kept; inner PySR found z = c - sqrt(Hill quadratic) and the
+  outer map is linear, so the latent is the right invariant and is affine
+  in y: here the two-step chain costs nothing.
+- The error (1.4e-2) is entirely the inner search on 6 raw components:
+  complexity reaches the maxsize 40 cap before every term gets its own
+  constant (s13 and s23 share one; others rounded, 5-20% off the truth).
+  This is the same limit PySR alone hits (HILL-B).
+- Point for the paper: distillation still has to solve a 6-input symbolic
+  problem (z from x), so it inherits PySR's difficulty with dimension. Our
+  encoder replaces that step with a learned tensor in a fixed invariant
+  form, which is exact by construction (A: 1.3e-5). Supports contribution 1
+  (one SR step on a closed-form latent) and 2 (structure learned by gradient
+  descent, not searched).
 
 ### VM25-E (fixed library, von Mises)
 

@@ -138,7 +138,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | VM100-B | von Mises 100 (scale check) | PySR alone | o | done | 1/5 (42) | `9248eab` | recovered (2.2e-6), exact form; 222 s | 48, 49 |
 | HILL-A | Hill aligned | Ours | R | done | 1/5 (42) | `1b22c97` | recovered (1.3e-5); n = 1, I11, tensor cosine 0.9999999996 | 49 |
 | HILL-B | Hill aligned | PySR alone | R | done | 1/5 (42) | `dcb66db` | not recovered (7.4e-3, loss 4.7e-5, 1116 s); Hill shape, s12/s13 share one constant | 50 |
-| HILL-C | Hill aligned | Distillation | R | planned | | | | |
+| HILL-C | Hill aligned | Distillation | R | done | 1/5 (42) | `3ae90d6` | not recovered (1.4e-2); latent = Hill form, constants off; outer linear | 61 |
 | HILL-D | Hill aligned | Sparse linear | R | done | 1/5 (42) | `dcb66db` | recovered (4.7e-11), 9 terms | 50 |
 | HILL-E | Hill aligned | PySR + library | R | done | 1/5 (42) | `733a827` | not recovered (5.8e-2, loss plateau 3.1e-3); isotropic library cannot express Hill | 51 |
 | HILL-F | Hill aligned | Structure recovery | R | done | 1/5 (42) | `1b22c97` | n = 1, I11, cosine 0.9999999996; 5 eigenvalues within 2e-5 | 49 |

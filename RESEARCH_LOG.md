@@ -1104,3 +1104,12 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   backfilled for VM25-A..RH3-E and VM25-C, plus cross-cutting notes
   (recovery criterion, error floor of A, why D solves the Hill ladder).
   Rule added to `CLAUDE.md` and `EXPERIMENTS.md`: update it after every run.
+
+## 61. HILL-C (2026-10-27)
+
+- Distillation on aligned Hill; `experiments/runs/HILL-C/`. One latent kept.
+  Inner: z7 = 3.311 - sqrt(Hill quadratic) with s13/s23 sharing a constant
+  and other coefficients 5-20% off (complexity at the maxsize 40 cap); outer
+  linear y = 1.102 - 0.338 z7. Composed fresh relative L2 1.38e-2: not
+  recovered. Error is the inner 6-input search, as for PySR alone (HILL-B).
+  Interpretation in `experiments/ANALYSIS.md`.
