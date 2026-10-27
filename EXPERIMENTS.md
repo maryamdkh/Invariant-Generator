@@ -141,7 +141,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | HILL-F | Hill aligned | Structure recovery | R | done | 1/5 (42) | `1b22c97` | n = 1, I11, cosine 0.9999999996; 5 eigenvalues within 2e-5 | 49 |
 | HILL-I | Hill aligned | Operon +- encoder | o | blocked (P6) | | | | |
 | RH2-A | Rotated Hill 2D | Ours | R | done | 1/5 (42) | `22e0d10` | recovered (1.1e-6); n = 1, I11; PySR 20 s to loss 1e-8 | 52 |
-| RH2-B | Rotated Hill 2D | PySR alone | R | planned | | | | |
+| RH2-B | Rotated Hill 2D | PySR alone | R | done | 1/5 (42) | `def3529` | borderline, not recovered (1.5e-4, loss 2.1e-8, 468 s); one constant short | 53 |
 | RH2-C | Rotated Hill 2D | Distillation | R | planned | | | | |
 | RH2-D | Rotated Hill 2D | Sparse linear | R | done | 1/5 (42) | `b229b38` | recovered (4.5e-11), 6 terms | 52 |
 | RH2-E | Rotated Hill 2D | PySR + library | R | planned | | | | |

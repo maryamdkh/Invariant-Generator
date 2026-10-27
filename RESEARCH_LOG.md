@@ -993,3 +993,14 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   within 4e-6. Ten times more precise than the 6D runs (3x3 block vs 6x6).
 - RH2-D (sparse linear, run locally, 0.01 s): exact 6-term quadratic,
   4.5e-11.
+
+## 53. RH2-B (2026-10-27)
+
+- PySR alone on rotated Hill 2D (s11, s22, s12); `experiments/runs/RH2-B/`.
+  Stopped by hand after 468 s at loss 2.1e-8, complexity 32. Fresh relative
+  L2 1.39e-4 (test 1.52e-4): just above the 1e-4 threshold, not recovered.
+- Same failure pattern as HILL-B: right quadratic shape, but s11^2 and s22^2
+  share one coefficient (truth differs by 0.12%). Borderline: under a loss
+  < 1e-7 rule it would count as found; under the relative-error criterion
+  fixed in entry 49 it does not. Kept as is (criterion not changed per run);
+  more seeds will decide. RH2-A: 1.1e-6 at complexity 4.
