@@ -1063,3 +1063,25 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   (test relative L2; x = not recovered at 1e-4.)
 - Next: more seeds (RH3-B first, then all B and A), the distillation fix
   (C), then CB2001 / Yld2004 where D is not expected to be exact.
+
+## 58. Distillation (C) fixed: scale-invariant latent L1 (2026-10-27)
+
+- Problem (entry 40): with L1 on z alone, the network shrank every latent
+  component together and grew the decoder weights (L1 dodged), so nothing
+  became sparse and PySR fitted targets of std ~1e-3.
+- Fix (`src/invariant_generator/distillation.py`): penalty
+  mean |z_j| * ||W_j|| (W_j = decoder first-layer weights reading z_j),
+  unchanged by that rescaling (`tests/test_distillation.py`); components
+  ranked by std(z_j) * ||W_j||; kept components standardised before PySR.
+  Defaults l1_weight 1e-2 -> 5e-2, keep_fraction 0.01 -> 0.2.
+- Probe `experiments/probes/distillation_latent_probe.py` (network only,
+  ~20 s): VM25 and RH3 now have one dominant component (next 4-12% of it);
+  y from the top component alone (degree-6 polynomial) ~1% off at L1 1e-2,
+  5e-2 and 2e-1, i.e. the latent is a smooth warp of the yield function,
+  limited by the MLP's own precision (train nrmse 2e-3).
+- Local VM25 check (PySR 6 min split over 2 searches, scratch, not a
+  result): one component kept; inner fit z = 0.98 - 0.0061 (s12^2 + s13^2 +
+  s23^2) (loss 0.41 on the standardised latent), composed formula 0.18
+  relative L2. Working as intended: the latent is not closed form, which is
+  the weakness our contribution 1 addresses. On the cluster each of the two
+  searches gets the author's hand-stopped budget.

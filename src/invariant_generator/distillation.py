@@ -1,10 +1,14 @@
 """Symbolic distillation baseline (Cranmer et al. 2020, arXiv:2006.11287).
 
 An MLP x -> latent z -> y is trained with an L1 penalty on the latent
-activations, so few latent components stay informative. The components with
-the largest standard deviation are kept; PySR then fits each kept component
-from the raw inputs (z_j = h_j(x)) and the target from the kept components
-(y = g(z)), and the composition g(h(x)) is the distilled formula. The PySR time
+activations, so few latent components stay informative. A plain L1 on z can
+be dodged by shrinking z and growing the decoder's first layer (all
+components collapse together, nothing becomes sparse), so the penalty is
+|z_j| * ||W_j||, with W_j the decoder weights reading z_j: unchanged by that
+rescaling. Components are ranked by the same product std(z_j) * ||W_j||. Each
+kept component is standardised; PySR then fits it from the raw inputs
+(z_j = h_j(x)) and the target from the kept components (y = g(z)), and the
+composition g(h(x)) is the distilled formula. The PySR time
 limit is split evenly over the k + 1 searches, so the total budget matches a
 single PySR run. Constants are not refit after composition.
 """
@@ -25,11 +29,11 @@ from torch import nn
 class DistillationSettings:
     latent_dim: int = 8
     hidden: int = 128
-    l1_weight: float = 1e-2
+    l1_weight: float = 5e-2
     epochs: int = 2000
     batch_size: int = 256
     learning_rate: float = 1e-3
-    keep_fraction: float = 0.01  # keep components with std > keep_fraction * max std
+    keep_fraction: float = 0.2  # keep components with importance > keep_fraction * max importance
     max_kept: int = 4
     seed: int = 42
 
@@ -50,6 +54,10 @@ class DistillationNet(nn.Module):
         z = self.encoder(x)
         return self.decoder(z).squeeze(-1), z
 
+    def latent_weight_norms(self) -> torch.Tensor:
+        """||W_j||: norm of the decoder weights that read latent component j."""
+        return torch.linalg.vector_norm(self.decoder[0].weight, dim=0)
+
 
 def train_distillation_net(X: np.ndarray, y: np.ndarray, settings: DistillationSettings) -> tuple[DistillationNet, dict[str, Any]]:
     torch.manual_seed(settings.seed)
@@ -67,7 +75,8 @@ def train_distillation_net(X: np.ndarray, y: np.ndarray, settings: DistillationS
         for start in range(0, len(X_t), settings.batch_size):
             batch = order[start:start + settings.batch_size]
             prediction, z = net(X_t[batch])
-            loss = torch.mean((prediction - y_t[batch]) ** 2) + settings.l1_weight * torch.mean(torch.abs(z))
+            penalty = torch.mean(torch.abs(z) * net.latent_weight_norms())
+            loss = torch.mean((prediction - y_t[batch]) ** 2) + settings.l1_weight * penalty
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -104,10 +113,15 @@ def distill(
     started = time.perf_counter()
     net, info = train_distillation_net(X, y, settings)
     Z = latent(net, X)
-    std = Z.std(axis=0)
-    order = np.argsort(std)[::-1]
-    kept = [int(j) for j in order if std[j] > settings.keep_fraction * std[order[0]]][: settings.max_kept]
-    info.update({"network_seconds": time.perf_counter() - started, "latent_std": std.tolist(), "kept": kept})
+    with torch.no_grad():
+        importance = Z.std(axis=0) * net.latent_weight_norms().double().numpy()
+    order = np.argsort(importance)[::-1]
+    kept = [int(j) for j in order if importance[j] > settings.keep_fraction * importance[order[0]]][: settings.max_kept]
+    # Standardise the kept components so PySR fits targets of unit scale.
+    Z = (Z - Z.mean(axis=0)) / np.where(Z.std(axis=0) > 0, Z.std(axis=0), 1.0)
+    info.update({
+        "network_seconds": time.perf_counter() - started, "latent_importance": importance.tolist(), "kept": kept,
+    })
 
     seconds = total_pysr_seconds / (len(kept) + 1)
     started = time.perf_counter()

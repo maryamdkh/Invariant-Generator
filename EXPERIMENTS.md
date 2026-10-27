@@ -126,7 +126,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 |---|---|---|---|---|---|---|---|---|
 | VM25-A | von Mises 25 | Ours | R | done | 1/5 (42) | `32a258a` | recovered (1.3e-5); I11, tensor cosine 0.9999999995 | 42, 49 |
 | VM25-B | von Mises 25 | PySR alone | R | done | 1/5 (42) | 5d7c710+ | recovered (7.4e-8), 136 s PySR | 43 |
-| VM25-C | von Mises 25 | Distillation | R | planned | | | | |
+| VM25-C | von Mises 25 | Distillation | R | ready (fix: RESEARCH_LOG 58) | | | | |
 | VM25-D | von Mises 25 | Sparse linear | R | done | 1/5 (42) | `bcd8e18` | recovered (2.9e-11), 9 terms | 43 |
 | VM25-E | von Mises 25 | PySR + library | R | done | 1/5 (42) | 501c5f9+ | recovered (1.7e-8); exact form at complexity 12 | 45 |
 | VM25-F | von Mises 25 | Structure recovery | R | done | 1/5 (42) | `32a258a` | n = 1, I11, tensor cosine 0.9999999995 | 42 |
