@@ -56,7 +56,7 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 |---|---|---|---|---|---|
 | A ours | 1.3e-5 | 1.4e-5 | 1.3e-5 | 1.1e-6 | 1.1e-5 |
 | B PySR alone | 7e-8 | 2.3e-6 | 7.4e-3 x | 1.5e-4 x | 5.8e-2 x |
-| C distillation | 3.9e-2 x | - | 1.4e-2 x | | |
+| C distillation | 3.9e-2 x | - | 1.4e-2 x | 1.1e-2 x | |
 | D sparse linear | 4e-11 | - | 5e-11 | 4e-11 | 4e-11 |
 | E fixed library | 2e-8 | - | 5.8e-2 x | 6.6e-2 x | 5.7e-2 x |
 | F' tensor cosine | 0.9999999995 | 0.9999999995 | 0.9999999996 | 0.99999999999 | 0.9999999997 |
@@ -117,6 +117,18 @@ quadratic.
   form, which is exact by construction (A: 1.3e-5). Supports contribution 1
   (one SR step on a closed-form latent) and 2 (structure learned by gradient
   descent, not searched).
+
+### RH2-C (distillation, rotated Hill 2D)
+
+- One latent kept; inner PySR found the rotated Hill quadratic (affine in
+  y^2) with coefficients 0.6-2.7% off (s11 s22 pinned to -1: one constant
+  short, as PySR alone in RH2-B); outer y = sqrt(z0 + 2.123) - 0.315 has the
+  right shape but its offset does not match the latent's (1.728). Composed
+  1.1e-2, worse than PySR alone (1.5e-4) on the same 3 inputs.
+- Point for the paper: even in low dimension, splitting one SR problem into
+  two (z from x, then y from z) lets each step's small errors compound;
+  distillation is worse than PySR alone here. Our latent needs no inner
+  search (RH2-A 1.1e-6). Supports contribution 1.
 
 ### VM25-E (fixed library, von Mises)
 

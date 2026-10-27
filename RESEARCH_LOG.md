@@ -1113,3 +1113,11 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   linear y = 1.102 - 0.338 z7. Composed fresh relative L2 1.38e-2: not
   recovered. Error is the inner 6-input search, as for PySR alone (HILL-B).
   Interpretation in `experiments/ANALYSIS.md`.
+
+## 62. RH2-C (2026-10-27)
+
+- Distillation on rotated Hill 2D; `experiments/runs/RH2-C/`. One latent.
+  Inner: the rotated Hill quadratic, coefficients 0.6-2.7% off; outer
+  sqrt(z0 + 2.123) - 0.315. Composed fresh relative L2 1.15e-2: not
+  recovered, worse than PySR alone (RH2-B, 1.5e-4). Analysis in
+  `experiments/ANALYSIS.md`.
