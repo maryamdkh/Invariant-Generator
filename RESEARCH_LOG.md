@@ -1121,3 +1121,13 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   sqrt(z0 + 2.123) - 0.315. Composed fresh relative L2 1.15e-2: not
   recovered, worse than PySR alone (RH2-B, 1.5e-4). Analysis in
   `experiments/ANALYSIS.md`.
+
+## 63. RH3-C; distillation on the Hill ladder done (2026-10-27)
+
+- Distillation on rotated Hill 3D; `experiments/runs/RH3-C/`. One latent
+  (network nrmse 2.2e-3). Inner PySR on 6 inputs, at the maxsize 40 cap:
+  near-isotropic Hill-like form, no rotation cross terms. Composed fresh
+  relative L2 5.7e-2 (test 5.4e-2): not recovered, same level as B and E.
+- C across the ladder (seed 42): VM25 3.9e-2, HILL 1.4e-2, RH2 1.1e-2,
+  RH3 5.4e-2; never recovered. Hill ladder seed 42 now complete for A-F
+  (I postponed). Analysis in `experiments/ANALYSIS.md`.

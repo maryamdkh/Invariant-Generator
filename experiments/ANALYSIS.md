@@ -56,7 +56,7 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 |---|---|---|---|---|---|
 | A ours | 1.3e-5 | 1.4e-5 | 1.3e-5 | 1.1e-6 | 1.1e-5 |
 | B PySR alone | 7e-8 | 2.3e-6 | 7.4e-3 x | 1.5e-4 x | 5.8e-2 x |
-| C distillation | 3.9e-2 x | - | 1.4e-2 x | 1.1e-2 x | |
+| C distillation | 3.9e-2 x | - | 1.4e-2 x | 1.1e-2 x | 5.4e-2 x |
 | D sparse linear | 4e-11 | - | 5e-11 | 4e-11 | 4e-11 |
 | E fixed library | 2e-8 | - | 5.8e-2 x | 6.6e-2 x | 5.7e-2 x |
 | F' tensor cosine | 0.9999999995 | 0.9999999995 | 0.9999999996 | 0.99999999999 | 0.9999999997 |
@@ -65,8 +65,9 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 
 Story: A recovers every surface with the exact tensor. B degrades with
 anisotropy and dimension. E fails as soon as the surface is anisotropic,
-which isolates the learned tensor. C finds the right invariant but loses
-accuracy in the two-step chain. D is exact because the surfaces are
+which isolates the learned tensor. C never recovers: on VM, HILL, RH2 it
+finds the right invariant but loses accuracy in the two-step chain or in
+the 6-input inner search; on RH3 its inner search fails exactly like B. D is exact because the surfaces are
 quadratic.
 
 ### VM25-A / VM100-A (ours, von Mises)
@@ -129,6 +130,23 @@ quadratic.
   two (z from x, then y from z) lets each step's small errors compound;
   distillation is worse than PySR alone here. Our latent needs no inner
   search (RH2-A 1.1e-6). Supports contribution 1.
+
+### RH3-C (distillation, rotated Hill 3D)
+
+- One latent kept; the network itself is accurate (predicts y to 2.2e-3
+  nrmse), so the latent contains the right information.
+- The inner PySR search (z from 6 raw inputs) hits the maxsize 40 cap and
+  returns a near-isotropic Hill-like form (s13, s23 share a constant; no
+  rotation cross terms), exactly like PySR alone (RH3-B). Composed 5.4e-2,
+  the same level as B (5.8e-2) and E (5.7e-2).
+- Point for the paper: distillation moves the difficulty, it does not remove
+  it: a symbolic search over all raw inputs is still needed to explain the
+  latent. Our latent is a learned tensor inside a fixed invariant form, so
+  there is nothing to search on the raw inputs (RH3-A 1.1e-5). This is the
+  sharpest evidence for contribution 1 against the closest prior work.
+- Caveat as for RH3-B: maxsize 40 binds the inner search; RH3-B-max checks
+  whether a larger cap changes the picture for PySR on raw inputs (the same
+  conclusion would apply to C's inner search).
 
 ### VM25-E (fixed library, von Mises)
 

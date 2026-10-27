@@ -153,7 +153,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | RH3-A | Rotated Hill 3D | Ours | R | done | 1/5 (42) | `de42785` | recovered (1.1e-5); n = 1, I11; PySR 20 s to loss 1e-8 | 55 |
 | RH3-B | Rotated Hill 3D | PySR alone | R | done | 1/5 (42) | `7c0822f` | not recovered (5.8e-2, loss plateau 2.2e-3, 1056 s); no rotation terms | 56 |
 | RH3-B-max | Rotated Hill 3D | PySR alone, maxsize ~100 (cap check) | R | planned | | | | |
-| RH3-C | Rotated Hill 3D | Distillation | R | planned | | | | |
+| RH3-C | Rotated Hill 3D | Distillation | R | done | 1/5 (42) | `1079f13` | not recovered (5.4e-2); latent search fails like B (no rotation terms) | 63 |
 | RH3-D | Rotated Hill 3D | Sparse linear | R | done | 1/5 (42) | `de42785` | recovered (4.1e-11), 21 terms | 55 |
 | RH3-E | Rotated Hill 3D | PySR + library | R | done | 1/5 (42) | `1618c9b` | not recovered (5.7e-2, plateau 2.8e-3); returns von Mises form | 57 |
 | RH3-F | Rotated Hill 3D | Structure recovery | R | done | 1/5 (42) | `de42785` | cosine 0.9999999997; eigenvalues within 2e-5 | 55 |
