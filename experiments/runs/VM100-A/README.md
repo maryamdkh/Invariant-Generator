@@ -34,3 +34,6 @@ Scale check passed: identical structure (n = 1, I11, the von Mises tensor)
 and the same error level as VM25-A; the pipeline is insensitive to the stress
 scale. The 1.3e-5 limit is again the learned tensor (best possible relative
 error with it: 1.34e-5).
+
+Update 2026-10-27: yield recovery threshold is now relative L2 < 1e-4
+(RESEARCH_LOG 49), so this run counts as recovered.

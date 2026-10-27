@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+HILL-F,HILL,hill_full,F',42,1b22c97,,,,,,1,1,0.9999999996,,,,"from HILL-A: cosine of learned A vs true Hill tensor; eigenvalues 2.6e-5 (true 0), five non-zero within 2e-5"

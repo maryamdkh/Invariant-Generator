@@ -1,0 +1,23 @@
+{
+  "checkpoint": "results/yield_benchmark/hill_ladder/seed42/hill/hill_full/stage2_sparse/checkpoint_best.pt",
+  "truth": "data/hill_ladder_full/hill_full.json",
+  "cosine": 0.9999999996410062,
+  "eigenvalues_learned_over_max": [
+    2.5997049031629463e-05,
+    0.5378961648768015,
+    0.5976459654991263,
+    0.6574177501154871,
+    0.792951848088641,
+    1.0
+  ],
+  "eigenvalues_true_over_max": [
+    1.6915787622985172e-15,
+    0.537889832125587,
+    0.597655369028429,
+    0.657420905931272,
+    0.7929661070852865,
+    1.0
+  ],
+  "best_scale": 0.6897020476710444,
+  "relative_l2_floor": 9.485242736002246e-06
+}

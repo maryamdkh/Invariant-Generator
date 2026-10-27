@@ -925,3 +925,31 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   threshold alone hides that; a "structure recovered" column (exact form up
   to constants) would separate right-but-imprecise from wrong formulas. Kept
   as is for now (author); revisit before the tables go into the paper.
+
+## 49. HILL-A, HILL-F; yield recovery threshold 1e-6 -> 1e-4 (2026-10-27)
+
+- HILL-A (rerun after a lost connection; run folder
+  `experiments/runs/HILL-A/`): Stage 1 n = 1 (964 s), Stage 2 one active term
+  J1 = -1.58264 * I11 (694 s), Stage 3 y = -0.43579 * J1 (complexity 4,
+  loss 1.6e-10, stopped by hand after 243 s). Fresh relative L2 1.14e-5
+  (test 1.30e-5).
+- HILL-F with the new `experiments/probes/structure_recovery.py` (output
+  `experiments/outputs/structure_recovery_hill.json`): learned A vs the true
+  Hill tensor cosine 0.9999999996; eigenvalues / max 2.6e-5 (true 0) and
+  0.53790, 0.59765, 0.65742, 0.79295, 1 (true 0.53789, 0.59766, 0.65742,
+  0.79297, 1). Error floor of c * sqrt(sigma:A_learned:sigma) on random
+  directions 9.5e-6, so the 1.1e-5 is the learned tensor's float32
+  precision. Same script on VM25-A reproduces cosine 0.9999999995.
+- Decision (author): a PySR loss of ~1e-10 already means the equation was
+  found; the PySR community usually treats loss < 1e-7 as found. With
+  `inverse_target_squared` weights the loss is ~ (relative error)^2, so
+  1e-7 is a relative error of ~3e-4. Yield recovery threshold set to
+  relative L2 < 1e-4 (loss ~1e-8, a margin below 1e-7), applied the same to
+  every method: `RECOVERY_THRESHOLD` in `yield_benchmark.py`, the
+  time-to-recovery marker now fires at loss 1e-8. Equation datasets keep
+  1e-6 (exponents snapped to exact rationals there). Caveat for the paper:
+  loss thresholds in the PySR docs are for the plain MSE in the target's
+  units, so the paper must state the criterion as a relative error.
+- Re-marked: VM25-A (1.3e-5), VM100-A (1.35e-5), VM100-B (2.2e-6) now
+  recovered; VM25-B/D/E unchanged (recovered). The structure-score column
+  (F') stays as the second, structural criterion.

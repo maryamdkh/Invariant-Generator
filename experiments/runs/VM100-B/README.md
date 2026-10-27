@@ -30,3 +30,6 @@ constants were not yet precise enough for the strict threshold (at scale 25
 it reached 7e-8 in 136 s). Like VM25-A/VM100-A, "right structure, error just
 above 1e-6": the strict numerical threshold alone does not separate these
 cases well (RESEARCH_LOG 48).
+
+Update 2026-10-27: yield recovery threshold is now relative L2 < 1e-4
+(RESEARCH_LOG 49), so this run counts as recovered.

@@ -28,7 +28,8 @@ latest commits `6030fff` (v3) and later log updates. Key pieces:
   rref basis, `snap_acceptance = "relative_to_dense"`) or `"graded"`
   (homogeneous rows for polynomial maps).
 - Stage 3 (`adaptive_symbolic.py`): monomial inputs, expansion to original
-  inputs, recovery = relative L2 < 1e-6 on fresh/official-test points.
+  inputs, recovery = relative L2 < 1e-6 on fresh/official-test points
+  (yield surfaces: < 1e-4, RESEARCH_LOG 49).
 - Benchmarks: Feynman (`scripts/prepare_feynman_benchmark.py`, PMLB
   formulas), LLM-SRBench LSR-Transform (`scripts/prepare_llm_srbench.py`,
   data gated, downloaded to `data/llm_srbench/`), yield criteria

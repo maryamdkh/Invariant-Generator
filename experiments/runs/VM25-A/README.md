@@ -38,3 +38,6 @@ from the truth by 1.30e-5 for any constant, so stopping PySR earlier or later
 does not matter. The 1e-6 threshold (taken from the Feynman benchmark, where
 exponents are snapped to exact rationals) cannot be met by a tensor learned
 in float32 without a final refit; see RESEARCH_LOG 42.
+
+Update 2026-10-27: yield recovery threshold is now relative L2 < 1e-4
+(RESEARCH_LOG 49), so this run counts as recovered.

@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+HILL-A,HILL,hill_full,A,42,1b22c97,True,1.2976835292907629e-05,,"J1*(-0.43579091163229255); J1 = -1.58264*I11, I11 = sqrt(sigma:A:sigma) (homogenized)",4,1,1,0.9999999996,1657.9659,242.6367,,"stopped by hand (loss 1.6e-10); fresh rel. L2 1.14e-5; error = learned-tensor floor 9.5e-6"

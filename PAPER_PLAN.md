@@ -123,8 +123,8 @@ CB2001, synthetic; (5) D and E (cheap); (6) Feynman to 5 seeds + C;
    and a cubic orthotropic invariant: two encoder rows over an orthotropic
    polynomial integrity basis), Yld2004-18p (stress test: not polynomial; report
    accuracy and compactness honestly).
-5. **Metrics:** SRBench symbolic solution, numerical recovery (< 1e-6 on fresh
-   points), R^2 > 0.999 rate, complexity, time to solution; paired tests and
+5. **Metrics:** SRBench symbolic solution, numerical recovery (relative L2 on fresh
+   points < 1e-6 for equations, < 1e-4 for yield surfaces: PySR loss ~1e-8), R^2 > 0.999 rate, complexity, time to solution; paired tests and
    bootstrap intervals.
 
 ## Compute

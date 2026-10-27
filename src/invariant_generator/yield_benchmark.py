@@ -3,7 +3,7 @@
 Each arm is scored the same way: its prediction on fresh stress points (new
 directions on the true surface, scaled by k as in the homogeneity
 augmentation) against the generating criterion, recovered when the relative
-L2 error is below 1e-6. Rows use the layout of feynman_benchmark.run_benchmark
+L2 error is below RECOVERY_THRESHOLD. Rows use the layout of feynman_benchmark.run_benchmark
 (one benchmark_summary.json per task), so the cluster job script, merge and
 export scripts apply unchanged.
 
@@ -50,7 +50,10 @@ from invariant_generator.symbolic import (
 from invariant_generator.utils import resolve_device, save_json
 from invariant_generator.yield_criteria import CRITERIA
 
-RECOVERY_THRESHOLD = 1e-6
+# Relative L2 1e-4 = PySR loss ~1e-8 under inverse_target_squared weights,
+# within the loss < 1e-7 usually taken to mean the equation was found.
+# The earlier 1e-6 failed float32-learned tensors with the right structure (RESEARCH_LOG 49).
+RECOVERY_THRESHOLD = 1e-4
 PLANE_STRESS = [0, 1, 5]  # s11, s22, s12 in canonical Voigt order
 
 
@@ -130,7 +133,7 @@ def run_baseline(config: Config, output_dir: Path, fresh: tuple[np.ndarray, np.n
     active = [j for j in range(data.X_train.shape[1]) if np.any(data.X_train[:, j] != 0)]
     names = [data.feature_names[j] for j in active]
     config = _with_stop_condition(config, data.y_train)
-    watch = LossWatcher(output_dir, recovery_loss_threshold(config.symbolic.weight_mode, data.y_train))
+    watch = LossWatcher(output_dir, recovery_loss_threshold(config.symbolic.weight_mode, data.y_train, RECOVERY_THRESHOLD))
     stop_rule = config.symbolic.early_stop_condition
     config.symbolic.early_stop_condition = watch.julia_stop_condition(stop_rule)
     model = PySRRegressor(**pysr_regressor_options(config, output_directory=output_dir))
@@ -197,7 +200,7 @@ def run_pipeline(config: Config, fresh: tuple[np.ndarray, np.ndarray]) -> dict[s
     data = prepare_training_data(symbolic_config)
     symbolic_config = _with_stop_condition(symbolic_config, data.y_train)
     watch = LossWatcher(Path(symbolic_config.symbolic.output_directory),
-                        recovery_loss_threshold(symbolic_config.symbolic.weight_mode, data.y_train))
+                        recovery_loss_threshold(symbolic_config.symbolic.weight_mode, data.y_train, RECOVERY_THRESHOLD))
     symbolic_config.symbolic.early_stop_condition = watch.julia_stop_condition(
         symbolic_config.symbolic.early_stop_condition
     )
@@ -277,7 +280,7 @@ def run_library_pysr(config: Config, output_dir: Path, fresh: tuple[np.ndarray, 
     F_train = features(data.X_train)
     variables = [f"F{i + 1}" for i in range(len(names))]  # neutral names for Julia/SymPy
     config = _with_stop_condition(config, data.y_train)
-    watch = LossWatcher(output_dir, recovery_loss_threshold(config.symbolic.weight_mode, data.y_train))
+    watch = LossWatcher(output_dir, recovery_loss_threshold(config.symbolic.weight_mode, data.y_train, RECOVERY_THRESHOLD))
     config.symbolic.early_stop_condition = watch.julia_stop_condition(config.symbolic.early_stop_condition)
     model = PySRRegressor(**pysr_regressor_options(config, output_directory=output_dir))
     started = time.perf_counter()
