@@ -30,6 +30,9 @@ generalizes. We are a front end for PySR, not a competitor.
   numbered entry in `RESEARCH_LOG.md`; keep `HANDOFF.md` current. Probe
   scripts go in `experiments/probes/`, their outputs in
   `experiments/outputs/`, never only in a scratch folder.
+- After every paper experiment, add its interpretation (meaning, why,
+  caveats, honest notes, contribution supported) to
+  `experiments/ANALYSIS.md`; the paper's results section is written from it.
 - Work on branch `feynman-generalization`; commit and push so the cluster
   can `git pull`.
 - Cluster (Arrhenius, SLURM, two-factor login): the author runs all cluster

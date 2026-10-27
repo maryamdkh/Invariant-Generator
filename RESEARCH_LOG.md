@@ -1096,3 +1096,11 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   (inner loss 0.024), outer approximates the inverse. Supports
   contribution 1 (closed-form latent, one SR step). A final refit of the
   composed constants would likely help C; not added (not in Cranmer et al.).
+
+## 60. Analysis log for the paper (2026-10-27)
+
+- Author's request: keep the interpretation given for every experiment, not
+  only the numbers, for writing the paper. New `experiments/ANALYSIS.md`,
+  backfilled for VM25-A..RH3-E and VM25-C, plus cross-cutting notes
+  (recovery criterion, error floor of A, why D solves the Hill ladder).
+  Rule added to `CLAUDE.md` and `EXPERIMENTS.md`: update it after every run.

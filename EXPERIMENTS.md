@@ -3,6 +3,9 @@
 Master table of every experiment for the paper. Plan and rationale:
 `PAPER_PLAN.md` ("Experiment matrix"); the narrative goes in
 `RESEARCH_LOG.md`, and each entry names the experiment IDs it concerns.
+The interpretation of every result (what it means, why, caveats, which
+contribution it supports), written for the paper, goes in
+`experiments/ANALYSIS.md`, updated after every run.
 
 ## How to use
 
