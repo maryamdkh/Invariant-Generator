@@ -1029,3 +1029,16 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   quadratic monomials solves it; the encoder's advantage over D must be shown
   on non-polynomial surfaces (CB2001, Yld2004, CPFEM) and in interpretability
   (one tensor, one invariant vs 21 coefficients).
+
+## 56. RH3-B: PySR alone fails on rotated Hill 3D (2026-10-27)
+
+- PySR on the 6 raw components; `experiments/runs/RH3-B/`. Stopped by hand
+  after 1056 s, loss plateau 2.2e-3 (complexity 39). Selected equation
+  (complexity 34): a von Mises-like form (equal-weight squared stress
+  differences + squared shears / 0.182, s12 rescaled), fourth root, minus
+  0.868. Fresh relative L2 6.0e-2: not recovered. No rotation cross terms.
+- Confirms the author's earlier observation for this seed. Our pipeline
+  (RH3-A): 1.1e-5, complexity 4, PySR at loss 1e-8 after 20 s.
+- PySR alone across the ladder (seed 42): VM25 recovered; HILL 7e-3 and
+  RH2 1.5e-4 (one constant short); RH3 6e-2 (wrong form). More seeds needed
+  for all B runs; RH3-B seeds are the priority.
