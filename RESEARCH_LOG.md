@@ -1085,3 +1085,14 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   relative L2. Working as intended: the latent is not closed form, which is
   the weakness our contribution 1 addresses. On the cluster each of the two
   searches gets the author's hand-stopped budget.
+
+## 59. VM25-C (2026-10-27)
+
+- Distillation on von Mises 25; `experiments/runs/VM25-C/`. One latent kept.
+  Inner PySR: z7 = 1.709 - 0.002056 [(1/2) sum of squared stress
+  differences] - 0.006208 shear^2 (ratio 3.02 vs 3: the von Mises invariant).
+  Outer: a cubic in z7. Composed fresh relative L2 3.9e-2: not recovered.
+- The error is the chain: latent only approximately affine in sigma_eq^2
+  (inner loss 0.024), outer approximates the inverse. Supports
+  contribution 1 (closed-form latent, one SR step). A final refit of the
+  composed constants would likely help C; not added (not in Cranmer et al.).
