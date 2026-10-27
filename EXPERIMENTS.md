@@ -134,9 +134,9 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | VM100-A | von Mises 100 (scale check) | Ours | R | done | 1/5 (42) | `2c33f0e` | recovered (1.35e-5); same structure as VM25-A | 47, 49 |
 | VM100-B | von Mises 100 (scale check) | PySR alone | o | done | 1/5 (42) | `9248eab` | recovered (2.2e-6), exact form; 222 s | 48, 49 |
 | HILL-A | Hill aligned | Ours | R | done | 1/5 (42) | `1b22c97` | recovered (1.3e-5); n = 1, I11, tensor cosine 0.9999999996 | 49 |
-| HILL-B | Hill aligned | PySR alone | R | planned | | | | |
+| HILL-B | Hill aligned | PySR alone | R | done | 1/5 (42) | `dcb66db` | not recovered (7.4e-3, loss 4.7e-5, 1116 s); Hill shape, s12/s13 share one constant | 50 |
 | HILL-C | Hill aligned | Distillation | R | planned | | | | |
-| HILL-D | Hill aligned | Sparse linear | R | planned | | | | |
+| HILL-D | Hill aligned | Sparse linear | R | done | 1/5 (42) | `dcb66db` | recovered (4.7e-11), 9 terms | 50 |
 | HILL-E | Hill aligned | PySR + library | R | planned | | | | |
 | HILL-F | Hill aligned | Structure recovery | R | done | 1/5 (42) | `1b22c97` | n = 1, I11, cosine 0.9999999996; 5 eigenvalues within 2e-5 | 49 |
 | HILL-I | Hill aligned | Operon +- encoder | o | blocked (P6) | | | | |

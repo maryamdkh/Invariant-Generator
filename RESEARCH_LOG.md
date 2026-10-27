@@ -953,3 +953,18 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Re-marked: VM25-A (1.3e-5), VM100-A (1.35e-5), VM100-B (2.2e-6) now
   recovered; VM25-B/D/E unchanged (recovered). The structure-score column
   (F') stays as the second, structural criterion.
+
+## 50. HILL-B and HILL-D (2026-10-27)
+
+- HILL-B (PySR alone, 6 raw components; `experiments/runs/HILL-B/`):
+  stopped by hand after 1116 s at loss 4.7e-5, complexity 38; the author had
+  seen this plateau in earlier runs. Fresh relative L2 8.8e-3 (test 7.4e-3):
+  not recovered. The equation has the Hill shape (squared stress differences
+  plus squared shears); its quadratic form matches the true M within 0.1% in
+  the normal block and 0.3% for s23, but s12 and s13 share one coefficient
+  (truth 0.22 and 0.20 in Mandel), which is the whole error. Our pipeline
+  (HILL-A) gets the exact form at complexity 4.
+- First difference between A and B on the Hill ladder: on von Mises (VM25-B)
+  PySR alone recovered. One seed only; more seeds needed before a claim.
+- HILL-D (sparse linear, run locally, 0.03 s): exact 9-term quadratic,
+  4.7e-11. As for VM25-D, expected: Hill surfaces are quadratic forms.
