@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+RH3-E,RH3,rotatedhill_full,E,42,1618c9b,False,0.057251221928018334,,"sqrt((-0.07849053076318897 * square(F1)) + (square(F2) / 4.251024201559169)); F1=I1, F2=I2 (identity tensors)",12,,1,,,1085.9058,,"stopped by hand at loss 2.8e-3 (plateau); fresh rel. L2 6.2e-2; best isotropic (von Mises) fit"

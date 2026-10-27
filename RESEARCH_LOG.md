@@ -1042,3 +1042,24 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - PySR alone across the ladder (seed 42): VM25 recovered; HILL 7e-3 and
   RH2 1.5e-4 (one constant short); RH3 6e-2 (wrong form). More seeds needed
   for all B runs; RH3-B seeds are the priority.
+
+## 57. RH3-E; Hill ladder seed 42 complete (2026-10-27)
+
+- Fixed isotropic library, no encoder, rotated Hill 3D;
+  `experiments/runs/RH3-E/`. Stopped by hand after 1086 s, loss plateau
+  2.8e-3. Selected y = sqrt(-0.0785 F1^2 + F2^2/4.251), a von Mises form
+  (best isotropic fit); fresh relative L2 6.2e-2. Not recovered.
+- Hill ladder, seed 42, all arms except C (distillation, needs a fix) and
+  I (Operon, P6):
+
+  | | VM25 | VM100 | HILL | RH2 | RH3 |
+  |---|---|---|---|---|---|
+  | A ours | 1.3e-5 | 1.4e-5 | 1.3e-5 | 1.1e-6 | 1.1e-5 |
+  | B PySR alone | 7e-8 | 2.3e-6 | 7.4e-3 x | 1.5e-4 x | 5.8e-2 x |
+  | D sparse linear | 4e-11 | - | 5e-11 | 4e-11 | 4e-11 |
+  | E fixed library | 2e-8 | - | 5.8e-2 x | 6.6e-2 x | 5.7e-2 x |
+  | F' tensor cosine | 0.9999999995 | 0.9999999995 | 0.9999999996 | 0.99999999999 | 0.9999999997 |
+
+  (test relative L2; x = not recovered at 1e-4.)
+- Next: more seeds (RH3-B first, then all B and A), the distillation fix
+  (C), then CB2001 / Yld2004 where D is not expected to be exact.
