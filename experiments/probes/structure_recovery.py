@@ -24,6 +24,8 @@ from invariant_generator.config import load_config
 from invariant_generator.constraints import fourth_order_to_mandel_matrix
 from invariant_generator.sparsify import load_model_for_checkpoint
 
+PLANE_STRESS = [0, 1, 5]  # s11, s22, s12 in Mandel order
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -39,13 +41,15 @@ def main() -> None:
     tensor = model.invariant_pool.effective_fourth_order_tensor().detach().double()
     learned = fourth_order_to_mandel_matrix(tensor).numpy()
     truth = np.asarray(json.loads(args.truth.read_text(encoding="utf-8"))["M_mandel"], dtype=float)
+    if truth.shape == (3, 3):  # plane stress: only the s11, s22, s12 block is identifiable
+        learned = learned[np.ix_(PLANE_STRESS, PLANE_STRESS)]
 
     cosine = float(np.sum(learned * truth) / (np.linalg.norm(learned) * np.linalg.norm(truth)))
     eig_learned = np.linalg.eigvalsh(learned)
     eig_truth = np.linalg.eigvalsh(truth)
 
     rng = np.random.default_rng(2026)
-    directions = rng.normal(size=(5000, 6))
+    directions = rng.normal(size=(5000, len(truth)))
     q_learned = np.sqrt(np.clip(np.einsum("ni,ij,nj->n", directions, learned, directions), 0, None))
     q_truth = np.sqrt(np.einsum("ni,ij,nj->n", directions, truth, directions))
     scale = float(q_learned @ q_truth / (q_learned @ q_learned))

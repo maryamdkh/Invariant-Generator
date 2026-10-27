@@ -980,3 +980,14 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   A recovered (structure exact), B one constant short (7.4e-3), D exact
   (linear fit of a quadratic form), E impossible (6%). E vs A isolates the
   learned structural tensor (contribution 2); on isotropic VM25 E recovered.
+
+## 52. RH2-A and RH2-F (2026-10-27)
+
+- Rotated Hill, plane stress (s11, s22, s12), our pipeline;
+  `experiments/runs/RH2-A/`. Stage 1 n = 1 (591 s), Stage 2 J1 = -1.19932 *
+  I11 (694 s), Stage 3 y = J1 / -1.7472 (complexity 4, loss 1.2e-12, PySR
+  reached 1e-8 after 20 s, stopped by hand at 54 s). Fresh relative L2
+  1.18e-6: recovered. Time to recovery 1306 s, almost all encoder.
+- RH2-F: `structure_recovery.py` now compares only the s11, s22, s12 block
+  when the truth is plane stress (3x3). Cosine 0.99999999999, eigenvalues
+  within 4e-6. Ten times more precise than the 6D runs (3x3 block vs 6x6).

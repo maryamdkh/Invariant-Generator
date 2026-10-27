@@ -1,0 +1,17 @@
+{
+  "checkpoint": "results/yield_benchmark/hill_ladder/seed42/rh2/rotatedhill2d_full/stage2_sparse/checkpoint_best.pt",
+  "truth": "data/hill_ladder_full/rotatedhill2d_full.json",
+  "cosine": 0.99999999999429,
+  "eigenvalues_learned_over_max": [
+    0.2597613167546086,
+    0.6949066209053418,
+    1.0
+  ],
+  "eigenvalues_true_over_max": [
+    0.25976214214837917,
+    0.6949108637953896,
+    1.0
+  ],
+  "best_scale": 0.6864272113277234,
+  "relative_l2_floor": 1.143376625983225e-06
+}

@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+RH2-A,RH2,rotatedhill2d_full,A,42,22e0d10,True,1.0746159534359173e-06,,"J1 / -1.7471976851694084; J1 = -1.19932*I11, I11 = sqrt(sigma:A:sigma) (homogenized)",4,1,1,0.99999999999,1285.4107,53.8474,1305.5774,"stopped by hand (loss 1.2e-12); fresh rel. L2 1.18e-6; PySR reached loss 1e-8 after 20 s"
