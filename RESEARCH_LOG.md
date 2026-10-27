@@ -991,3 +991,5 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - RH2-F: `structure_recovery.py` now compares only the s11, s22, s12 block
   when the truth is plane stress (3x3). Cosine 0.99999999999, eigenvalues
   within 4e-6. Ten times more precise than the 6D runs (3x3 block vs 6x6).
+- RH2-D (sparse linear, run locally, 0.01 s): exact 6-term quadratic,
+  4.5e-11.

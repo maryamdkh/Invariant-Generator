@@ -143,7 +143,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | RH2-A | Rotated Hill 2D | Ours | R | done | 1/5 (42) | `22e0d10` | recovered (1.1e-6); n = 1, I11; PySR 20 s to loss 1e-8 | 52 |
 | RH2-B | Rotated Hill 2D | PySR alone | R | planned | | | | |
 | RH2-C | Rotated Hill 2D | Distillation | R | planned | | | | |
-| RH2-D | Rotated Hill 2D | Sparse linear | R | planned | | | | |
+| RH2-D | Rotated Hill 2D | Sparse linear | R | done | 1/5 (42) | `b229b38` | recovered (4.5e-11), 6 terms | 52 |
 | RH2-E | Rotated Hill 2D | PySR + library | R | planned | | | | |
 | RH2-F | Rotated Hill 2D | Structure recovery | R | done | 1/5 (42) | `22e0d10` | cosine 0.99999999999 (plane-stress block) | 52 |
 | RH2-I | Rotated Hill 2D | Operon +- encoder | o | blocked (P6) | | | | |
