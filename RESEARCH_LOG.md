@@ -968,3 +968,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   PySR alone recovered. One seed only; more seeds needed before a claim.
 - HILL-D (sparse linear, run locally, 0.03 s): exact 9-term quadratic,
   4.7e-11. As for VM25-D, expected: Hill surfaces are quadratic forms.
+
+## 51. HILL-E (2026-10-27)
+
+- PySR on the fixed library (identity tensors: I1, I2, I3, I13), no
+  encoder; `experiments/runs/HILL-E/`. Stopped by hand after 1330 s, loss
+  plateau 3.1e-3; selected y = -0.0939 F1^2/F4 + F2/2.032, fresh relative L2
+  6.1e-2. Not recovered.
+- Expected by construction: identity-tensor invariants are isotropic and
+  cannot represent an anisotropic surface. Hill ladder so far (seed 42):
+  A recovered (structure exact), B one constant short (7.4e-3), D exact
+  (linear fit of a quadratic form), E impossible (6%). E vs A isolates the
+  learned structural tensor (contribution 2); on isotropic VM25 E recovered.

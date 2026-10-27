@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+HILL-E,HILL,hill_full,E,42,733a827,False,0.05800925711703847,,"(-0.09388843152661909 / (F4 / square(F1))) + (F2 / 2.031888283915623); F1=I1, F2=I2, F4=I13 (identity tensors)",12,,1,,,1329.8708,,"stopped by hand at loss 3.1e-3 (plateau); fresh rel. L2 6.1e-2; isotropic library cannot represent anisotropic Hill"

@@ -10,6 +10,7 @@ Recovered = relative L2 < 1e-4 on fresh points (yield; PySR loss ~1e-8). Structu
 | HILL-A | HILL | A | 1 | [1] | 1.0 +- 0.0 | 1.30e-05 | 0.9999999996 |
 | HILL-B | HILL | B | 1 | [0] | 0.0 +- 0.0 | 7.36e-03 | - |
 | HILL-D | HILL | D | 1 | [1] | 1.0 +- 0.0 | 4.69e-11 | - |
+| HILL-E | HILL | E | 1 | [0] | 0.0 +- 0.0 | 5.80e-02 | - |
 | HILL-F | HILL | F' | 0 | - | - | - | 0.9999999996 |
 | VM100-A | VM100 | A | 1 | [1] | 1.0 +- 0.0 | 1.37e-05 | 0.9999999995 |
 | VM100-B | VM100 | B | 1 | [1] | 1.0 +- 0.0 | 2.26e-06 | - |
@@ -21,7 +22,7 @@ Recovered = relative L2 < 1e-4 on fresh points (yield; PySR loss ~1e-8). Structu
 
 | dataset | A | B | D | E | F' |
 |---|---|---|---|---|---|
-| HILL | 1.0/1 | 0.0/1 | 1.0/1 | - | - |
+| HILL | 1.0/1 | 0.0/1 | 1.0/1 | 0.0/1 | - |
 | VM100 | 1.0/1 | 1.0/1 | - | - | - |
 | VM25 | 1.0/1 | 1.0/1 | 1.0/1 | 1.0/1 | - |
 
