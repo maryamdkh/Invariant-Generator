@@ -171,3 +171,12 @@ quadratic.
 - PySR alone across the ladder: recovered (VM) -> one constant short (HILL,
   RH2) -> wrong form (RH3). Clean degradation with anisotropy and dimension.
 - Priority: more seeds for RH3-B (and A) before the claim goes in the paper.
+- Caveat (maxsize): all arms share the author's PySR config with
+  maxsize = 40. The exact rotated Hill formula on raw components has 21
+  quadratic terms (complexity ~80+), so B cannot express it under the cap;
+  ours needs 4. Shortening the formula is part of our point, but a reviewer
+  may say PySR alone only needed a larger maxsize. Planned check: RH3-B with
+  maxsize ~100 (RH3-B-max). If it still fails, the claim is much stronger.
+- Same settings for every arm (fairness). Distillation's inner searches use
+  plain MSE instead of relative weights because the latents cross zero; its
+  outer search uses the config unchanged.
