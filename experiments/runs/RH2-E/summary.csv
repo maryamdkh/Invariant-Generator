@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+RH2-E,RH2,rotatedhill2d_full,E,42,4e4e007,False,0.06617964518377861,,"F4 / ((F1 / F3) + 1.4137414145328078); F1=I1, F3=I3, F4=I13 (identity tensors)",8,,1,,,506.3748,,"stopped by hand at loss 2.5e-3 (plateau); fresh rel. L2 6.8e-2; isotropic library cannot represent anisotropic surface"

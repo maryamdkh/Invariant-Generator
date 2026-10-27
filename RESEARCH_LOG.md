@@ -1004,3 +1004,13 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   < 1e-7 rule it would count as found; under the relative-error criterion
   fixed in entry 49 it does not. Kept as is (criterion not changed per run);
   more seeds will decide. RH2-A: 1.1e-6 at complexity 4.
+
+## 54. RH2-E (2026-10-27)
+
+- Fixed isotropic library, no encoder, rotated Hill 2D;
+  `experiments/runs/RH2-E/`. Stopped by hand after 506 s (no improvement),
+  loss plateau 2.5e-3; selected y = F4 / (F1/F3 + 1.414), fresh relative L2
+  6.8e-2. Not recovered; same reason as HILL-E (isotropic features,
+  anisotropic surface).
+- RH2 so far (seed 42): A 1.1e-6 (complexity 4), B 1.5e-4 (borderline, one
+  constant short), D exact, E 7%. Next: RH3, the core case.
