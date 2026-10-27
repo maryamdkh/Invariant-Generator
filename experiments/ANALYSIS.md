@@ -222,7 +222,8 @@ quadratic.
   quadratic terms (complexity ~80+), so B cannot express it under the cap;
   ours needs 4. Shortening the formula is part of our point, but a reviewer
   may say PySR alone only needed a larger maxsize. Planned check: RH3-B with
-  maxsize ~100 (RH3-B-max). If it still fails, the claim is much stronger.
+  maxsize 150 (RH3-B-max; the expanded exact form needs ~143 with
+  constants costing 2, and fits the other constraints). If it still fails, the claim is much stronger.
 - Same settings for every arm (fairness). Distillation's inner searches use
   plain MSE instead of relative weights because the latents cross zero; its
   outer search uses the config unchanged.
