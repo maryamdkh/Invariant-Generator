@@ -369,7 +369,7 @@ def pysr_regressor_options(
 ) -> dict[str, Any]:
     """Build the common PySR search settings used by symbolic pipeline stages."""
     symbolic = config.symbolic
-    return {
+    options = {
         "parallelism": symbolic.parallelism,
         "procs": symbolic.numprocs,
         "batching": symbolic.batching,
@@ -399,6 +399,9 @@ def pysr_regressor_options(
         "early_stop_condition": symbolic.early_stop_condition,
         "random_state": symbolic.random_state,
     }
+    if symbolic.heap_size_hint_gb is not None:
+        options["heap_size_hint_in_bytes"] = int(symbolic.heap_size_hint_gb * 1024**3)
+    return options
 
 
 def transform_symbolic_target(target: np.ndarray, *, target_transform: str) -> np.ndarray:

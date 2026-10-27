@@ -339,6 +339,9 @@ class SymbolicConfig:
     warm_start: bool = True
     parallelism: str = "multithreading" #"multiprocessing" #"multithreading" 
     numprocs: int = 4
+    # Opt-in Julia heap limit per PySR process (GB); None keeps PySR's automatic
+    # hint, which can exceed a SLURM job's memory with large maxsize.
+    heap_size_hint_gb: float | None = None
     batching: bool = True
     batch_size: int = 100
     """

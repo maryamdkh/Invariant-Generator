@@ -166,6 +166,7 @@ timeout_hours = 24.0
 warm_start = true
 parallelism = "multiprocessing"
 numprocs = 8
+heap_size_hint_gb = 6  # RH3-B-max: per-process Julia heap; the automatic 48 GB hint ran out of job memory
 batching = true
 batch_size = 100
 populations = 24

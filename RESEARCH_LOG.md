@@ -1131,3 +1131,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - C across the ladder (seed 42): VM25 3.9e-2, HILL 1.4e-2, RH2 1.1e-2,
   RH3 5.4e-2; never recovered. Hill ladder seed 42 now complete for A-F
   (I postponed). Analysis in `experiments/ANALYSIS.md`.
+
+## 64. RH3-B-max first attempt died; opt-in PySR heap limit (2026-10-27)
+
+- RH3-B-max (maxsize 150) stopped without saving (no hall_of_fame.csv; a
+  Julia "Allocations ... GC" report at the end): most likely out of memory.
+  PySR's automatic heap hint was 48 GB per process (from the node's total
+  memory, not the SLURM job's), with 16 processes and maxsize 150.
+- New opt-in `[symbolic].heap_size_hint_gb` (default None = PySR's own
+  hint, so all existing configs unchanged): passed as
+  heap_size_hint_in_bytes. `configs/hill_ladder/rh3_maxsize150.toml` sets
+  6 GB; rerun with --numprocs 8 and srun --mem=128G. Benchmark TOML writer
+  skips the key when None. hill_old_vs_new vs ad2c574: IDENTICAL; tests pass.
