@@ -1014,3 +1014,18 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   anisotropic surface).
 - RH2 so far (seed 42): A 1.1e-6 (complexity 4), B 1.5e-4 (borderline, one
   constant short), D exact, E 7%. Next: RH3, the core case.
+
+## 55. RH3-A, RH3-D, RH3-F (2026-10-27)
+
+- RH3-A (core case, rotated Hill 3D, 6 inputs; `experiments/runs/RH3-A/`):
+  Stage 1 n = 1 (975 s), Stage 2 J1 = -1.57933 * I11 (694 s), Stage 3
+  y = -0.43385 * J1 (complexity 4, loss 1.4e-10; PySR reached loss 1e-8
+  after 20 s, stopped by hand at 68 s). Fresh relative L2 1.05e-5:
+  recovered. Time to recovery 1689 s, almost all encoder.
+- RH3-F: learned A vs true rotated Hill tensor cosine 0.9999999997; the
+  eigenvalues equal HILL-A's (same tensor, rotated), within 2e-5 of the truth.
+- RH3-D (sparse linear, local, 0.03 s): exact 21-term quadratic, 4.1e-11.
+  Rotated Hill is still a quadratic form, so linear regression on the 21
+  quadratic monomials solves it; the encoder's advantage over D must be shown
+  on non-polynomial surfaces (CB2001, Yld2004, CPFEM) and in interpretability
+  (one tensor, one invariant vs 21 coefficients).

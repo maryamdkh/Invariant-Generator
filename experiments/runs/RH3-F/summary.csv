@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+RH3-F,RH3,rotatedhill_full,F',42,de42785,,,,,,1,1,0.9999999997,,,,"from RH3-A: cosine of learned A vs true rotated Hill tensor; eigenvalues within 2e-5"

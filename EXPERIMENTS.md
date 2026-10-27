@@ -147,12 +147,12 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | RH2-E | Rotated Hill 2D | PySR + library | R | done | 1/5 (42) | `4e4e007` | not recovered (6.6e-2, loss plateau 2.5e-3); isotropic library | 54 |
 | RH2-F | Rotated Hill 2D | Structure recovery | R | done | 1/5 (42) | `22e0d10` | cosine 0.99999999999 (plane-stress block) | 52 |
 | RH2-I | Rotated Hill 2D | Operon +- encoder | o | blocked (P6) | | | | |
-| RH3-A | Rotated Hill 3D | Ours | R | planned | | | | |
+| RH3-A | Rotated Hill 3D | Ours | R | done | 1/5 (42) | `de42785` | recovered (1.1e-5); n = 1, I11; PySR 20 s to loss 1e-8 | 55 |
 | RH3-B | Rotated Hill 3D | PySR alone | R | planned | | | | |
 | RH3-C | Rotated Hill 3D | Distillation | R | planned | | | | |
-| RH3-D | Rotated Hill 3D | Sparse linear | R | planned | | | | |
+| RH3-D | Rotated Hill 3D | Sparse linear | R | done | 1/5 (42) | `de42785` | recovered (4.1e-11), 21 terms | 55 |
 | RH3-E | Rotated Hill 3D | PySR + library | R | planned | | | | |
-| RH3-F | Rotated Hill 3D | Structure recovery | R | blocked (RH3-A) | | | | |
+| RH3-F | Rotated Hill 3D | Structure recovery | R | done | 1/5 (42) | `de42785` | cosine 0.9999999997; eigenvalues within 2e-5 | 55 |
 | RH3-I | Rotated Hill 3D | Operon +- encoder | o | blocked (P6) | | | | |
 
 Known: a linear fit on the 21 quadratic monomials recovers every surface in
