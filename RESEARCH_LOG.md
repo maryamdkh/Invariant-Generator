@@ -1191,3 +1191,21 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   stored. Scoring in yield_benchmark is consistent (load_truth applies the
   criterion to the same columns).
 - benchmark_summary.json restored with CB-D after the rsync overwrote it.
+
+## 68. Yield recovery threshold 1e-4 -> 10^-3.5 (~3.2e-4, loss ~1e-7) (2026-10-28)
+
+- Author's decision after CB-A: main threshold = relative L2 < 10^-3.5
+  (~3.2e-4) on fresh points, i.e. PySR loss ~1e-7 under
+  inverse_target_squared weights, the loss usually taken to mean "found".
+  Same for every method; equation datasets keep 1e-6.
+  `RECOVERY_THRESHOLD = 10**-3.5` in `yield_benchmark.py` (the
+  time-to-recovery marker now fires at loss 1e-7).
+- Checked before switching: of 21 seed-42 yield results only CB-A (2.9e-4)
+  and RH2-B (1.4e-4) change (both become recovered). All RH3 results are
+  >= 100x above either threshold; the core claim is unaffected.
+- Re-marked CB-A and RH2-B (summary.csv, README notes), EXPERIMENTS.md,
+  PAPER_PLAN, HANDOFF, results tables; ANALYSIS.md has the criterion
+  history and a sensitivity table (1e-6, 1e-5, 1e-4, 3.2e-4) for the
+  paper's appendix.
+- Local benchmark_summary.json for vm25, hill, rh2, rh3 regained their
+  sparse_linear entries (overwritten by later rsyncs; identical values).

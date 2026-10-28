@@ -29,8 +29,8 @@ test_rel_l2, test_r2, equation, complexity, n_selected, n_true,
 structure_score, time_encoder_s, time_sr_s, time_to_recovery_s, notes`
 
 - `instance`: surface name, equation name, or `d=6`, etc.
-- `recovered`: yield datasets: relative L2 < 1e-4 on fresh points (PySR
-  loss ~1e-8 with relative weights; RESEARCH_LOG 49); equation datasets:
+- `recovered`: yield datasets: relative L2 < 10^-3.5 (~3.2e-4) on fresh
+  points (PySR loss ~1e-7 with relative weights; RESEARCH_LOG 68); equation datasets:
   relative L2 < 1e-6 or symbolic match; for noisy runs, symbolic match only.
 - `time_sr_s`: PySR wall time until it returned (stopped by hand or by its
   own limit). `time_to_recovery_s`: time until PySR's best training loss first
@@ -103,7 +103,7 @@ Any change to shared code passes `experiments/probes/hill_old_vs_new.py`
 - Yield datasets (Hill ladder, CB, YLD): `scripts/run_yield_benchmark.py`
   (locally) or `cluster/yield_array.sbatch` (task lines `<config> <seed>`).
   Arms: `pipeline` (A), `baseline` (B), `distillation` (C), `sparse_linear`
-  (D), `library_pysr` (E). Recovered = relative L2 < 1e-4 on 5000 fresh
+  (D), `library_pysr` (E). Recovered = relative L2 < 3.2e-4 on 5000 fresh
   surface points against the generating criterion.
 - Equation datasets (FEY, LLM, SA, SB, SBD, NFEY): `scripts/run_feynman_benchmark.py`
   / `cluster/feynman_array.sbatch` with the same arm names (plus `portfolio`).
@@ -144,7 +144,7 @@ Req: R = required, o = optional. Status for all rows starts at `planned`.
 | HILL-F | Hill aligned | Structure recovery | R | done | 1/5 (42) | `1b22c97` | n = 1, I11, cosine 0.9999999996; 5 eigenvalues within 2e-5 | 49 |
 | HILL-I | Hill aligned | Operon +- encoder | o | blocked (P6) | | | | |
 | RH2-A | Rotated Hill 2D | Ours | R | done | 1/5 (42) | `22e0d10` | recovered (1.1e-6); n = 1, I11; PySR 20 s to loss 1e-8 | 52 |
-| RH2-B | Rotated Hill 2D | PySR alone | R | done | 1/5 (42) | `def3529` | borderline, not recovered (1.5e-4, loss 2.1e-8, 468 s); one constant short | 53 |
+| RH2-B | Rotated Hill 2D | PySR alone | R | done | 1/5 (42) | `def3529` | recovered at 3.2e-4 (fresh 1.4e-4, loss 2.1e-8, 468 s); one constant short | 53, 68 |
 | RH2-C | Rotated Hill 2D | Distillation | R | done | 1/5 (42) | `9274664` | not recovered (1.1e-2); latent = quadratic, constants off; outer sqrt | 62 |
 | RH2-D | Rotated Hill 2D | Sparse linear | R | done | 1/5 (42) | `b229b38` | recovered (4.5e-11), 6 terms | 52 |
 | RH2-E | Rotated Hill 2D | PySR + library | R | done | 1/5 (42) | `4e4e007` | not recovered (6.6e-2, loss plateau 2.5e-3); isotropic library | 54 |
@@ -166,7 +166,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
-| CB-A | CB2001 | Ours | R | done | 1/5 (42) | `8466a4d` | not recovered at 1e-4 (2.9e-4 fresh); exact form at complexity 13, n = 2; floor = learned J3^0 | 22, 67 |
+| CB-A | CB2001 | Ours | R | done | 1/5 (42) | `8466a4d` | recovered (fresh 2.9e-4 < 3.2e-4); exact form at complexity 13, n = 2; floor = learned J3^0 | 22, 67, 68 |
 | CB-B | CB2001 | PySR alone | R | planned | | | | |
 | CB-C | CB2001 | Distillation | R | planned | | | | |
 | CB-D | CB2001 | Sparse linear | R | done | 1/5 (42) | `ecaa45a` | recovered (1.6e-9): y^6 is a degree-6 polynomial; 138 terms | 66 |

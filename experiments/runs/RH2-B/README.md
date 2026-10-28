@@ -33,3 +33,6 @@ case: the loss (2.1e-8) is below the 1e-7 "found" rule of thumb but the
 relative error is just above our 1e-4 threshold. Our pipeline reached
 1.1e-6 at complexity 4 (RH2-A). Several seeds needed: another seed may
 well cross the threshold.
+
+Update 2026-10-28: yield recovery threshold is now relative L2 < 10^-3.5
+(~3.2e-4, PySR loss ~1e-7; RESEARCH_LOG 68), so this run counts as recovered.

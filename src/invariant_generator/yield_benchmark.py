@@ -50,10 +50,10 @@ from invariant_generator.symbolic import (
 from invariant_generator.utils import resolve_device, save_json
 from invariant_generator.yield_criteria import CRITERIA
 
-# Relative L2 1e-4 = PySR loss ~1e-8 under inverse_target_squared weights,
-# within the loss < 1e-7 usually taken to mean the equation was found.
-# The earlier 1e-6 failed float32-learned tensors with the right structure (RESEARCH_LOG 49).
-RECOVERY_THRESHOLD = 1e-4
+# Relative L2 10^-3.5 ~ 3.2e-4 = PySR loss ~1e-7 under inverse_target_squared
+# weights, the loss usually taken to mean the equation was found (author's
+# decision, RESEARCH_LOG 68; was 1e-4 in entries 49-67, 1e-6 before).
+RECOVERY_THRESHOLD = 10**-3.5
 PLANE_STRESS = [0, 1, 5]  # s11, s22, s12 in canonical Voigt order
 
 

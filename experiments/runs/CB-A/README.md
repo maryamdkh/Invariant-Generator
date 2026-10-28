@@ -43,3 +43,6 @@ pattern as the Hill ladder (exact structure, error floor = learned
 constants), at a larger floor because 29 coefficients are learned. PySR's
 "best" selection prefers a longer, wrong-form equation that is marginally
 lower in loss.
+
+Update 2026-10-28: yield recovery threshold is now relative L2 < 10^-3.5
+(~3.2e-4, PySR loss ~1e-7; RESEARCH_LOG 68), so this run counts as recovered.

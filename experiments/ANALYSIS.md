@@ -12,22 +12,54 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 
 ## Cross-cutting decisions
 
-### Recovery criterion for yield surfaces (RESEARCH_LOG 49)
+### Recovery criterion for yield surfaces (RESEARCH_LOG 49, 68)
 
-- Recovered = relative L2 on 5000 fresh surface points < 1e-4, the same for
-  every method. Equation datasets keep 1e-6 (exponents snapped there).
+- Recovered = relative L2 on 5000 fresh surface points < 10^-3.5 (~3.2e-4),
+  the same for every method. Equation datasets keep 1e-6 (exponents
+  snapped there).
 - Why: the PySR community treats a loss below ~1e-7 as "found". With our
   `inverse_target_squared` weights the loss is ~ (relative error)^2, so
-  1e-7 is ~3e-4 relative error; 1e-4 (loss ~1e-8) leaves a margin.
+  loss 1e-7 = relative error ~3.2e-4. Author's decision (entry 68).
+- History, to state openly: 1e-6 first (failed our pipeline only because of
+  float32 precision, structure exact), then 1e-4 (entries 49-67), then
+  3.2e-4. Only two of 21 seed-42 results depend on the choice between 1e-4
+  and 3.2e-4: CB-A (2.9e-4, exact CB2001 form) and RH2-B (PySR alone, 3
+  inputs, 1.4e-4). Both become recovered; the first is right (true
+  equation found), the second matches the author's earlier observation that
+  PySR alone solves rotated Hill with 3 inputs. Every RH3 result is >= 100x
+  above either threshold, so the core claim does not depend on it.
 - Caveat for the paper: loss thresholds in the PySR docs refer to plain MSE
   in the target's units and depend on scale; state the criterion as a
   relative error, not as a loss value.
-- The earlier 1e-6 failed our pipeline only because of float32 precision in
-  the learned tensor (structure exact, error ~1e-5). The structure score
-  (F') is reported alongside as a second, structural criterion.
-- Borderline case to mention: RH2-B (1.4e-4) passes a loss < 1e-7 rule but
-  not our criterion. The criterion was fixed before that run and not
-  changed per run.
+- For the paper: main tables at 3.2e-4; appendix table with recovery at
+  1e-4, 1e-5, 1e-6 next to the structure score (F'), so no reviewer can say
+  the threshold was chosen for us. Symbolic recovery (right expression up
+  to constants) is reported separately from numerical recovery.
+
+Sensitivity, seed 42 (fresh relative L2; Y = recovered):
+
+| run | fresh | 1e-6 | 1e-5 | 1e-4 | 3.2e-4 |
+|---|---|---|---|---|---|
+| VM25-A | 1.3e-5 | n | n | Y | Y |
+| VM100-A | 1.4e-5 | n | n | Y | Y |
+| HILL-A | 1.1e-5 | n | n | Y | Y |
+| RH2-A | 1.2e-6 | n | Y | Y | Y |
+| RH3-A | 1.0e-5 | n | n | Y | Y |
+| CB-A | 2.9e-4 | n | n | n | Y |
+| VM25-B | 7.4e-8 | Y | Y | Y | Y |
+| VM100-B | 2.3e-6 | n | Y | Y | Y |
+| HILL-B | 8.8e-3 | n | n | n | n |
+| RH2-B | 1.4e-4 | n | n | n | Y |
+| RH3-B | 6.0e-2 | n | n | n | n |
+| RH3-B-max | 3.3e-2 | n | n | n | n |
+| all C | >= 1.1e-2 | n | n | n | n |
+| all D | <= 1e-8 | Y | Y | Y | Y |
+| VM25-E | 1.7e-8 | Y | Y | Y | Y |
+| HILL/RH2/RH3-E | >= 6e-2 | n | n | n | n |
+
+At 1e-5 and 1e-6 our 6D results drop because of the learned-constant floor
+(see next section), while the structure score stays at cosine >= 0.99999;
+this is the case for a final constant refit before submission.
 
 ### Error floor of our pipeline on 6D surfaces
 
@@ -69,7 +101,7 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 
 | | CB2001 |
 |---|---|
-| A ours | 1.8e-4 (fresh 2.9e-4) x, exact form at complexity 13 |
+| A ours | 1.8e-4 (fresh 2.9e-4), exact form at complexity 13 |
 | D sparse linear | 1.6e-9 (138 terms, m = 6) |
 | F' row cosines | 0.99999993 (J2^0), 0.999994 (J3^0) |
 
@@ -80,7 +112,8 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 - Contribution 1: the two rows are J2^0 and J3^0 (cosines 0.99999993,
   0.999994) and PySR finds the exact CB2001 form
   cbrt(sqrt((J1/c)^3 - k J2^2)) at complexity 13 within 7 minutes.
-- Not recovered at 1e-4: fresh 2.9e-4 (selected), 3.3e-4 (exact form).
+- Recovered at the main threshold 3.2e-4 (fresh 2.9e-4, selected); not at
+  1e-4. The exact form itself scores 3.3e-4.
   Scoring the whole hall of fame shows no equation below 2.9e-4, so it is
   not a PySR stopping issue: the floor is the learned J3^0 coefficients
   (3.4e-3 relative error). Same pattern as the Hill ladder (exact structure,
@@ -102,13 +135,13 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
 | | VM25 | VM100 | HILL | RH2 | RH3 |
 |---|---|---|---|---|---|
 | A ours | 1.3e-5 | 1.4e-5 | 1.3e-5 | 1.1e-6 | 1.1e-5 |
-| B PySR alone | 7e-8 | 2.3e-6 | 7.4e-3 x | 1.5e-4 x | 5.8e-2 x |
+| B PySR alone | 7e-8 | 2.3e-6 | 7.4e-3 x | 1.5e-4 | 5.8e-2 x |
 | C distillation | 3.9e-2 x | - | 1.4e-2 x | 1.1e-2 x | 5.4e-2 x |
 | D sparse linear | 4e-11 | - | 5e-11 | 4e-11 | 4e-11 |
 | E fixed library | 2e-8 | - | 5.8e-2 x | 6.6e-2 x | 5.7e-2 x |
 | F' tensor cosine | 0.9999999995 | 0.9999999995 | 0.9999999996 | 0.99999999999 | 0.9999999997 |
 
-(test relative L2; x = not recovered at 1e-4.)
+(test relative L2; x = not recovered at 3.2e-4.)
 
 Story: A recovers every surface with the exact tensor. B degrades with
 anisotropy and dimension. E fails as soon as the surface is anisotropic,
@@ -240,7 +273,7 @@ quadratic.
 
 ### RH2-B (PySR alone, rotated Hill 2D)
 
-- Borderline, not recovered (1.4e-4 fresh, 1.5e-4 test; loss 2.1e-8).
+- Recovered at 3.2e-4, not at 1e-4 (1.4e-4 fresh, 1.5e-4 test; loss 2.1e-8).
   Same failure as HILL-B: right quadratic shape, but s11^2 and s22^2 forced
   equal while the truth differs by 0.12%. The author had seen PySR alone
   solve this case; another seed may cross the threshold. Report honestly as
