@@ -177,6 +177,30 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   ("constant polishing", RESEARCH_LOG 22). It would likely push CB-A (and
   the Hill-ladder 1e-5 floor) well below 1e-4 without changing structure.
 
+## Yld2004-18p, 2090-T3 (seed 42)
+
+### YLD-D (sparse linear) and what it means for the paper (RESEARCH_LOG 72)
+
+- Recovered: m = 8, degree-8 library (3003 terms), 363 active terms, test
+  2.6e-7, ~26 s.
+- Why: with the integer exponent a = 8, sum_ij (S'_i - S''_j)^8 expands into
+  products tr(X'^(8-k)) tr(X''^k) of traces of powers of linear transforms
+  of the deviator, which are polynomials in sigma. Yld2004 at a = 8 is a
+  degree-8 polynomial, despite being written with principal values.
+- Consequence: every analytic yield surface in the paper so far (Hill
+  ladder, CB2001, Yld2004 a = 8) is a polynomial in sigma, so sparse linear
+  regression recovers all of them, at a cost that grows fast: 9 -> 21 ->
+  138 -> 363 active terms from libraries of 84 -> 924 -> 3003 columns, and
+  the user must know the right power m and degree in advance. Our pipeline
+  gives 1-2 interpretable invariants and a <= 13-node formula.
+- An accuracy advantage over D cannot be claimed on these surfaces. It needs
+  surfaces that are not polynomial (non-integer exponent, e.g. Yld2004 with
+  a = 8.5 or Hosford-type criteria, or CPFEM data without a closed form).
+  The honest framing for D: "SINDy-style regression is exact when the
+  surface is a polynomial and the degree is known; it yields hundreds of
+  coefficients without structure. Our method recovers the structure
+  (invariants, tensors, n) and a compact formula."
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |

@@ -1239,3 +1239,19 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   D exact (1.6e-9), E 2.6e-2; F' cosines 0.99999993 / 0.999994. The library
   contains everything CB2001 needs, so E vs A isolates the compression to
   n = 2. CB-I (Operon) postponed with P6. CB-D entry restored after rsync.
+
+## 72. Yld2004 prepared; sparse linear exact because a = 8 is an integer (2026-10-28)
+
+- `configs/yld/yld2004_2090T3.toml`: same as the CB2001 paper config
+  except data/output paths (orthotropic degree-2/3 features, graded Stage 2,
+  author's PySR settings + cube/cbrt). Local smoke run (300 epochs, PySR
+  2 min, scratch): runs end to end (n = 1, 2.9e-2; too short to judge).
+- YLD-D (local, `--sparse-max-power 8`): m = 8, degree-8 library (3003
+  terms), 363 active terms, fresh 9.0e-7, test 2.6e-7: recovered.
+  With a = 8, sum_ij (S'_i - S''_j)^8 = sum_k C(8,k)(-1)^k tr(X'^(8-k))
+  tr(X''^k), a polynomial in sigma of degree 8.
+- Consequence: all analytic surfaces in the paper are polynomials; D is
+  exact on all of them (9, 21, 138, 363 terms). The accuracy argument
+  against D needs non-polynomial data (non-integer exponent or CPFEM).
+  Decision pending (author): how to run YLD-A and whether to add a
+  non-polynomial surface. Analysis in `experiments/ANALYSIS.md`.

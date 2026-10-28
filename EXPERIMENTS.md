@@ -66,7 +66,7 @@ structure_score, time_encoder_s, time_sr_s, time_to_recovery_s, notes`
 | RH2 | Rotated Hill, plane stress (s11, s22, s12) | 3 | `data/hill_ladder_full/rotatedhill2d_full.hdf` (plane-stress section of the RH3 tensor), `configs/hill_ladder/rh2.toml` | exists |
 | RH3 | Rotated Hill, 3D | 6 | `data/hill_ladder_full/rotatedhill_full.hdf`, `configs/hill_ladder/rh3.toml` | exists |
 | CB | CB2001, 2090-T3 | 6 | `data/yield_benchmarks/cb2001_2090T3.hdf` (`scripts/prepare_yield_benchmark.py`), `configs/cb/cb2001_2090T3.toml` | exists |
-| YLD | Yld2004-18p | 6 | `scripts/prepare_yield_benchmark.py` | exists |
+| YLD | Yld2004-18p | 6 | `data/yield_benchmarks/yld2004_2090T3.hdf`, `configs/yld/yld2004_2090T3.toml` | exists |
 | DX | DX56D steel, CPFEM (proposed) | 6 | `data/dx56d_miller.hdf`, see `EXTERNAL_DATASETS.md` | exists; row not yet agreed |
 | AU | Single-crystal gold, CPFEM (proposed) | 6 | `data/single_crystal_gold_ep002.hdf` | exists; row not yet agreed |
 | SA | Synthetic (a): rotated quadratic forms, d = 2, 3, 4, 6, 8, 10, 12 (70 problems) | 2-12 | `scripts/prepare_synthetic_benchmark.py` -> `data/synthetic/sa` (gitignored, regenerate), config `configs/synthetic_sa.toml` | exists |
@@ -176,7 +176,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 | YLD-A | Yld2004-18p | Ours | R | planned | | | | |
 | YLD-B | Yld2004-18p | PySR alone | R | planned | | | | |
 | YLD-C | Yld2004-18p | Distillation | R | planned | | | | |
-| YLD-D | Yld2004-18p | Sparse linear | o | planned | | | | |
+| YLD-D | Yld2004-18p | Sparse linear | o | done | 1/5 (42) | `a09ac20`+ | recovered (2.6e-7): a = 8 makes Yld2004 a degree-8 polynomial; 363 terms | 72 |
 | YLD-E | Yld2004-18p | PySR + library | o | planned | | | | |
 | YLD-I | Yld2004-18p | Operon +- encoder | o | blocked (P6) | | | | |
 
