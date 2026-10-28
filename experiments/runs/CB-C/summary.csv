@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+CB-C,CB,cb2001_2090T3,C,42,86541cb,False,0.03915925527328476,,"y = cbrt((0.12672489299099038*z7 - 1.089226208451481)**6 - 0.3252633563210743); z7 = (quadratic in s, no cubic term) / (s12^2 + s13^2 + s23^2)^(1/9) (see benchmark_summary.json)",,1,2,,195.4666,858.5243,,"two PySR searches stopped by hand; latent search finds only the quadratic part, no J3^0; composed 3.9e-2"

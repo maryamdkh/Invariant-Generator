@@ -103,6 +103,7 @@ this is the case for a final constant refit before submission.
 |---|---|
 | A ours | 1.8e-4 (fresh 2.9e-4), exact form at complexity 13 |
 | B PySR alone | 2.4e-2 x |
+| C distillation | 3.9e-2 x |
 | D sparse linear | 1.6e-9 (138 terms, m = 6) |
 | F' row cosines | 0.99999993 (J2^0), 0.999994 (J3^0) |
 
@@ -118,6 +119,20 @@ this is the case for a final constant refit before submission.
   invariants it is a 13-node formula (CB-A). Second case after RH3 where
   the encoder turns an unsolvable search into an easy one; this one is
   non-quadratic and needs n = 2 (contributions 1 and 3).
+
+### CB-C (distillation)
+
+- Not recovered (3.9e-2). One latent kept; the network is accurate (train
+  nrmse 2.8e-3), but the inner PySR search (z from 6 raw inputs, at the
+  maxsize cap) returns only the quadratic, Hill-like part with an ad hoc
+  (shear^2)^(1/9) divisor, without the cubic J3^0, exactly the gap of PySR
+  alone (CB-B). Composed error is worse than PySR alone (3.9e-2 vs 2.4e-2):
+  splitting the search adds the outer step's error on top.
+- Same conclusion as RH3-C: distillation still needs a symbolic search over
+  all raw inputs to explain its latent; our encoder's latents are the
+  invariants by construction (contribution 1). Here, in addition, one
+  latent is not enough (CB2001 needs two invariants), and distillation's
+  L1 kept only one: our Stage 1 chooses n = 2 explicitly (contribution 3).
 
 ### CB-A / CB-F (ours)
 

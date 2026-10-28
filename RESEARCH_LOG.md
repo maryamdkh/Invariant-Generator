@@ -1218,3 +1218,13 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   (s22 - s33)^2), a quadratic surface without the cubic J3^0. Fresh
   relative L2 2.4e-2: not recovered. CB-A found the exact form at
   complexity 13. CB-D entry restored in benchmark_summary.json after rsync.
+
+## 70. CB-C (2026-10-28)
+
+- Distillation on CB2001; `experiments/runs/CB-C/`. One latent kept (next
+  2%); network nrmse 2.8e-3. Inner PySR (at the maxsize cap): quadratic
+  Hill-like form divided by (shear^2)^(1/9), no cubic term; outer
+  cbrt((0.127 z - 1.089)^6 - 0.325). Composed fresh 4.1e-2, test 3.9e-2: not
+  recovered, worse than PySR alone (CB-B 2.4e-2). Distillation kept one
+  latent where CB2001 needs two; Stage 1 of our pipeline chooses n = 2.
+  CB-D entry restored after rsync.

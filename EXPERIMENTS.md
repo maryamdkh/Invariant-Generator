@@ -168,7 +168,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 |---|---|---|---|---|---|---|---|---|
 | CB-A | CB2001 | Ours | R | done | 1/5 (42) | `8466a4d` | recovered (fresh 2.9e-4 < 3.2e-4); exact form at complexity 13, n = 2; floor = learned J3^0 | 22, 67, 68 |
 | CB-B | CB2001 | PySR alone | R | done | 1/5 (42) | `35a378d` | not recovered (2.4e-2, loss plateau 3.6e-4); quadratic only, no J3^0 | 69 |
-| CB-C | CB2001 | Distillation | R | planned | | | | |
+| CB-C | CB2001 | Distillation | R | done | 1/5 (42) | `86541cb` | not recovered (3.9e-2); inner search quadratic only, no J3^0 | 70 |
 | CB-D | CB2001 | Sparse linear | R | done | 1/5 (42) | `ecaa45a` | recovered (1.6e-9): y^6 is a degree-6 polynomial; 138 terms | 66 |
 | CB-E | CB2001 | PySR + library | R | planned | | | | |
 | CB-F | CB2001 | Structure recovery (rows vs J2^0, J3^0) | R | done | 1/5 (42) | `8466a4d` | cosines 0.99999993 (J2^0), 0.999994 (J3^0) | 67 |
