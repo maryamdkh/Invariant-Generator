@@ -169,7 +169,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 | CB-A | CB2001 | Ours | R | planned (old: n = 2, rows vs J2^0, J3^0 cosine 0.999999, 1 seed) | | | | 22 |
 | CB-B | CB2001 | PySR alone | R | planned | | | | |
 | CB-C | CB2001 | Distillation | R | planned | | | | |
-| CB-D | CB2001 | Sparse linear | R | done | 1/5 (42) | (this commit) | recovered (1.6e-9): y^6 is a degree-6 polynomial; 138 terms | 66 |
+| CB-D | CB2001 | Sparse linear | R | done | 1/5 (42) | `ecaa45a` | recovered (1.6e-9): y^6 is a degree-6 polynomial; 138 terms | 66 |
 | CB-E | CB2001 | PySR + library | R | planned | | | | |
 | CB-F | CB2001 | Structure recovery (rows vs J2^0, J3^0) | R | blocked (CB-A) | | | | |
 | CB-I | CB2001 | Operon +- encoder | o | blocked (P6) | | | | |
