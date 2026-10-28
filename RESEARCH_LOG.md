@@ -1155,3 +1155,19 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   3.4e-2. The cap is not what blocks PySR; the claim "PySR alone fails on
   rotated Hill 3D" survives the obvious reviewer objection. Analysis in
   `experiments/ANALYSIS.md`.
+
+## 66. CB2001 paper config; sparse linear exact on CB2001; inverse-power bug (2026-10-28)
+
+- `configs/cb/cb2001_2090T3.toml`: encoder/training from
+  configs/yield_cb2001_2090T3.toml (entry 22: n = 2, rows span J2^0, J3^0),
+  [symbolic] = the author's Hill-ladder PySR settings + cube/cbrt (needed
+  by the CB2001 form; constraints and nesting limits as for square/sqrt).
+  Same config for all CB arms. E on CB = PySR on the 29 orthotropic
+  invariant monomials, no encoder.
+- D gained `--sparse-max-power` (default 3: Hill-ladder results unchanged,
+  RH3-D rechecked: identical 4.07e-11); library degree max(3, m).
+- Bug: `_inverse_power` used sqrt for every even m (m = 4, 6 inverted
+  wrongly); fixed. m <= 3 unaffected (all earlier D runs, Feynman D arm).
+- CB-D (local): m = 6, 138 terms, test 1.6e-9: recovered. CB2001 is a
+  degree-6 polynomial. Entry 40's "D fails on CB2001" is withdrawn; the
+  accuracy argument against D moves to Yld2004 and CPFEM (ANALYSIS.md).

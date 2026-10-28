@@ -50,6 +50,21 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
   over D must be shown on surfaces that are not polynomial in sigma
   (CB2001, Yld2004, CPFEM). A reviewer will raise this; address it upfront.
 
+### Sparse linear (D) also solves CB2001 (RESEARCH_LOG 66)
+
+- CB2001 is y^6 proportional to J2^0^3 - c J3^0^2, a degree-6 polynomial in
+  sigma. With powers up to 6 and a degree-6 library (924 terms), STLSQ is
+  exact (1.6e-9) with 138 active terms. Earlier "D fails on CB2001" (2.1e-2,
+  RESEARCH_LOG 40) came from capping D at m = 3, plus a bug in the inverse
+  of even powers (fixed).
+- So CB2001 does not show an accuracy advantage over D either. Our
+  advantage there is interpretability and compactness: n = 2 encoded
+  variables (J2^0, J3^0) and a short nested formula vs 138 coefficients.
+- Accuracy over D must come from surfaces that are not polynomial in sigma:
+  Yld2004-18p (exponent 8 on differences of principal values of linear
+  transforms: not a polynomial) and CPFEM data. Plan the paper's argument
+  around that; do not claim "D cannot do CB2001".
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |

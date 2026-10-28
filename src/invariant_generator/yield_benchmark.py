@@ -333,24 +333,30 @@ def stlsq(Theta: np.ndarray, target: np.ndarray, threshold: float, *, ridge: flo
 
 
 def _inverse_power(value: np.ndarray, m: int) -> np.ndarray:
-    return np.sign(value) * np.abs(value) ** (1.0 / m) if m % 2 else np.sqrt(np.clip(value, 0.0, None))
+    return np.sign(value) * np.abs(value) ** (1.0 / m) if m % 2 else np.clip(value, 0.0, None) ** (1.0 / m)
 
 
 def run_sparse_linear(config: Config, output_dir: Path, fresh: tuple[np.ndarray, np.ndarray],
-                      *, degree: int = 3, powers: tuple[int, ...] = (1, 2, 3),
+                      *, degree: int = 3, max_power: int = 3,
                       thresholds: tuple[float, ...] = tuple(10.0 ** np.arange(-8, 0))) -> dict[str, Any]:
     """y^m = polynomial(raw components) with STLSQ; (m, threshold) chosen on a
-    held-out 10% of the training rows, then refit on all training rows."""
+    held-out 10% of the training rows, then refit on all training rows.
+
+    m runs over 1..max_power; the library degree is max(degree, m), so a
+    surface whose m-th power is a degree-m polynomial (CB2001: m = 6) is
+    representable. The defaults reproduce the Hill-ladder runs."""
     output_dir.mkdir(parents=True, exist_ok=True)
     data = prepare_training_data(config)
     active = [j for j in range(data.X_train.shape[1]) if np.any(data.X_train[:, j] != 0)]
     names = [data.feature_names[j] for j in active]
-    Theta, terms = _polynomial_library(data.X_train[:, active], degree)
+    libraries = {d: _polynomial_library(data.X_train[:, active], d)
+                 for d in {max(degree, m) for m in range(1, max_power + 1)}}
     rng = np.random.default_rng(config.train.seed)
-    holdout = rng.random(len(Theta)) < 0.1
+    holdout = rng.random(len(data.X_train)) < 0.1
     started = time.perf_counter()
     best: tuple[float, int, int, float] | None = None  # (error, terms, m, threshold)
-    for m in powers:
+    for m in range(1, max_power + 1):
+        Theta = libraries[max(degree, m)][0]
         for threshold in thresholds:
             xi = stlsq(Theta[~holdout], data.y_train[~holdout] ** m, threshold)
             prediction = _inverse_power(Theta[holdout] @ xi, m)
@@ -360,6 +366,8 @@ def run_sparse_linear(config: Config, output_dir: Path, fresh: tuple[np.ndarray,
                 best = candidate
     assert best is not None
     _, _, m, threshold = best
+    degree = max(degree, m)
+    Theta, terms = libraries[degree]
     xi = stlsq(Theta, data.y_train ** m, threshold)
     elapsed = time.perf_counter() - started
 
@@ -374,6 +382,7 @@ def run_sparse_linear(config: Config, output_dir: Path, fresh: tuple[np.ndarray,
         "power": m,
         "threshold": threshold,
         "active_terms": int(np.count_nonzero(xi)),
+        "library_degree": degree,
         "library_size": len(terms),
         "fit_seconds": elapsed,
         **_score(predict(X_fresh), y_fresh, predict(data.X_test), data.y_test),
@@ -424,6 +433,7 @@ def run_distillation(config: Config, output_dir: Path, fresh: tuple[np.ndarray, 
 
 def run_yield_benchmark(
     config: Config, *, results_dir: Path, arms: tuple[str, ...], resume: bool = True,
+    sparse_max_power: int = 3,
 ) -> Path:
     """One dataset, several arms; writes <results_dir>/benchmark_summary.json."""
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -452,7 +462,8 @@ def run_yield_benchmark(
             elif arm == "library_pysr":
                 row[arm] = run_library_pysr(config, results_dir / name / "library_pysr", fresh)
             elif arm == "sparse_linear":
-                row[arm] = run_sparse_linear(config, results_dir / name / "sparse_linear", fresh)
+                row[arm] = run_sparse_linear(config, results_dir / name / "sparse_linear", fresh,
+                                             max_power=sparse_max_power)
             elif arm == "distillation":
                 row[arm] = run_distillation(config, results_dir / name / "distillation", fresh)
             else:

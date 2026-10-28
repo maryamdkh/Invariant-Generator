@@ -26,6 +26,8 @@ def main() -> None:
     parser.add_argument("--numprocs", type=int, default=None)
     parser.add_argument("--device", default=None, help="Override [train].device, e.g. cpu.")
     parser.add_argument("--epochs", type=int, default=None, help="Override [train].epochs (smoke tests).")
+    parser.add_argument("--sparse-max-power", type=int, default=3,
+                        help="sparse_linear (D): fit y^m for m = 1..this, library degree max(3, m).")
     args = parser.parse_args()
 
     import_module("pysr")  # Julia before Torch
@@ -45,7 +47,8 @@ def main() -> None:
     if args.epochs is not None:
         config.train.epochs = args.epochs
     results_dir = args.results_dir if args.results_dir.is_absolute() else PROJECT_ROOT / args.results_dir
-    summary = run_yield_benchmark(config, results_dir=results_dir, arms=tuple(args.arms.split(",")))
+    summary = run_yield_benchmark(config, results_dir=results_dir, arms=tuple(args.arms.split(",")),
+                                  sparse_max_power=args.sparse_max_power)
     print(f"[YIELD] summary: {summary}")
 
 

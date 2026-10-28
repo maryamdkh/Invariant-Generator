@@ -65,7 +65,7 @@ structure_score, time_encoder_s, time_sr_s, time_to_recovery_s, notes`
 | HILL | Hill, aligned axes | 6 | `data/hill_ladder_full/hill_full.hdf`, `configs/hill_ladder/hill.toml` | exists |
 | RH2 | Rotated Hill, plane stress (s11, s22, s12) | 3 | `data/hill_ladder_full/rotatedhill2d_full.hdf` (plane-stress section of the RH3 tensor), `configs/hill_ladder/rh2.toml` | exists |
 | RH3 | Rotated Hill, 3D | 6 | `data/hill_ladder_full/rotatedhill_full.hdf`, `configs/hill_ladder/rh3.toml` | exists |
-| CB | CB2001, 2090-T3 | 6 | `scripts/prepare_yield_benchmark.py` | exists |
+| CB | CB2001, 2090-T3 | 6 | `data/yield_benchmarks/cb2001_2090T3.hdf` (`scripts/prepare_yield_benchmark.py`), `configs/cb/cb2001_2090T3.toml` | exists |
 | YLD | Yld2004-18p | 6 | `scripts/prepare_yield_benchmark.py` | exists |
 | DX | DX56D steel, CPFEM (proposed) | 6 | `data/dx56d_miller.hdf`, see `EXTERNAL_DATASETS.md` | exists; row not yet agreed |
 | AU | Single-crystal gold, CPFEM (proposed) | 6 | `data/single_crystal_gold_ep002.hdf` | exists; row not yet agreed |
@@ -169,7 +169,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 | CB-A | CB2001 | Ours | R | planned (old: n = 2, rows vs J2^0, J3^0 cosine 0.999999, 1 seed) | | | | 22 |
 | CB-B | CB2001 | PySR alone | R | planned | | | | |
 | CB-C | CB2001 | Distillation | R | planned | | | | |
-| CB-D | CB2001 | Sparse linear | R | planned | | | | |
+| CB-D | CB2001 | Sparse linear | R | done | 1/5 (42) | (this commit) | recovered (1.6e-9): y^6 is a degree-6 polynomial; 138 terms | 66 |
 | CB-E | CB2001 | PySR + library | R | planned | | | | |
 | CB-F | CB2001 | Structure recovery (rows vs J2^0, J3^0) | R | blocked (CB-A) | | | | |
 | CB-I | CB2001 | Operon +- encoder | o | blocked (P6) | | | | |
