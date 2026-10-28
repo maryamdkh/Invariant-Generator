@@ -1,2 +1,2 @@
 experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
-YLD-D,YLD,yld2004_2090T3,D,42,a09ac20+,True,2.6029543680384357e-07,,y^8 = 363-term degree-8 polynomial in s11..s12 (see benchmark_summary.json),363,,,,,,,"m = 8, degree-8 library (3003 terms), --sparse-max-power 8; fit ~26 s locally"
+YLD-D,YLD,yld2004_2090T3,D,42,95bb0ba,True,2.6029543680384357e-07,,y^8 = 363-term degree-8 polynomial in s11..s12 (see benchmark_summary.json),363,,,,,,,"m = 8, degree-8 library (3003 terms), --sparse-max-power 8; fit ~26 s locally"
