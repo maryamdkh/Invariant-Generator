@@ -1143,3 +1143,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   heap_size_hint_in_bytes. `configs/hill_ladder/rh3_maxsize150.toml` sets
   6 GB; rerun with --numprocs 8 and srun --mem=128G. Benchmark TOML writer
   skips the key when None. hill_old_vs_new vs ad2c574: IDENTICAL; tests pass.
+
+## 65. RH3-B-max: a larger maxsize does not rescue PySR alone (2026-10-28)
+
+- PySR alone on rotated Hill 3D with maxsize 150 (heap 6 GB/process, 8
+  processes, srun --mem=128G); `experiments/runs/RH3-B-max/`. Stopped by
+  hand after 5502 s. Hall of fame never beyond complexity 80 (exact form
+  ~143); best loss 7.8e-4 (complexity 80); selected complexity 42 (loss
+  9.3e-4), fresh relative L2 3.3e-2, test 3.4e-2. Not recovered.
+- vs RH3-B (maxsize 40, 1056 s): loss 2.2e-3 -> 7.8e-4, error 5.8e-2 ->
+  3.4e-2. The cap is not what blocks PySR; the claim "PySR alone fails on
+  rotated Hill 3D" survives the obvious reviewer objection. Analysis in
+  `experiments/ANALYSIS.md`.

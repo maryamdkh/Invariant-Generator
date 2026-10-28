@@ -224,6 +224,13 @@ quadratic.
   may say PySR alone only needed a larger maxsize. Planned check: RH3-B with
   maxsize 150 (RH3-B-max; the expanded exact form needs ~143 with
   constants costing 2, and fits the other constraints). If it still fails, the claim is much stronger.
+- RH3-B-max (done, RESEARCH_LOG 65): with maxsize 150 and 92 min (5x
+  RH3-B's time), PySR alone never went beyond complexity 80, best loss
+  7.8e-4, test error 3.4e-2 (RH3-B: 5.8e-2). Not recovered, four orders of
+  magnitude from the threshold. The cap was not the reason: the search does
+  not find its way to a 143-node formula. Answer to the reviewer: raising
+  the cap and the time helps a little; it does not solve the problem. The
+  encoder turns it into a 4-node problem PySR solves in 20 s.
 - Same settings for every arm (fairness). Distillation's inner searches use
   plain MSE instead of relative weights because the latents cross zero; its
   outer search uses the config unchanged.
