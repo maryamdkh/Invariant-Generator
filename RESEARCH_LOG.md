@@ -1255,3 +1255,18 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   against D needs non-polynomial data (non-integer exponent or CPFEM).
   Decision pending (author): how to run YLD-A and whether to add a
   non-polynomial surface. Analysis in `experiments/ANALYSIS.md`.
+
+## 73. YLD-A: stress test, best quadratic approximation (2026-10-28)
+
+- `experiments/runs/YLD-A/`: Stage 1 reference (29 features, no bottleneck)
+  test nrmse 5.8e-2; n = 1 accepted (9.7e-2 < 2 x reference); Stage 2 kept
+  all 29 terms; Stage 3 sqrt(J1)/1.643 (PySR stopped at loss 6.4e-4, 317 s).
+  Fresh 2.94e-2, test 2.88e-2: not recovered.
+- `experiments/probes/yld_polynomial_floor.py`
+  (`experiments/outputs/yld_polynomial_floor.json`): best y^m on all
+  degree-m monomials: 2 -> 2.91e-2, 3 -> 1.56e-1, 4 -> 1.58e-2,
+  6 -> 8.3e-3, 8 -> 4.1e-11. YLD-A = the best quadratic approximation; the
+  answer (degree 8) lies outside the degree-2/3 library.
+- Paper: Yld2004 is a limitation/stress test; a library of invariants of
+  learned linear transforms of the deviator would be the extension.
+  YLD-D entry restored after rsync.

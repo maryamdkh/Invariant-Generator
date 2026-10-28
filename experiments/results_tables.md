@@ -40,6 +40,7 @@ Recovered = relative L2 < 3.2e-4 on fresh points (yield; PySR loss ~1e-7). Struc
 | VM25-D | VM25 | D | 1 | [1] | 1.0 +- 0.0 | 3.54e-11 | - |
 | VM25-E | VM25 | E | 1 | [1] | 1.0 +- 0.0 | 1.85e-08 | - |
 | VM25-F | VM25 | F' | 0 | - | - | - | 0.9999999995 |
+| YLD-A | YLD | A | 1 | [0] | 0.0 +- 0.0 | 2.88e-02 | - |
 | YLD-D | YLD | D | 1 | [1] | 1.0 +- 0.0 | 2.60e-07 | - |
 
 | dataset | A | B | B (maxsize 150) | C | D | E | F' |
@@ -50,5 +51,5 @@ Recovered = relative L2 < 3.2e-4 on fresh points (yield; PySR loss ~1e-7). Struc
 | RH3 | 1.0/1 | 0.0/1 | 0.0/1 | 0.0/1 | 1.0/1 | 0.0/1 | - |
 | VM100 | 1.0/1 | 1.0/1 | - | - | - | - | - |
 | VM25 | 1.0/1 | 1.0/1 | - | 0.0/1 | 1.0/1 | 1.0/1 | - |
-| YLD | - | - | - | - | 1.0/1 | - | - |
+| YLD | 0.0/1 | - | - | - | 1.0/1 | - | - |
 

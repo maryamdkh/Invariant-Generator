@@ -201,6 +201,27 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   coefficients without structure. Our method recovers the structure
   (invariants, tensors, n) and a compact formula."
 
+### YLD-A (ours, stress test)
+
+- Not recovered (2.9e-2). Stage 1 accepted n = 1 because the reference
+  model on the 29 degree-2/3 features was itself weak (5.8e-2) and the
+  rule is "within 2x the reference"; Stage 2 kept all 29 terms; PySR
+  returned sqrt(J1), a Hill-type surface.
+- 2.94e-2 equals the best quadratic approximation of Yld2004 (2.91e-2).
+  Polynomial floors by degree: 2 -> 2.9e-2, 4 -> 1.6e-2, 6 -> 8.3e-3,
+  8 -> exact. The answer is outside the library (degree <= 3), so the
+  pipeline returns the best structure its library allows: an honest
+  limitation, not a failure of the encoder idea.
+- For the paper: present Yld2004 as a limitation/stress test. The library
+  determines what can be recovered; Yld2004 needs invariants of two linear
+  transforms of the deviator (traces of powers up to 8, or principal
+  values), i.e. a library extension in the spirit of contribution 2
+  (learned linear transforms C', C'' inside the features). Future work, or a
+  targeted extension if time allows.
+- Also worth stating: the relative-to-reference acceptance in Stage 1
+  silently inherits the reference model's weakness; with a poor reference
+  it accepts too small an n. A note for the method section.
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |

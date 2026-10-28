@@ -173,7 +173,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 | CB-E | CB2001 | PySR + library | R | done | 1/5 (42) | `122e479` | not recovered (2.6e-2, plateau 3.9e-4); quadratic monomials only | 71 |
 | CB-F | CB2001 | Structure recovery (rows vs J2^0, J3^0) | R | done | 1/5 (42) | `8466a4d` | cosines 0.99999993 (J2^0), 0.999994 (J3^0) | 67 |
 | CB-I | CB2001 | Operon +- encoder | o | blocked (P6) | | | | |
-| YLD-A | Yld2004-18p | Ours | R | planned | | | | |
+| YLD-A | Yld2004-18p | Ours (stress test) | R | done | 1/5 (42) | `2bd3f48` | not recovered (2.9e-2) = best quadratic approximation; library degree <= 3, answer degree 8 | 73 |
 | YLD-B | Yld2004-18p | PySR alone | R | planned | | | | |
 | YLD-C | Yld2004-18p | Distillation | R | planned | | | | |
 | YLD-D | Yld2004-18p | Sparse linear | o | done | 1/5 (42) | `95bb0ba` | recovered (2.6e-7): a = 8 makes Yld2004 a degree-8 polynomial; 363 terms | 72 |

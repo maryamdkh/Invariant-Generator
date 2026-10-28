@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+YLD-A,YLD,yld2004_2090T3,A,42,2bd3f48,False,0.028814121241560495,,"sqrt(J1) / 1.6429234167709985; J1 = 29-term degree-2/3 orthotropic combination (quadratic dominant)",5,1,,,325.4802,317.2150,,"stress test: library degree <= 3, Yld2004 a=8 is degree 8; result = best quadratic approximation (2.91e-2); reference model 5.8e-2 so n = 1 accepted"
