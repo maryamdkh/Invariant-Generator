@@ -1171,3 +1171,23 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - CB-D (local): m = 6, 138 terms, test 1.6e-9: recovered. CB2001 is a
   degree-6 polynomial. Entry 40's "D fails on CB2001" is withdrawn; the
   accuracy argument against D moves to Yld2004 and CPFEM (ANALYSIS.md).
+
+## 67. CB-A and CB-F (2026-10-28)
+
+- CB-A (`experiments/runs/CB-A/`): Stage 1 n = 2 (n = 1 rejected, 7.0e-2);
+  Stage 2 graded rows: 9 quadratic and 20 cubic terms. PySR stopped by hand
+  after 434 s (loss ~4e-8). Exact CB2001 form at complexity 13 (loss
+  8.3e-8, fresh 3.3e-4); selected complexity 22 (fresh 2.9e-4, test
+  1.8e-4). Not recovered at 1e-4.
+- `experiments/probes/score_hall_of_fame.py`: every hall-of-fame equation
+  scored on fresh points (`experiments/outputs/cb2001_hall_of_fame_scores.json`);
+  none below 2.9e-4.
+- CB-F with `experiments/probes/cb_structure_recovery.py`
+  (`experiments/outputs/structure_recovery_cb2001.json`): J1 = J2^0 (cosine
+  0.99999993, coefficient error 3.7e-4), J2 = J3^0 (0.999994, 3.4e-3). The
+  learned J3^0 coefficients set the 3e-4 floor.
+- Data note: the CB2001 file is labelled mandel_3d but y = criterion(stored
+  columns) to 6e-16 (no sqrt 2 on shears); the probe uses the columns as
+  stored. Scoring in yield_benchmark is consistent (load_truth applies the
+  criterion to the same columns).
+- benchmark_summary.json restored with CB-D after the rsync overwrote it.

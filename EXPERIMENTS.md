@@ -166,12 +166,12 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
-| CB-A | CB2001 | Ours | R | planned (old: n = 2, rows vs J2^0, J3^0 cosine 0.999999, 1 seed) | | | | 22 |
+| CB-A | CB2001 | Ours | R | done | 1/5 (42) | `8466a4d` | not recovered at 1e-4 (2.9e-4 fresh); exact form at complexity 13, n = 2; floor = learned J3^0 | 22, 67 |
 | CB-B | CB2001 | PySR alone | R | planned | | | | |
 | CB-C | CB2001 | Distillation | R | planned | | | | |
 | CB-D | CB2001 | Sparse linear | R | done | 1/5 (42) | `ecaa45a` | recovered (1.6e-9): y^6 is a degree-6 polynomial; 138 terms | 66 |
 | CB-E | CB2001 | PySR + library | R | planned | | | | |
-| CB-F | CB2001 | Structure recovery (rows vs J2^0, J3^0) | R | blocked (CB-A) | | | | |
+| CB-F | CB2001 | Structure recovery (rows vs J2^0, J3^0) | R | done | 1/5 (42) | `8466a4d` | cosines 0.99999993 (J2^0), 0.999994 (J3^0) | 67 |
 | CB-I | CB2001 | Operon +- encoder | o | blocked (P6) | | | | |
 | YLD-A | Yld2004-18p | Ours | R | planned | | | | |
 | YLD-B | Yld2004-18p | PySR alone | R | planned | | | | |

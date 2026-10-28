@@ -65,6 +65,38 @@ All results below are seed 42 only unless stated; claims need 5 seeds.
   transforms: not a polynomial) and CPFEM data. Plan the paper's argument
   around that; do not claim "D cannot do CB2001".
 
+## CB2001, 2090-T3 (seed 42)
+
+| | CB2001 |
+|---|---|
+| A ours | 1.8e-4 (fresh 2.9e-4) x, exact form at complexity 13 |
+| D sparse linear | 1.6e-9 (138 terms, m = 6) |
+| F' row cosines | 0.99999993 (J2^0), 0.999994 (J3^0) |
+
+### CB-A / CB-F (ours)
+
+- Contribution 3 shown: Stage 1 rejects n = 1 (7.0e-2) and accepts n = 2
+  (6.8e-3), the true number of generalized invariants.
+- Contribution 1: the two rows are J2^0 and J3^0 (cosines 0.99999993,
+  0.999994) and PySR finds the exact CB2001 form
+  cbrt(sqrt((J1/c)^3 - k J2^2)) at complexity 13 within 7 minutes.
+- Not recovered at 1e-4: fresh 2.9e-4 (selected), 3.3e-4 (exact form).
+  Scoring the whole hall of fame shows no equation below 2.9e-4, so it is
+  not a PySR stopping issue: the floor is the learned J3^0 coefficients
+  (3.4e-3 relative error). Same pattern as the Hill ladder (exact structure,
+  floor = precision of learned constants), larger here because 29
+  coefficients are learned instead of a 6x6 tensor.
+- Under a "loss < 1e-7 means found" reading (loss 8e-8 at the exact form)
+  this counts as found; under our relative-error criterion it does not. The
+  author's decision on the criterion settles it (see the criterion section).
+- PySR's model_selection = "best" picked complexity 22 (loss 4.3e-8, not the
+  exact form) over the exact form at 13 (8.3e-8). For the paper, report the
+  hall of fame, not only the selected equation.
+- Remedy worth considering for the method: a final joint refit of the
+  encoder coefficients and formula constants once the structure is found
+  ("constant polishing", RESEARCH_LOG 22). It would likely push CB-A (and
+  the Hill-ladder 1e-5 floor) well below 1e-4 without changing structure.
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |
