@@ -105,6 +105,7 @@ this is the case for a final constant refit before submission.
 | B PySR alone | 2.4e-2 x |
 | C distillation | 3.9e-2 x |
 | D sparse linear | 1.6e-9 (138 terms, m = 6) |
+| E library, no encoder | 2.6e-2 x |
 | F' row cosines | 0.99999993 (J2^0), 0.999994 (J3^0) |
 
 ### CB-B (PySR alone)
@@ -133,6 +134,23 @@ this is the case for a final constant refit before submission.
   invariants by construction (contribution 1). Here, in addition, one
   latent is not enough (CB2001 needs two invariants), and distillation's
   L1 kept only one: our Stage 1 chooses n = 2 explicitly (contribution 3).
+
+### CB-E (PySR on the 29 invariant monomials, no encoder)
+
+- Not recovered (2.6e-2; plateau 3.9e-4 after 1962 s). PySR uses only the
+  9 quadratic monomials (sqrt of a quadratic form) and never assembles the
+  cubic invariant J3^0, a 20-term combination of F10-F29; same 2.4% level
+  as PySR alone (CB-B).
+- Unlike the Hill ladder, the library here is not missing anything (it
+  contains everything CB2001 needs). So E vs A isolates the encoder's
+  compression: combining 29 monomials into two invariants (n = 2) is what
+  turns an unsolved search into a 13-node formula. Clean evidence for
+  contributions 1 and 3 (closed-form latent of the right size); on the
+  Hill ladder E vs A isolated contribution 2 (learned tensor) instead.
+
+CB2001 story (seed 42): A finds the exact form (recovered at 3.2e-4); B, C,
+E all stop at 2.4-4% with a quadratic surface and no cubic invariant; D is
+exact because CB2001 is a degree-6 polynomial (138 terms).
 
 ### CB-A / CB-F (ours)
 

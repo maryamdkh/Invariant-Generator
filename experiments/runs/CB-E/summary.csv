@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+CB-E,CB,cb2001_2090T3,E,42,122e479,False,0.025998712322108552,,"sqrt((((F6 + (F4 - F3)) - F5) * 1.224491805848004) + (((F8 + (F7 + F9)) / 0.2131037020782786) + (F1 - F2))); F1-F9 quadratic orthotropic monomials",24,,2,,,1961.7497,,"stopped by hand at loss 3.9e-4 (plateau); fresh 2.4e-2; uses only quadratic monomials, never forms J3^0"

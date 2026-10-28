@@ -1,0 +1,124 @@
+# CB2001 (Cazacu & Barlat 2001), 2090-T3, paper runs (EXPERIMENTS.md, CB-*).
+# Encoder/training: configs/yield_cb2001_2090T3.toml (RESEARCH_LOG 22: n = 2, rows
+# span J2^0 and J3^0). [symbolic]: the author's PySR settings from the Hill
+# ladder (configs/hill_ladder/rh3.toml) plus cube/cbrt, which the CB2001 form needs.
+
+[data]
+data_dir = "data/yield_benchmarks"
+dataset_name = "cb2001_2090T3"
+dataset_key = "stress"
+stress_format = "mandel_3d"
+feature_names = ["s11", "s22", "s33", "s23", "s13", "s12"]
+test_size = 0.1
+random_state = 42
+shuffle = true
+
+[augmentation]
+enabled = true
+include_original = true
+augment_test = true
+k_values = []
+n_aug_per_sample = 5
+k_range = [0.5, 1.75]
+random_state = 42
+shuffle = true
+homogeneity_degree = 1.0
+surface_target = 1.0
+
+[input_transform]
+kind = "orthotropic_polynomial"
+
+[encoder]
+enabled = true
+output_dim = 1
+init = "random"
+
+[normalization]
+enabled = true
+mode = "scale_only"
+
+[model]
+hidden_dims = [64, 64]
+activation = "silu"
+output_activation = "softplus"
+
+[loss]
+lambda_param = 0.0
+lambda_structure = 0.0
+lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l1 = 0.0
+lambda_encoder_l2 = 0.0
+
+[train]
+run_id = "yield_cb2001_2090T3"
+results_dir = "results/yield_benchmarks"
+split_dir = "results/yield_benchmarks/splits"
+seed = 42
+epochs = 4000
+batch_size = 0
+learning_rate = 1e-3
+encoder_learning_rate_scale = 30.0
+device = "cpu"
+log_every = 25
+save_every = 0
+lr_plateau_min_delta = 0.0
+early_stopping_min_delta = 0.0
+early_stopping_patience = 20
+
+[adaptive]
+results_subdir = "cb/cb2001_2090T3"
+metric = "nrmse"
+nrmse_threshold = 0.01
+n_min = 1
+n_max = 4
+stop_on_first_success = true
+restarts = 3
+acceptance = "relative_to_reference"
+relative_factor = 2.0
+relative_floor = 1e-3
+reference_init = true
+
+[sparsification]
+method = "graded"
+masked_refit_epochs = 4000
+masked_refit_learning_rate = 3e-3
+masked_refit_schedule = "cosine"
+masked_refit_min_learning_rate = 1e-5
+run_id = "stage2_graded"
+
+[symbolic]
+top_k = 0
+feature_selection = "manual"
+selected_invariants = []
+target_transform = "identity"
+target_source = "data"
+feature_space = "encoded_invariants"
+random_state = 42
+output_subdir = "stage3_pysr"
+output_directory = "results/cb/cb2001_2090T3/stage3_pysr"
+run_id = "pysr_search"
+
+niterations = 10000000
+timeout_hours = 24.0
+warm_start = true
+parallelism = "multiprocessing"
+numprocs = 8
+batching = true
+batch_size = 100
+populations = 24
+population_size = 50
+ncycles_per_iteration = 5000
+model_selection = "best"
+elementwise_loss = "loss(prediction, target, weight) = weight * (prediction - target)^2"
+weight_mode = "inverse_target_squared"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "cube", "sqrt", "cbrt"]  # Hill ladder: square, sqrt
+maxsize = 40
+maxdepth = -1
+parsimony = 0.003
+complexity_of_constants = 2
+constraints = { square = 10, cube = 10, sqrt = 90, cbrt = 90, "*" = [8, 8] }
+nested_constraints = { square = { square = 1 }, cube = { cube = 1 }, sqrt = { sqrt = 1 }, cbrt = { cbrt = 1 } }
+precision = 64
+progress = true
+early_stop_condition = "stop_if(loss, complexity) = loss < 1e-17"

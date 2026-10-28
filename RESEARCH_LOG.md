@@ -1228,3 +1228,14 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   recovered, worse than PySR alone (CB-B 2.4e-2). Distillation kept one
   latent where CB2001 needs two; Stage 1 of our pipeline chooses n = 2.
   CB-D entry restored after rsync.
+
+## 71. CB-E; CB2001 seed 42 complete (2026-10-28)
+
+- PySR on the 29 orthotropic monomials, no encoder; `experiments/runs/CB-E/`.
+  Stopped by hand after 1962 s, plateau 3.9e-4. Selected (complexity 24): sqrt
+  of a quadratic in F1-F9; cubic monomials never used. Fresh 2.4e-2, test
+  2.6e-2: not recovered.
+- CB2001, seed 42: A recovered (exact form, 2.9e-4), B 2.4e-2, C 3.9e-2,
+  D exact (1.6e-9), E 2.6e-2; F' cosines 0.99999993 / 0.999994. The library
+  contains everything CB2001 needs, so E vs A isolates the compression to
+  n = 2. CB-I (Operon) postponed with P6. CB-D entry restored after rsync.
