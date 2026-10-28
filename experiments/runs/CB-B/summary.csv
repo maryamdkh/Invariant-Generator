@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+CB-B,CB,cb2001_2090T3,B,42,35a378d,False,0.024479604608307354,,"sqrt(square(s11 - ((s33 + s22) / 1.9998391696203621)) + ((((square(s13) + square(s12)) + square(s23)) * 4.674628207636333) + square(s22 - s33)))",27,,2,,,696.9448,,"stopped by hand at loss 3.6e-4 (plateau); fresh 2.4e-2; sqrt-of-quadratic, no cubic J3^0 term"

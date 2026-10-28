@@ -1209,3 +1209,12 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   paper's appendix.
 - Local benchmark_summary.json for vm25, hill, rh2, rh3 regained their
   sparse_linear entries (overwritten by later rsyncs; identical values).
+
+## 69. CB-B (2026-10-28)
+
+- PySR alone on CB2001 (6 raw components); `experiments/runs/CB-B/`.
+  Stopped by hand after 697 s, loss plateau 3.6e-4 (complexity 39).
+  Selected (complexity 27): sqrt((s11 - (s22+s33)/2)^2 + 4.675 shear^2 +
+  (s22 - s33)^2), a quadratic surface without the cubic J3^0. Fresh
+  relative L2 2.4e-2: not recovered. CB-A found the exact form at
+  complexity 13. CB-D entry restored in benchmark_summary.json after rsync.

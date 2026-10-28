@@ -102,8 +102,22 @@ this is the case for a final constant refit before submission.
 | | CB2001 |
 |---|---|
 | A ours | 1.8e-4 (fresh 2.9e-4), exact form at complexity 13 |
+| B PySR alone | 2.4e-2 x |
 | D sparse linear | 1.6e-9 (138 terms, m = 6) |
 | F' row cosines | 0.99999993 (J2^0), 0.999994 (J3^0) |
+
+### CB-B (PySR alone)
+
+- Not recovered (2.4e-2; loss plateau 3.6e-4 after 697 s). PySR returns a
+  sqrt-of-quadratic surface, i.e. a Hill/von Mises-like form; the cubic
+  invariant J3^0, which carries CB2001's tension/compression asymmetry,
+  never appears (only a tiny cbrt(s12) s23 s13 term in the longest
+  equations).
+- CB2001 in raw components is a degree-6 polynomial under a sixth root with
+  hundreds of terms; PySR cannot assemble it. With the two encoded
+  invariants it is a 13-node formula (CB-A). Second case after RH3 where
+  the encoder turns an unsolvable search into an easy one; this one is
+  non-quadratic and needs n = 2 (contributions 1 and 3).
 
 ### CB-A / CB-F (ours)
 

@@ -8,6 +8,7 @@ Recovered = relative L2 < 3.2e-4 on fresh points (yield; PySR loss ~1e-7). Struc
 | experiment | dataset | method | instances | recovered per seed | mean +- sd | median test rel. L2 | median structure |
 |---|---|---|---|---|---|---|---|
 | CB-A | CB | A | 1 | [1] | 1.0 +- 0.0 | 1.84e-04 | 0.9999941400 |
+| CB-B | CB | B | 1 | [0] | 0.0 +- 0.0 | 2.45e-02 | - |
 | CB-D | CB | D | 1 | [1] | 1.0 +- 0.0 | 1.65e-09 | - |
 | CB-F | CB | F' | 0 | - | - | - | 0.9999941400 |
 | HILL-A | HILL | A | 1 | [1] | 1.0 +- 0.0 | 1.30e-05 | 0.9999999996 |
@@ -40,7 +41,7 @@ Recovered = relative L2 < 3.2e-4 on fresh points (yield; PySR loss ~1e-7). Struc
 
 | dataset | A | B | B (maxsize 150) | C | D | E | F' |
 |---|---|---|---|---|---|---|---|
-| CB | 1.0/1 | - | - | - | 1.0/1 | - | - |
+| CB | 1.0/1 | 0.0/1 | - | - | 1.0/1 | - | - |
 | HILL | 1.0/1 | 0.0/1 | - | 0.0/1 | 1.0/1 | 0.0/1 | - |
 | RH2 | 1.0/1 | 1.0/1 | - | 0.0/1 | 1.0/1 | 0.0/1 | - |
 | RH3 | 1.0/1 | 0.0/1 | 0.0/1 | 0.0/1 | 1.0/1 | 0.0/1 | - |
