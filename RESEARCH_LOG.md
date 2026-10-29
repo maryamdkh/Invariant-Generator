@@ -1287,3 +1287,15 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   reach for both PySR alone and our degree-2/3 library; only D (degree 8,
   363 terms) is exact.
 
+## 75. YLD-C: distillation loses the accurate network in the symbolic step (2026-10-29)
+
+- Run on the Mac (8 processes, `screen` session `yldc`), both PySR searches
+  stopped by hand; `experiments/runs/YLD-C/`.
+- Network train nrmse 2.5e-3 (44 s); one latent kept (z7). Latent equation:
+  (1.406 - (s11-s22)^2 - (s33-0.592(s11+s22))^2 - 4.662(s12^2+s13^2+s23^2))
+  / (s11^2+s13^2+s23^2)^(1/9); outer y = 1.104 - 0.3325 z7 - 0.0032 z7^2.
+  Fresh 4.8e-2, test 4.4e-2: not recovered, worse than YLD-B (3.4e-2) and
+  YLD-A (2.9e-2).
+- Yld2004 seed 42 so far: A 2.9e-2, B 3.4e-2, C 4.8e-2 (all x), D exact
+  (363 terms). E optional.
+

@@ -243,6 +243,26 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   finds, not below it". Supports presenting Yld2004 as a limitation with a
   clear extension (invariants of learned linear transforms of the deviator).
 
+### YLD-C (distillation, stress test)
+
+- Not recovered (4.8e-2), the worst of A/B/C on Yld2004. The network itself
+  is accurate (train nrmse 2.5e-3, ten times below the best quadratic
+  2.9e-2), so a black box can represent Yld2004; the loss happens in the
+  symbolic step. The latent search over the 6 raw inputs returns a
+  Hill-type quadratic with an ad hoc (s11^2+s13^2+s23^2)^(1/9) divisor, as
+  in CB-C, and the outer quadratic in z7 adds its own error.
+- Same pattern as CB-C and RH3-C: distillation moves the hard search from y
+  to a latent but does not make it easier, because the latent is not
+  closed form by construction; the latent is as hard to write down as y.
+  Our encoder rows are closed form by construction (contribution 1), which
+  is why A is never worse than B here and much better on RH3 and CB2001.
+- Honest note: on Yld2004 our A is also not recovered; the ranking
+  A (2.9e-2) < B (3.4e-2) < C (4.8e-2) is within the "best quadratic"
+  regime and one seed, so present it as "all symbolic methods stop at the
+  quadratic; only D with the right degree is exact", not as a win for A.
+- Caveats: Mac run (8 processes), timing not comparable; one seed; both
+  searches stopped by hand at a plateau.
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |
