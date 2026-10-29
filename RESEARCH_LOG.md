@@ -1270,3 +1270,20 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Paper: Yld2004 is a limitation/stress test; a library of invariants of
   learned linear transforms of the deviator would be the extension.
   YLD-D entry restored after rsync.
+
+## 74. YLD-B: PySR alone stops at the best quadratic (2026-10-29)
+
+- Arrhenius GPU queue did not start jobs for hours (project FairShare 0.34
+  after ~300 GPU h in 30 days; maintenance reservation 2026-11-03 08:00 to
+  11-06 12:00). YLD-B needs no GPU, so it ran on the Mac (8 processes,
+  same search settings) in a detached `screen` session. A first attempt was
+  killed after 7 min when its terminal closed; deleted and rerun.
+- `experiments/runs/YLD-B/`: stopped by hand after 1450 s at loss 8.3e-4
+  (complexity 38). Selected complexity 27:
+  sqrt((s11 - 0.505(s22+s33))^2 + (s22-s33)^2 + 4.153(s12^2+s23^2+s13^2)).
+  Fresh 3.4e-2, test 3.4e-2: not recovered.
+- Best loss 8.3e-4 ~ 2.9e-2 relative = the best quadratic approximation
+  (2.91e-2), the same plateau as YLD-A (2.94e-2). Yld2004 a = 8 is out of
+  reach for both PySR alone and our degree-2/3 library; only D (degree 8,
+  363 terms) is exact.
+

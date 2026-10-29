@@ -222,6 +222,27 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   silently inherits the reference model's weakness; with a poor reference
   it accepts too small an n. A note for the method section.
 
+### YLD-B (PySR alone, stress test)
+
+- Not recovered (3.4e-2). Selected equation is a sqrt-of-quadratic
+  (von Mises/Hill-type, shear weight 4.15); longest equations add only small
+  s12^4 terms. Best loss 8.3e-4 ~ 2.9e-2 relative error.
+- Same plateau as our pipeline (YLD-A 2.94e-2) and as the best quadratic
+  approximation (2.91e-2). On Yld2004 the encoder gives no advantage, but
+  also no loss: both methods find the best quadratic, ours in one variable
+  and complexity 5, PySR alone in six variables and complexity 27-38.
+- Why PySR alone stalls: the next improvement needs degree 4-8 structure
+  (floors 1.6e-2 at degree 4, 8.3e-3 at degree 6), i.e. long products that
+  are hard to reach by mutation in 6 raw variables. The same reason it
+  fails on RH3 and CB2001, here without a library that contains the answer.
+- Caveats: run on the Mac with 8 instead of 16 processes (search settings
+  unchanged, timing not comparable to the cluster runs); one seed; stopped by
+  hand at a plateau, as for the other B runs.
+- Contribution: none directly; it bounds the stress-test claim: "when the
+  answer lies outside the library, our pipeline degrades to what PySR alone
+  finds, not below it". Supports presenting Yld2004 as a limitation with a
+  clear extension (invariants of learned linear transforms of the deviator).
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |
