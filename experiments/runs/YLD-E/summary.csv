@@ -1,0 +1,2 @@
+experiment_id,dataset,instance,method,seed,commit,recovered,test_rel_l2,test_r2,equation,complexity,n_selected,n_true,structure_score,time_encoder_s,time_sr_s,time_to_recovery_s,notes
+YLD-E,YLD,yld2004_2090T3,E,42,d9a9954,False,0.03216660666955696,,"sqrt((((F1 + F4) - (F5 - F6)) - F3) / 0.8741386216248809 + (F8 + F9 + F7) / 0.24414808636492738 - F2); F1-F9 quadratic orthotropic monomials",24,,,,,1304.5495,,"run on the Mac (8 procs); stopped by hand at loss 8.1e-4 (plateau); fresh 3.4e-2; uses only quadratic monomials = best quadratic approximation"

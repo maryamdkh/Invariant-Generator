@@ -177,7 +177,7 @@ this group exactly (RESEARCH_LOG 35), so D is expected to succeed here.
 | YLD-B | Yld2004-18p | PySR alone | R | done | 1/5 (42) | `6aee578` | not recovered (3.4e-2): sqrt-of-quadratic, best loss = best quadratic approximation; run on the Mac | 74 |
 | YLD-C | Yld2004-18p | Distillation | R | done | 1/5 (42) | `010d585` | not recovered (4.8e-2): network 2.5e-3 but latent equation quadratic only; run on the Mac | 75 |
 | YLD-D | Yld2004-18p | Sparse linear | o | done | 1/5 (42) | `95bb0ba` | recovered (2.6e-7): a = 8 makes Yld2004 a degree-8 polynomial; 363 terms | 72 |
-| YLD-E | Yld2004-18p | PySR + library | o | planned | | | | |
+| YLD-E | Yld2004-18p | PySR + library | o | done | 1/5 (42) | `d9a9954` | not recovered (3.4e-2): quadratic monomials only = best quadratic approximation; run on the Mac | 76 |
 | YLD-I | Yld2004-18p | Operon +- encoder | o | blocked (P6) | | | | |
 
 ### 3. Crystal-plasticity data (proposed, not yet agreed)

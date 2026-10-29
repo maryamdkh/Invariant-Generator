@@ -263,6 +263,22 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
 - Caveats: Mac run (8 processes), timing not comparable; one seed; both
   searches stopped by hand at a plateau.
 
+### YLD-E (PySR on the fixed library, stress test)
+
+- Not recovered (3.4e-2); uses only the 9 quadratic monomials, a Hill-type
+  quadratic form, again at the best quadratic approximation (2.91e-2).
+- Together with YLD-A this isolates the cause of the Yld2004 failure: with
+  or without the encoder, the degree-2/3 library cannot express a degree-8
+  surface. The limit is the library, not the encoder or PySR.
+- Yld2004 summary for the paper (seed 42): A 2.9e-2, B 3.4e-2, E 3.4e-2,
+  C 4.8e-2, all not recovered and all (except C) at the best quadratic;
+  D exact with 363 terms because a = 8 makes it a degree-8 polynomial.
+  Message: "on a criterion outside its library, the pipeline is as good as
+  the best competitor that also lacks the right basis; extending the
+  library (invariants of learned linear transforms of the deviator) is the
+  natural next step".
+- Caveats: Mac run (8 processes), one seed, stopped by hand at a plateau.
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |

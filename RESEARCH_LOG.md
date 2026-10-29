@@ -1299,3 +1299,13 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Yld2004 seed 42 so far: A 2.9e-2, B 3.4e-2, C 4.8e-2 (all x), D exact
   (363 terms). E optional.
 
+## 76. YLD-E: fixed library without encoder, same quadratic plateau; Yld2004 seed 42 done (2026-10-29)
+
+- Run on the Mac (8 processes, `screen` session `ylde`), stopped by hand
+  after 1305 s at loss 8.1e-4; `experiments/runs/YLD-E/`.
+- Selected (complexity 24): sqrt((F1+F4+F6-F3-F5)/0.874 - F2 + (F7+F8+F9)/0.244),
+  quadratic monomials only. Fresh 3.4e-2, test 3.2e-2: not recovered.
+- Yld2004 seed 42 complete: A 2.9e-2, B 3.4e-2, C 4.8e-2, E 3.4e-2 (all x,
+  all at the best quadratic approximation 2.91e-2 except C), D exact
+  (degree 8, 363 terms).
+
