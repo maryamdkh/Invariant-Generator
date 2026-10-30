@@ -1,0 +1,58 @@
+[
+  {
+    "problem": "sa_d06_00",
+    "outer": "sqrt(q1)",
+    "n_rows": 1,
+    "principal_cosines": [
+      0.9999999941901133
+    ],
+    "row_vs_form_cosines": [
+      [
+        0.9999999941901134
+      ]
+    ],
+    "linear_share": [
+      0.0
+    ]
+  },
+  {
+    "problem": "sa_d06_05",
+    "outer": "q1/(1 + q2)",
+    "n_rows": 2,
+    "principal_cosines": [
+      0.9999998989127439,
+      0.9999985812355835
+    ],
+    "row_vs_form_cosines": [
+      [
+        0.955583914139311,
+        0.8925054960859548
+      ],
+      [
+        0.5021088682055602,
+        0.23871804235566468
+      ]
+    ],
+    "linear_share": [
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "problem": "sa_d06_09",
+    "outer": "sqrt(q1) + q2",
+    "n_rows": 1,
+    "principal_cosines": [
+      0.9999924504851272
+    ],
+    "row_vs_form_cosines": [
+      [
+        0.9161579615736888,
+        0.9947144130424648
+      ]
+    ],
+    "linear_share": [
+      0.0
+    ]
+  }
+]

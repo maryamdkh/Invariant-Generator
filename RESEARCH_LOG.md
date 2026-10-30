@@ -1309,3 +1309,39 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   all at the best quadratic approximation 2.91e-2 except C), D exact
   (degree 8, 363 terms).
 
+## 77. SA dev runs: graded Stage 2, absolute n acceptance; rows span the true forms but mix (2026-10-30)
+
+- Goal: `configs/synthetic_sa.toml` had never been run. Author decided SA comes
+  before Feynman and LLM-SRBench. Dev runs on the Mac (seed 42, 8 processes,
+  10-min PySR limit, overshoots to ~14 min), `results/synthetic/sa_dev*`.
+  These are config tests, not results.
+- Dev 1 (gated Stage 2), d = 6: Stage 1 good, Stage 2 removes true terms
+  (val nrmse 3e-3 -> 0.16, 0.29). A 4.2e-2, 1.0e-1, 6.3e-3.
+- Dev 2: graded Stage 2 (as CB2001), operators square, cube, sqrt, cbrt, silu.
+  Needed `PairwiseFeaturePool.terms` (`input_features.py`, read only by graded;
+  `hill_old_vs_new.py HEAD` IDENTICAL). A 2.4e-5, 1.9e-3, 4.8e-3 (n = 1 on
+  sqrt(q1) + q2: "2 x reference" too loose, reference 7.5e-3 is weaker than the
+  true bottleneck 3e-3).
+- Dev 3: absolute acceptance, nrmse < 5e-3. Tuned on sa_d06_{00,05,09}: these
+  three are not independent evidence. Correct n on all problems run.
+- Fresh relative L2:
+
+  | problem | A | B | D |
+  |---|---|---|---|
+  | d6 sqrt(q1) | 2.4e-5 | - | 1.7e-11 |
+  | d6 q1/(1+q2) | 1.9e-3 | 1.2e-1 | 7.5e-2 |
+  | d6 sqrt(q1)+q2 | 5.9e-4 | 7.2e-2 | 9.9e-3 |
+  | d12 sqrt(q1) | 3.1e-5 | - | - |
+  | d12 q1/(1+q2) | 5.3e-3 | 1.4e-1 | 4.2e-2 (test; fresh NaN) |
+  | d12 sqrt(q1)+q2 | 1.2e-4 | - | - |
+
+- `experiments/probes/sa_row_mixing.py` (`experiments/outputs/sa_row_mixing*.json`):
+  on every n = 2 problem the row space equals span{q1, q2} (smallest principal
+  cosine >= 0.99993), but the individual rows are mixtures (row-form cosines
+  e.g. 0.96/0.68 and 0.46/0.07). Any basis of the span fits y equally, so PySR
+  gets mixed J and returns long outer formulas. This, not the encoder accuracy,
+  is what blocks recovery of q1/(1 + q2).
+- To fix before the full run: D's fresh NaN on d12 q1/(1+q2) (root of a
+  negative value in the scoring); recovery threshold of the equation runner is
+  1e-6, yield uses 3.2e-4 (author to decide; stored errors can be rescored).
+

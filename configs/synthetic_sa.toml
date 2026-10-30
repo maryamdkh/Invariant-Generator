@@ -1,7 +1,8 @@
 # Synthetic SA (rotated quadratic forms): configs/feynman_benchmark_v3.toml with
 # identity targets, a product feature map (x_i, x_i x_j) so an encoder row is a
-# quadratic form, and gated Stage 2 with large caps (dense rows).
-# FIRST VERSION: needs a dev run before the full experiment (RESEARCH_LOG 40).
+# quadratic form, and graded Stage 2 as for CB2001 (dense rows: gated Stage 2
+# removed true terms, val nrmse 3e-3 -> 0.16-0.29, RESEARCH_LOG 77).
+# Dev runs: RESEARCH_LOG 77.
 # Data: scripts/prepare_synthetic_benchmark.py; run with
 #   --manifest data/synthetic/sa/manifest.json
 
@@ -37,6 +38,7 @@ mode = "standard"
 
 [model]
 hidden_dims = [64, 64]
+activation = "silu"
 output_activation = "none"
 standardize_target = true
 
@@ -67,28 +69,21 @@ early_stopping_patience = 20
 [adaptive]
 results_subdir = "set_per_equation"
 metric = "nrmse"
-nrmse_threshold = 0.01
+# Absolute: the no-bottleneck reference on these features is weaker than the
+# true bottleneck (7.5e-3 vs 3e-3), so "2 x reference" accepts too small an n
+# (sqrt(q1) + q2, n = 1 at 1.3e-2; RESEARCH_LOG 77).
+nrmse_threshold = 0.005
 stop_on_first_success = true
 restarts = 3
-acceptance = "relative_to_reference"
-relative_factor = 2.0
-relative_floor = 1e-3
-reference_init = true
+acceptance = "absolute"
 
 [sparsification]
-# Quadratic-form rows are dense (up to d(d+1)/2 + d terms), so the caps are large.
-method = "gated"
-lambda_encoder_l1 = 1e-1
-lambda_gate = 3e-2
-gate_init_probability = 0.95
-threshold = 2e-2
-adaptive_max_active_terms = true
-max_active_terms_candidates = [3, 10, 30, 90]
-epochs = 3000
-learning_rate = 1e-3
-masked_refit_epochs = 3000
-masked_refit_learning_rate = 1e-3
-run_id = "stage2_gated"
+method = "graded"
+masked_refit_epochs = 4000
+masked_refit_learning_rate = 3e-3
+masked_refit_schedule = "cosine"
+masked_refit_min_learning_rate = 1e-5
+run_id = "stage2_graded"
 
 [symbolic]
 # Shared by both arms; only the inputs differ (monomial groups vs raw inputs).
@@ -100,9 +95,9 @@ run_id = "pysr_search"
 weight_mode = "none"
 elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
 binary_operators = ["+", "-", "*", "/"]
-unary_operators = ["square", "sqrt", "exp", "log", "sin", "cos"]
+unary_operators = ["square", "cube", "sqrt", "cbrt"]
 constraints = {}
-nested_constraints = { exp = { exp = 0, log = 0 }, log = { exp = 0, log = 0 }, sin = { sin = 0, cos = 0 }, cos = { sin = 0, cos = 0 } }
+nested_constraints = {}
 maxsize = 35
 maxdepth = -1
 parsimony = 0.0

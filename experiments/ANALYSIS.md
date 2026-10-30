@@ -279,6 +279,23 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   natural next step".
 - Caveats: Mac run (8 processes), one seed, stopped by hand at a plateau.
 
+## Synthetic SA, dev runs only (not results; RESEARCH_LOG 77)
+
+- Dev numbers on 6 problems (d = 6, 12; one seed): A beats PySR alone by 20-100x
+  and D by 8-40x on the two non-polynomial forms (q1/(1+q2), sqrt(q1)+q2), the
+  first place with an accuracy advantage over D. D stays exact on sqrt(q1), as
+  designed (SINDy control). A's accuracy does not visibly degrade from d = 6 to 12.
+- Stage 2 lesson: gated sparsification assumes sparse rows and destroys dense
+  quadratic forms; dense targets need the graded route. A reviewer may ask how a
+  user knows which; the honest answer today is a config choice.
+- Identifiability: rows recover span{q1, q2} (cosine >= 0.99993) but not q1 and q2
+  individually, since any invertible mixture fits y. The structure claim for SA
+  must be stated on subspaces. Mixed rows make the outer formula long, the main
+  obstacle to symbolic recovery of q1/(1+q2).
+- Caveats: the library contains the answer by design; maxsize 35 means B cannot
+  write a d = 12 form at all (needs a larger-maxsize check, as RH3-B-max); the
+  5e-3 acceptance was tuned on three d = 6 problems.
+
 ## Hill ladder (seed 42)
 
 | | VM25 | VM100 | HILL | RH2 | RH3 |

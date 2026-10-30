@@ -69,7 +69,7 @@ structure_score, time_encoder_s, time_sr_s, time_to_recovery_s, notes`
 | YLD | Yld2004-18p | 6 | `data/yield_benchmarks/yld2004_2090T3.hdf`, `configs/yld/yld2004_2090T3.toml` | exists |
 | DX | DX56D steel, CPFEM (proposed) | 6 | `data/dx56d_miller.hdf`, see `EXTERNAL_DATASETS.md` | exists; row not yet agreed |
 | AU | Single-crystal gold, CPFEM (proposed) | 6 | `data/single_crystal_gold_ep002.hdf` | exists; row not yet agreed |
-| SA | Synthetic (a): rotated quadratic forms, d = 2, 3, 4, 6, 8, 10, 12 (70 problems) | 2-12 | `scripts/prepare_synthetic_benchmark.py` -> `data/synthetic/sa` (gitignored, regenerate), config `configs/synthetic_sa.toml` | exists |
+| SA | Synthetic (a): rotated quadratic forms, d = 2, 3, 4, 6, 8, 10, 12 (70 problems) | 2-12 | `scripts/prepare_synthetic_benchmark.py` -> `data/synthetic/sa` (gitignored, regenerate), config `configs/synthetic_sa.toml` (dev runs done, RESEARCH_LOG 77) | exists |
 | SB | Synthetic (b): power-law groups, d = 4-12, k = 1-3 groups (50 problems) | 4-12 | same script -> `data/synthetic/sb`, config `configs/feynman_benchmark_v3.toml` with `--data-dir` | exists |
 | SBD | Synthetic (b) plus 3 distractor inputs (50 problems) | 7-15 | same script -> `data/synthetic/sbd` | exists |
 | FEY | Feynman (110 equations) | 1-9 | `scripts/prepare_feynman_benchmark.py` | exists |

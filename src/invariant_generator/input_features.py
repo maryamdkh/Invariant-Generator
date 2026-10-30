@@ -93,6 +93,11 @@ class PairwiseFeaturePool(nn.Module):
             + (self.input_dim * (self.input_dim + 1) // 2 if include_products else 0)
             + (self.input_dim * (self.input_dim - 1) if include_ratios else 0)
         )
+        if include_products and not include_ratios:
+            # Same order as forward(); lets graded Stage 2 read the degrees.
+            self.terms = [(i,) for i in range(self.input_dim)] + [
+                (i, j) for i in range(self.input_dim) for j in range(i, self.input_dim)
+            ]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if x.ndim != 2 or x.shape[1] != self.input_dim:
