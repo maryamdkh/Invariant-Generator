@@ -1357,8 +1357,9 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - By d, under 3.2e-4: d2 0, d3 2, d4 6, d6 5, d8 8, d10 7, d12 8 (of 10 each).
 - 18 without n: 7 correct (d = 2, true n = 2), 11 false rejections just above 5e-3.
   The threshold was tuned on 3 d = 6 problems; it is not changed after seeing this run.
-- 4 tasks lost their summary (sa_d06_04, sa_d06_05, sa_d10_06, sa_d12_04), probably
-  killed at 1.5 h during scoring; job logs not read yet. Rescored offline; the rescoring
+- 4 tasks lost their summary (sa_d06_04, sa_d06_05, sa_d10_06, sa_d12_04), killed by
+  OUT_OF_MEMORY at 20-22 min (`sacct`, 64 GB limit) after PySR finished, so during
+  scoring; which SymPy step is not identified. Rescored offline; the rescoring
   reproduces a stored value (sa_d12_03).
 - PySR took 18.5 min median with a 15-minute limit (max 19.2).
 - Decision: keep the run as is; next SA-B. Problems without n report PySR alone from SA-B.

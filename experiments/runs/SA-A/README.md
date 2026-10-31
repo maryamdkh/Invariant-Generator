@@ -25,8 +25,8 @@
   reduce); 11 are false rejections: validation or test NRMSE just above 5e-3 at the
   true n (3 at d = 2, 4 at d = 3, sa_d06_03, sa_d08_02, sa_d10_03, sa_d10_04).
 - 4 tasks have no `benchmark_summary.json` (sa_d06_04, sa_d06_05, sa_d10_06,
-  sa_d12_04): PySR finished, the task ended during scoring. Probably the 1.5 h limit
-  (logs not yet read). Rescored offline from the saved equation; the same code
+  sa_d12_04): `sacct` shows OUT_OF_MEMORY at 20-22 min (64 GB limit), after PySR
+  finished, so during scoring, not the time limit. Rescored offline from the saved equation; the same code
   reproduces a stored score (sa_d12_03, 2.916606e-4).
 
 ## Conclusion
