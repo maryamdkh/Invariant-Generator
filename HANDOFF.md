@@ -73,6 +73,11 @@ Results are copied to the Mac with rsync (run on the Mac).
   "best" selection can never pick a one-term formula (`J1`); offline fix
   brings symbolic recovery to 67 vs 70.
 
+## Latest (RESEARCH_LOG 78)
+
+SA-A done: 36/70 under 3.2e-4 (provisional), n never wrong, 11 false rejections, no
+symbolic recovery. Next: read logs of the 4 tasks that lost their summary, then SA-B.
+
 ## Next steps (agreed)
 
 1. Done: LLM-SRBench 5 seeds (entry 32).

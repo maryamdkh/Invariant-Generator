@@ -279,6 +279,27 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   natural next step".
 - Caveats: Mac run (8 processes), one seed, stopped by hand at a plateau.
 
+## Synthetic SA (seed 42)
+
+### SA-A (ours; RESEARCH_LOG 78)
+
+- **Meaning.** On 70 problems the pipeline never chose a wrong n (52 of 52) and 36
+  reach fresh error below 3.2e-4. Automatic n is the best-supported claim here.
+- **Why.** Errors do not grow with d: 8 of 10 at d = 12 against 2 of 10 at d = 3. Once
+  the encoder finds the two-dimensional space, PySR faces a two-variable problem
+  whatever d is. This is what the scaling experiment is for, but B must confirm it.
+- **Honest notes.** (1) Small error is not recovery of the form: the symbolic check
+  passes on none, and mixed rows give long outer formulas. Report "accurate
+  surrogate", not "recovered formula", unless un-mixing changes this. (2) 3.2e-4 is
+  borrowed from yield surfaces and is provisional; 1e-6 gives 0/70. (3) 11 false
+  rejections come from a 5e-3 threshold tuned on three d = 6 problems; it is
+  brittle, some values miss by very little (sa_d10_03 at 5.0e-3 on one partition).
+  (4) Low d is weakest (none at d = 2), where PySR alone should do well, so the
+  fallback matters there. (5) Four scores were computed offline after the tasks ended
+  during scoring. (6) One seed; the library contains the answer by design.
+- **Contribution supported.** (3) automatic n, and scaling with d if SA-B degrades.
+  Not yet a comparison: one arm only.
+
 ## Synthetic SA, dev runs only (not results; RESEARCH_LOG 77)
 
 - Dev numbers on 6 problems (d = 6, 12; one seed): A beats PySR alone by 20-100x

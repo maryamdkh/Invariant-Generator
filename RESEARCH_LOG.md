@@ -1345,3 +1345,21 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   negative value in the scoring); recovery threshold of the equation runner is
   1e-6, yield uses 3.2e-4 (author to decide; stored errors can be rescored).
 
+## 78. SA-A: ours on the 70 Synthetic SA problems, seed 42
+
+- Goal: first full-benchmark arm for SA. Job `4669470`, commit `44f44db`, 15-minute
+  PySR limit, `KEEP_ARTIFACTS=full`. Details: `experiments/runs/SA-A/`.
+- Scoring: `experiments/probes/sa_a_score.py`, `experiments/outputs/sa_a_score.csv`.
+  Threshold 3.2e-4 (yield) is provisional for SA; the runner's own 1e-6 flag is false
+  on every problem.
+- n chosen on 52/70, correct on all 52. Under 3.2e-4: 36/70 (sqrt(q1) 14/21,
+  q1/(1+q2) 13/28, sqrt(q1)+q2 9/21). Symbolic check passes on none.
+- By d, under 3.2e-4: d2 0, d3 2, d4 6, d6 5, d8 8, d10 7, d12 8 (of 10 each).
+- 18 without n: 7 correct (d = 2, true n = 2), 11 false rejections just above 5e-3.
+  The threshold was tuned on 3 d = 6 problems; it is not changed after seeing this run.
+- 4 tasks lost their summary (sa_d06_04, sa_d06_05, sa_d10_06, sa_d12_04), probably
+  killed at 1.5 h during scoring; job logs not read yet. Rescored offline; the rescoring
+  reproduces a stored value (sa_d12_03).
+- PySR took 18.5 min median with a 15-minute limit (max 19.2).
+- Decision: keep the run as is; next SA-B. Problems without n report PySR alone from SA-B.
+
