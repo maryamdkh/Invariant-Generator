@@ -5,7 +5,8 @@
   `KEEP_ARTIFACTS=full`. Results rsynced to `results/feynman_benchmark/sa_A/` (gitignored).
 - Scored by `experiments/probes/sa_a_score.py` -> `experiments/outputs/sa_a_score.csv`.
 - "Recovered" = fresh relative L2 < 3.2e-4, the yield threshold; provisional for this
-  benchmark. No problem passed the symbolic check (19 false, 29 SymPy time-outs).
+  benchmark. The symbolic check (advisory) passed on none (19 false, 29 SymPy time-outs),
+  but it also fails PySR-alone formulas with error 2e-8 (SA-B), so this is weak evidence.
 
 ## Result
 
@@ -32,5 +33,6 @@
 ## Conclusion
 
 Never a wrong n, and accuracy does not fall with d. Weak points: the 5e-3 acceptance
-rejects 11 reducible problems, and errors are small but the formulas are not the
-true symbolic form. One arm only: no comparison claim before SA-B, C, D, E.
+rejects 11 reducible problems, and on the n = 2 forms mixed rows give long outer
+formulas that are accurate but do not read as the true form. On sqrt(q1) the form is right
+(e.g. sqrt(5.18 - 1.50 J1), d = 12). Comparison: see SA-B.

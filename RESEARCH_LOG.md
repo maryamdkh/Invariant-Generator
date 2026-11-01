@@ -1361,6 +1361,19 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   OUT_OF_MEMORY at 20-22 min (`sacct`, 64 GB limit) after PySR finished, so during
   scoring; which SymPy step is not identified. Rescored offline; the rescoring
   reproduces a stored value (sa_d12_03).
-- PySR took 18.5 min median with a 15-minute limit (max 19.2).
+- Stage 3 took 18.5 min median with a 15-minute PySR limit (max 19.2), scoring included.
 - Decision: keep the run as is; next SA-B. Problems without n report PySR alone from SA-B.
 
+## 79. SA-B: PySR alone on the 70 Synthetic SA problems, seed 42
+
+- Goal: first comparison on SA. Commit `a930e16`, same PySR config and limit as SA-A, no
+  failed tasks. `experiments/runs/SA-B/`, `experiments/probes/sa_b_compare.py`.
+- Under 3.2e-4: PySR alone 7/70, ours 36/70. Ours better on 52/52 paired problems, median
+  605x (sqrt(q1) 2103x, q1/(1+q2) 564x, sqrt(q1)+q2 223x).
+- PySR alone median by d: 1.7e-3, 1.7e-2, 2.6e-2, 5.9e-2, 8.1e-2, 1.1e-1, 1.1e-1.
+- All 7 PySR-alone successes are among the 18 where ours chose no n; with PySR alone as
+  fallback ours reaches 43/70.
+- Correction to entry 78: the symbolic check fails even on PySR-alone formulas with error
+  2e-8 (floats do not cancel), so it says little on SA.
+- Caveat: maxsize 35 cannot hold the expanded form from d = 4. Larger-maxsize check needed.
+- Decision: next SA-D (sparse linear), the strongest competitor; fix its fresh-NaN first.

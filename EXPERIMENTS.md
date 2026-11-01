@@ -202,8 +202,8 @@ the equation index (about 10 equations per d, 5 seeds).
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
-| SA-A | Synthetic (a) | Ours | R | done | 1/5 (42) | `44f44db` | 36/70 under 3.2e-4 (provisional), 0 symbolic; n never wrong, 11 false rejections; 4 tasks rescored offline | 78 |
-| SA-B | Synthetic (a) | PySR alone | R | planned | | | | |
+| SA-A | Synthetic (a) | Ours | R | done | 1/5 (42) | `44f44db` | 36/70 under 3.2e-4 (provisional); n never wrong, 11 false rejections; 4 tasks rescored offline | 78, 79 |
+| SA-B | Synthetic (a) | PySR alone | R | done | 1/5 (42) | `a930e16` | 7/70 under 3.2e-4, none from d = 4; ours better on 52/52, median 605x; maxsize 35 is binding from d = 4 | 79 |
 | SA-C | Synthetic (a) | Distillation | R | planned | | | | |
 | SA-D | Synthetic (a) | Sparse linear | R | planned | | | | |
 | SA-E | Synthetic (a) | PySR + library | R | planned | | | | |

@@ -283,6 +283,7 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
 
 ### SA-A (ours; RESEARCH_LOG 78)
 
+- **Corrected by SA-B (RESEARCH_LOG 79):** note (1) below overstated the symbolic result; see SA-B.
 - **Meaning.** On 70 problems the pipeline never chose a wrong n (52 of 52) and 36
   reach fresh error below 3.2e-4. Automatic n is the best-supported claim here.
 - **Why.** Errors do not grow with d: 8 of 10 at d = 12 against 2 of 10 at d = 3. Once
@@ -299,6 +300,28 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   during scoring. (6) One seed; the library contains the answer by design.
 - **Contribution supported.** (3) automatic n, and scaling with d if SA-B degrades.
   Not yet a comparison: one arm only.
+
+### SA-B (PySR alone; RESEARCH_LOG 79)
+
+- **Meaning.** Ours is more accurate on all 52 problems where it chose an n, by a median
+  605x. PySR alone worsens steadily with d (1.7e-3 at d = 2 to 1.1e-1 at d = 12) and
+  never gets under 3.2e-4 from d = 4, while ours stays flat at about 1e-4.
+- **Why.** The encoder turns a 78-term search at d = 12 into a one- or two-variable one.
+  But maxsize 35 cannot hold the expanded form from d = 4, so part of the gap is the cap.
+  RH3-B-max (maxsize 150, 92 min, 3.4e-2) suggests raising it may not rescue PySR on
+  Hill, but that must be shown on SA. Until then: "under the same budget and size limit".
+- **Honest notes.** (1) The symbolic check is not usable here: it says False on PySR-alone
+  formulas with error 2e-8, because fitted floats do not cancel. So "no symbolic recovery"
+  in SA-A is weak evidence. By reading: sqrt(q1) has the true form; n = 2 forms have long
+  outer formulas from mixed rows. (2) PySR alone wins where ours has no n: all 7 of its
+  successes are at d <= 3, and ours gives nothing there. Report ours with fallback, 43/70.
+  (3) Our formula's size in the raw inputs is large too; ours counts J as one variable.
+  (4) 18 problems are excluded from the paired count. (5) One seed; 3 of the 52 tuned the
+  5e-3 threshold. (6) 3.2e-4 is provisional; ordering holds at any threshold, the counts
+  do not. (7) SA-A Stage 3 times (18.5 min median) include scoring; the search limit
+  was the same (SA-B 15.1 min).
+- **Contribution supported.** Scaling with d, and (3) automatic n; (1) a closed form by
+  construction. Not against D yet, which has a similar library advantage.
 
 ## Synthetic SA, dev runs only (not results; RESEARCH_LOG 77)
 

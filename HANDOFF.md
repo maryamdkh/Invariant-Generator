@@ -76,7 +76,7 @@ Results are copied to the Mac with rsync (run on the Mac).
 ## Latest (RESEARCH_LOG 78)
 
 SA-A done: 36/70 under 3.2e-4 (provisional), n never wrong, 11 false rejections, no
-symbolic recovery. The 4 tasks without a summary ran out of memory during scoring. Next: SA-B.
+symbolic recovery. The 4 tasks without a summary ran out of memory during scoring. SA-B done (entry 79): ours better on 52/52, median 605x, with the maxsize caveat. Next: SA-D.
 
 ## Next steps (agreed)
 
