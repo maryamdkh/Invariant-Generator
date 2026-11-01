@@ -361,6 +361,27 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
 - **Contribution supported.** (1) closed-form variables, as on CB2001 (CB-E); here across d.
   Unlike the Hill ladder, this does not test the learned tensor (2), since no tensor is needed.
 
+### SA-C (distillation; RESEARCH_LOG 82)
+
+- **Meaning.** The closest prior method gets 0/70 and its best result is 1.5e-3, against 36/70
+  for ours. Ours is more accurate on all 49 paired problems, by a median 603x. This extends
+  RH3-C and CB-C from single surfaces to 70 problems.
+- **Why.** The network is not the problem: its error stays at 1e-3 to 5e-3 at every d and is
+  lowest at d = 12. Final error grows from 6.9e-3 to 1.1e-1. The hidden variables must be written
+  from all raw inputs, and at d = 12 that search returns little more than an equal-weight
+  sum of squares, like PySR alone. Our variables need no such search (contribution 1).
+- **Honest notes.** (1) This is our baseline, a plain network with an L1 penalty, not the graph
+  network setting of Cranmer et al., whose internal functions have few inputs. Claim only
+  this form. (2) Network settings were not tuned on SA, while our Stage 1 threshold was tuned on
+  three d = 6 problems; tuning could raise the network's accuracy but not fix the symbolic
+  step. (3) maxsize 35 binds the hidden-variable searches too, and each search has only part
+  of the time limit. (4) No constant refit after composition, as in the original method; it
+  could lower errors but not supply missing terms. (5) n: kept count equals true n on 30/70,
+  but the keep rule is ours, so do not make this a strong claim. (6) It is worse than PySR
+  alone on 45/66, except on q1/(1+q2) (better on 16/26). (7) 4 NaN fresh scores; test errors are
+  far above the threshold. (8) One seed; commit not recorded on the cluster.
+- **Contribution supported.** (1) closed-form variables, the sharpest comparison with prior work.
+
 ## Synthetic SA, dev runs only (not results; RESEARCH_LOG 77)
 
 - Dev numbers on 6 problems (d = 6, 12; one seed): A beats PySR alone by 20-100x

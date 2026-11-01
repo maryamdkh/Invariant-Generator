@@ -1406,3 +1406,19 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   home copy was left in place.
 - Caveat: maxsize 35 cannot hold a weighted sum of all terms from about d = 4.
 - Decision: next SA-C (distillation), then the maxsize check.
+
+## 82. SA-C: distillation on the 70 Synthetic SA problems, seed 42
+
+- Goal: compare with the closest prior method. Same PySR config, 15-minute limit split over the
+  searches, no failed tasks. Branch head `1e8ef7c` at submission (commit not recorded on the
+  cluster). `experiments/runs/SA-C/`, `experiments/probes/sa_c_compare.py`.
+- Under 3.2e-4: distillation 0/70 (best 1.5e-3), ours 36/70, sparse linear 21/70, fixed terms
+  8/70, PySR alone 7/70. Ours better on 49/49 paired, median 603x.
+- Median by d: 6.9e-3, 2.9e-2, 4.3e-2, 6.3e-2, 8.2e-2, 1.1e-1, 1.1e-1. Network NRMSE stays at
+  1e-3 to 5e-3 and is lowest at d = 12, so the loss is in the symbolic step.
+- Against PySR alone: better on 21/66, mostly q1/(1+q2) (16/26).
+- Kept hidden variables equal the true n on 30/70; the count depends on our keep rule.
+- 4 NaN fresh scores (negative sqrt argument) not rescored: test errors 9.1e-3 to 1.5e-1.
+- Caveat: maxsize 35 and a split time limit bind the hidden-variable searches; network
+  settings were not tuned on SA.
+- Decision: next the larger-maxsize check, then the structure check (SA-F).
