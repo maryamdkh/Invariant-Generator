@@ -76,7 +76,7 @@ Results are copied to the Mac with rsync (run on the Mac).
 ## Latest (RESEARCH_LOG 78)
 
 SA-A done: 36/70 under 3.2e-4 (provisional), n never wrong, 11 false rejections, no
-symbolic recovery. The 4 tasks without a summary ran out of memory during scoring. SA-B done (entry 79): ours better on 52/52, median 605x, with the maxsize caveat. SA-D done (entry 80): sparse linear 21/70, exact on sqrt(q1), 0/49 on non-polynomial forms. Next: SA-E, SA-C, maxsize check.
+symbolic recovery. The 4 tasks without a summary ran out of memory during scoring. SA-B done (entry 79): ours better on 52/52, median 605x, with the maxsize caveat. SA-D done (entry 80): sparse linear 21/70, exact on sqrt(q1), 0/49 on non-polynomial forms. SA-E done (entry 81): PySR on the fixed term list 8/70, ours better on 52/52, median 453x. Next: SA-C, maxsize check.
 
 ## Next steps (agreed)
 

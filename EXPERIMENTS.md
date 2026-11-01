@@ -206,7 +206,7 @@ the equation index (about 10 equations per d, 5 seeds).
 | SA-B | Synthetic (a) | PySR alone | R | done | 1/5 (42) | `a930e16` | 7/70 under 3.2e-4, none from d = 4; ours better on 52/52, median 605x; maxsize 35 is binding from d = 4 | 79 |
 | SA-C | Synthetic (a) | Distillation | R | planned | | | | |
 | SA-D | Synthetic (a) | Sparse linear | R | done | 1/5 (42) | `478d0f3` | 21/70 under 3.2e-4: all sqrt(q1) exact, 0/49 on non-polynomial forms (ours 22/49, better on 38/38 paired); run on the Mac | 80 |
-| SA-E | Synthetic (a) | PySR + library | R | planned | | | | |
+| SA-E | Synthetic (a) | PySR + library | R | done | 1/5 (42) | `9030a1b` | 8/70 under 3.2e-4, none from d = 4; ours better on 52/52, median 453x; maxsize 35 binding from about d = 4 | 81 |
 | SA-F | Synthetic (a) | Structure recovery (A vs true) | R | blocked (SA-A) | | | | |
 | SA-I | Synthetic (a) | Operon +- encoder | R | blocked (P6) | | | | |
 | SB-A | Synthetic (b) | Ours | R | planned | | | | |

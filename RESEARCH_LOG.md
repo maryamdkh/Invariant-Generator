@@ -1390,3 +1390,19 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Where ours has no n (18): sparse linear under on 7, sparse linear or PySR alone on 8.
 - Caveat: forms chosen partly outside the library; SINDy-PI not tested.
 - Decision: next SA-E (PySR on the fixed library), then SA-C, then the maxsize check.
+
+## 81. SA-E: PySR on the fixed term list on the 70 Synthetic SA problems, seed 42
+
+- Goal: separate the encoder from the terms. Same PySR config and limit as SA-A, no failed
+  tasks. Branch head `9030a1b` at submission (commit not recorded on the cluster).
+  `experiments/runs/SA-E/`, `experiments/probes/sa_e_compare.py`.
+- Under 3.2e-4: fixed terms 8/70, ours 36/70, sparse linear 21/70, PySR alone 7/70. Ours better
+  on 52/52 paired, median 453x (sqrt(q1) 1493x, q1/(1+q2) 454x, sqrt(q1)+q2 154x).
+- Fixed-terms median by d: 2.9e-4, 1.2e-2, 2.2e-2, 3.8e-2, 6.7e-2, 8.5e-2, 1.1e-1. Under by d:
+  5, 3, 0, 0, 0, 0, 0. All 8 are among the 18 where ours chose no n.
+- Against PySR alone: better on 55/70, a small gain. With fixed terms as fallback ours
+  reaches 44/70; 10 of the 18 no-n problems are under with at least one other method.
+- The rsync first landed in `~/results` (run from the home folder); copied to the repo. The
+  home copy was left in place.
+- Caveat: maxsize 35 cannot hold a weighted sum of all terms from about d = 4.
+- Decision: next SA-C (distillation), then the maxsize check.

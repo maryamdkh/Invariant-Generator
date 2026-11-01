@@ -344,6 +344,23 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
 - **Contribution supported.** (1) closed form by construction, beyond what a linear
   library can express.
 
+### SA-E (PySR on the fixed term list; RESEARCH_LOG 81)
+
+- **Meaning.** Giving PySR the right terms is not enough. With the same quadratic monomials
+  available, fixed terms gets 8/70 and ours 36/70, and ours is more accurate on all 52 paired
+  problems, by a median 453x. The gap comes from combining the terms, not from having them.
+- **Why.** q1 is a weighted sum of up to 78 terms at d = 12, and PySR must still assemble it
+  term by term. The encoder fits those weights by gradient descent, so PySR sees one or two
+  variables. Fixed terms only slightly improves on PySR alone (55/70, 4.6e-2 against 6.2e-2).
+- **Honest notes.** (1) maxsize 35 cannot hold the weighted sum from about d = 4, so part of the
+  gap is the cap, as for SA-B; the larger-maxsize check must include this arm. (2) All 8
+  successes are at d <= 3, where ours chose no n; at low d fixed terms beats ours, and it is
+  a useful fallback there (44/70). (3) The term list contains the answer by design. (4) The
+  symbolic check passes on 3 of the 8 (floats). (5) One seed; 3.2e-4 is provisional; the commit
+  was not recorded on the cluster.
+- **Contribution supported.** (1) closed-form variables, as on CB2001 (CB-E); here across d.
+  Unlike the Hill ladder, this does not test the learned tensor (2), since no tensor is needed.
+
 ## Synthetic SA, dev runs only (not results; RESEARCH_LOG 77)
 
 - Dev numbers on 6 problems (d = 6, 12; one seed): A beats PySR alone by 20-100x
