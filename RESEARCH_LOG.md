@@ -1377,3 +1377,16 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   2e-8 (floats do not cancel), so it says little on SA.
 - Caveat: maxsize 35 cannot hold the expanded form from d = 4. Larger-maxsize check needed.
 - Decision: next SA-D (sparse linear), the strongest competitor; fix its fresh-NaN first.
+
+## 80. SA-D: sparse linear on the 70 Synthetic SA problems, seed 42
+
+- Goal: test the strongest competitor. Mac, commit `478d0f3`, `experiments/runs/SA-D/`,
+  `experiments/probes/sa_d_compare.py`. Fit median 0.02 s; total about 10 min, mostly SymPy scoring.
+- Under 3.2e-4: sparse linear 21/70 (all 21 sqrt(q1), exact, symbolic true), ours 36/70,
+  PySR alone 7/70. Non-polynomial forms: sparse linear 0/49, ours 22/49, ours better on
+  38/38 paired (q1/(1+q2) 235x, sqrt(q1)+q2 38x). sqrt(q1): sparse linear better on 14/14.
+- NaN: the sqrt argument goes negative at some fresh points. 6 problems rescored in the
+  probe with the clipping of the test score; no shared code changed, so no Hill check needed.
+- Where ours has no n (18): sparse linear under on 7, sparse linear or PySR alone on 8.
+- Caveat: forms chosen partly outside the library; SINDy-PI not tested.
+- Decision: next SA-E (PySR on the fixed library), then SA-C, then the maxsize check.

@@ -310,8 +310,8 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   But maxsize 35 cannot hold the expanded form from d = 4, so part of the gap is the cap.
   RH3-B-max (maxsize 150, 92 min, 3.4e-2) suggests raising it may not rescue PySR on
   Hill, but that must be shown on SA. Until then: "under the same budget and size limit".
-- **Honest notes.** (1) The symbolic check is not usable here: it says False on PySR-alone
-  formulas with error 2e-8, because fitted floats do not cancel. So "no symbolic recovery"
+- **Honest notes.** (1) The symbolic check is too strict for fitted floats: it says False on PySR-alone
+  formulas with error 2e-8 (it does pass near 1e-11, SA-D). So "no symbolic recovery"
   in SA-A is weak evidence. By reading: sqrt(q1) has the true form; n = 2 forms have long
   outer formulas from mixed rows. (2) PySR alone wins where ours has no n: all 7 of its
   successes are at d <= 3, and ours gives nothing there. Report ours with fallback, 43/70.
@@ -322,6 +322,27 @@ exact because CB2001 is a degree-6 polynomial (138 terms).
   was the same (SA-B 15.1 min).
 - **Contribution supported.** Scaling with d, and (3) automatic n; (1) a closed form by
   construction. Not against D yet, which has a similar library advantage.
+
+### SA-D (sparse linear; RESEARCH_LOG 80)
+
+- **Meaning.** The first accuracy advantage over sparse linear in the project. On forms
+  where no power of y is polynomial, sparse linear gets 0/49 and ours 22/49, and ours is
+  more accurate on all 38 paired problems. On sqrt(q1), sparse linear is exact in under
+  a second and ours is not (2.7e-5 against 1.5e-11).
+- **Why.** Sparse linear is linear in a fixed list, so it succeeds exactly when the
+  answer is in the span of the list. The encoder builds q1, q2 and PySR searches the
+  outer function, which need not be polynomial. This answers "why not just use sparse
+  regression?" from the Hill and CB2001 results.
+- **Honest notes.** (1) The forms were chosen knowing this: two of three are outside the
+  library on purpose. Natural non-polynomial problems (Feynman, LLM-SRBench) must confirm
+  it. (2) SINDy-PI could write q1/(1+q2) implicitly; a reviewer will ask, and it was not
+  tested. A larger library of ratios is also possible, at a cost. (3) Sparse linear is
+  also strong where ours has no n: 7 of the 18, all sqrt(q1) at low d. (4) Six scores use
+  clipping for a negative sqrt argument, the test-score convention, which favours sparse
+  linear slightly; none changes a count. (5) The symbolic check passes on all 21 exact
+  fits, so it works near 1e-11; it fails on 1e-8 floats (SA-B). (6) One seed.
+- **Contribution supported.** (1) closed form by construction, beyond what a linear
+  library can express.
 
 ## Synthetic SA, dev runs only (not results; RESEARCH_LOG 77)
 
