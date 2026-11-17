@@ -238,6 +238,19 @@ the equation index (about 10 equations per d, 5 seeds).
 | LLM-F | LLM-SRBench | Structure recovery | o | blocked (LLM-A) | | | | |
 | LLM-I | LLM-SRBench | Operon +- encoder | o | blocked (P6) | | | | |
 
+### 5b. Redundant-input Feynman (main story, RESEARCH_LOG 83-85)
+
+Data `data/feynman_redundant/{L1,L2,L3}` (`scripts/prepare_redundant_feynman.py`); same rows, y and PySR settings as FEY-B (`configs/feynman_pysr_paper.toml`). L1: x = w + z; L2: x = u1 + u2 + u3; L3: L1 + d distractors.
+
+| ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
+|---|---|---|---|---|---|---|---|---|
+| FEY-L1-B | Feynman L1 | PySR alone | R | planned | | | | 85 |
+| FEY-L1-A | Feynman L1 | Ours | R | planned | | | | |
+| FEY-L2-B | Feynman L2 | PySR alone | R | planned | | | | |
+| FEY-L2-A | Feynman L2 | Ours | R | planned | | | | |
+| FEY-L3-B | Feynman L3 | PySR alone | R | planned | | | | |
+| FEY-L3-A | Feynman L3 | Ours | R | planned | | | | |
+
 ### 6. Noise robustness
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |

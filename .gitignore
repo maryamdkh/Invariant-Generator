@@ -45,3 +45,6 @@ data/llm_srbench_converted/
 references/*.pdf
 .DS_Store
 data/synthetic/
+
+# Redundant-input Feynman (regenerate: scripts/prepare_redundant_feynman.py)
+data/feynman_redundant/

@@ -1467,3 +1467,28 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   the Mac (same config, seed 42, 8 threads): recovered (fresh 1.0e-10,
   symbolic true), 1648 s.
 - Decision: baseline for the redundancy experiment = **93/119 (78.2%)**.
+
+## 85. Redundant Feynman datasets L1, L2, L3 (2026-11-17)
+
+- Goal: input spaces where only linear combinations of the inputs matter,
+  for the new story (entry 83). `scripts/prepare_redundant_feynman.py`
+  -> `data/feynman_redundant/{L1,L2,L3}/` (gitignored; regenerate in
+  seconds from `data/feynman`; on the Mac from `data/feynman_all`, which
+  matches `data/feynman` on all 21 shared files).
+- Construction: the 3000 original rows (X, y) of each equation are reused
+  unchanged, so y and the split equal FEY-B's. Each x in [lo, hi]:
+  L1 x = w + z (z ~ U[lo, hi], w = x - z), 2d inputs (2-18);
+  L2 x = u1 + u2 + u3 (two parts U[lo, hi]), 3d inputs (3-27);
+  L3 = L1 plus d distractors (copies of the w or z distribution of each
+  input, not in y), 3d inputs (3-27). Columns shuffled, named u1..uD;
+  true sums in JSON `mapping`, distractors in `distractors`. Seed 2026 + index.
+- Scoring unchanged: JSON formula = original with x replaced by its sum;
+  10,000 fresh rows `X_eval` (x uniform on its original range, then split)
+  via the existing `eval_key`. `inputs_positive = false`, so the symbolic
+  check uses no positivity assumptions; the headline is numerical.
+- Checks: y reproduced from the expanded formula on every equation and
+  level (worst 2.3e-15); truth finite on all fresh rows. Smoke test PySR
+  alone on L1 feynman_I_29_4 (omega/c), 1-min limit: runs and scores
+  (not recovered, 0.40; a 1-min smoke, not a result).
+- No shared code changed (new script only).
+- Next: FEY-L1-B (PySR alone on L1, FEY-B settings).
