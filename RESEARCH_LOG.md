@@ -1422,3 +1422,25 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Caveat: maxsize 35 and a split time limit bind the hidden-variable searches; network
   settings were not tuned on SA.
 - Decision: next the larger-maxsize check, then the structure check (SA-F).
+
+## 83. New story; FEY-B prepared with the PySR-paper budget (2026-11-17)
+
+- Story (author): PySR on a redundant input space. The encoder picks the few
+  useful linear combinations of the input features and hands them to PySR.
+  Feynman test: (1) PySR alone on the original inputs = baseline; (2) expand
+  the inputs with redundancy (e.g. x = w + z, plus distractors) and show PySR
+  alone fails; (3) ours on the expanded inputs recovers the baseline. The old
+  log-feature Feynman pipeline is not used for this.
+- The 2026-11-16 rotated-CB2001 / `relative_to_best` work is set aside in
+  `archive/2026-11-16_rotated_cb2001/` (untracked, not part of the paper).
+- Checked the PySR paper (Cranmer 2023, arXiv 2305.01582): no Feynman results;
+  Feynman is only criticized (constants given). Its EmpiricalBench (9 laws,
+  5 trials) gives each method 8 cores and up to 1 h, scores the Pareto front
+  by eye; Algorithm 1 defaults 40 populations x 1000. No operator or maxsize
+  values are given.
+- New config `configs/feynman_pysr_paper.toml` = v3 with numprocs 8,
+  populations 40, population_size 1000, timeout 1 h; everything else as v3.
+  Config only, no shared code changed.
+- FEY-B: PySR alone, all 119 equations (no positive-only filter, since the
+  new pipeline does not use log features), seed 42, this config. Reference:
+  v3 budget (15 min, 30 x 50) solved 86/110 on seed 42 (entry 27).
