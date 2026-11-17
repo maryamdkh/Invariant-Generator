@@ -224,7 +224,7 @@ the equation index (about 10 equations per d, 5 seeds).
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
 | FEY-A | Feynman | Ours | R | planned (old: seed 42, 85/110) | | | | 27 |
-| FEY-B | Feynman | PySR alone (PySR-paper budget, `configs/feynman_pysr_paper.toml`, 119 equations) | R | done (118/119; test_9 pending) | 1/5 (42) | `bf38ba6` | 92/118 recovered (78%); same as 15-min budget on common 109 (87 vs 86) | 83, 84 |
+| FEY-B | Feynman | PySR alone (PySR-paper budget, `configs/feynman_pysr_paper.toml`, 119 equations) | R | done | 1/5 (42) | `bf38ba6` | 93/119 recovered (78.2%; test_9 run on the Mac); same as 15-min budget on common 109 (87 vs 86) | 83, 84 |
 | FEY-C | Feynman | Distillation | R | planned | | | | |
 | FEY-D | Feynman | Sparse linear | o | planned | | | | |
 | FEY-E | Feynman | PySR + library | o | planned | | | | |

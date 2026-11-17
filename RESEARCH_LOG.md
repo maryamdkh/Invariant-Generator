@@ -1445,7 +1445,7 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   new pipeline does not use log features), seed 42, this config. Reference:
   v3 budget (15 min, 30 x 50) solved 86/110 on seed 42 (entry 27).
 
-## 84. FEY-B: PySR alone on original Feynman, PySR-paper budget, 92/118 (2026-11-17)
+## 84. FEY-B: PySR alone on original Feynman, PySR-paper budget, 93/119 (2026-11-17)
 
 - Job `5395431`, commit `bf38ba6`, `configs/feynman_pysr_paper.toml` (8 cores,
   1 h, 40 x 1000), seed 42, all 119 equations. 118 done; `feynman_test_9`
@@ -1463,5 +1463,7 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Failed (26): III_10_19, III_4_32, III_4_33, III_9_52, II_35_21, II_6_15a,
   I_15_3t, I_15_3x, I_16_6, I_26_2, I_30_5, I_32_17, I_34_14, I_37_4,
   I_41_16, I_6_2, I_9_18, test_10, 11, 13, 14, 16, 18, 2, 3, 8.
-- Decision: baseline for the redundancy experiment = 92/118 (78%), update
-  with test_9.
+- test_9: stuck in the cluster queue (Priority); cancelled there and run on
+  the Mac (same config, seed 42, 8 threads): recovered (fresh 1.0e-10,
+  symbolic true), 1648 s.
+- Decision: baseline for the redundancy experiment = **93/119 (78.2%)**.

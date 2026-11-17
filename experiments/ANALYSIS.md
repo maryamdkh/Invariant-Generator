@@ -587,8 +587,8 @@ quadratic.
 ## FEY-B: PySR alone on the original Feynman inputs (RESEARCH_LOG 84)
 
 - **Result.** With the budget the PySR paper states for its own benchmark
-  (8 cores, 1 h, 40 populations x 1000), PySR alone recovers 92 of 118
-  Feynman equations (78%, seed 42; relative L2 < 1e-6 on fresh points).
+  (8 cores, 1 h, 40 populations x 1000), PySR alone recovers 93 of 119
+  Feynman equations (78.2%, seed 42; relative L2 < 1e-6 on fresh points).
 - **Meaning.** This is the reference line for the redundancy experiment: the
   success rate PySR reaches when it is given exactly the right inputs. The
   claim to test is that ours on a redundant input space returns to this
@@ -600,6 +600,7 @@ quadratic.
   difficulty, not time.
 - **Caveats.** One seed. Scoring is stricter than the PySR paper's (it
   counts the true form anywhere on the Pareto front, by eye; we score only
-  the selected equation, numerically). One equation (test_9) still pending.
+  the selected equation, numerically). test_9 ran on the Mac (queue delay),
+  same config and seed.
 - **Contribution supported.** Fair, literature-matched baseline; none of the
   method's claims rest on it alone.
