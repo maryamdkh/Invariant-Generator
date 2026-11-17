@@ -583,3 +583,23 @@ quadratic.
 - Same settings for every arm (fairness). Distillation's inner searches use
   plain MSE instead of relative weights because the latents cross zero; its
   outer search uses the config unchanged.
+
+## FEY-B: PySR alone on the original Feynman inputs (RESEARCH_LOG 84)
+
+- **Result.** With the budget the PySR paper states for its own benchmark
+  (8 cores, 1 h, 40 populations x 1000), PySR alone recovers 92 of 118
+  Feynman equations (78%, seed 42; relative L2 < 1e-6 on fresh points).
+- **Meaning.** This is the reference line for the redundancy experiment: the
+  success rate PySR reaches when it is given exactly the right inputs. The
+  claim to test is that ours on a redundant input space returns to this
+  level while PySR alone on the same space drops below it.
+- **Why the budget does not matter here.** Our earlier 15-min, 30 x 50 budget
+  gave 86 of the same 109 equations vs 87 now; 7 gained and 6 lost are
+  single-seed noise. Recovered equations take a median of 49 s; the 26
+  failures use the full hour without success, so they are limited by search
+  difficulty, not time.
+- **Caveats.** One seed. Scoring is stricter than the PySR paper's (it
+  counts the true form anywhere on the Pareto front, by eye; we score only
+  the selected equation, numerically). One equation (test_9) still pending.
+- **Contribution supported.** Fair, literature-matched baseline; none of the
+  method's claims rest on it alone.
