@@ -1510,3 +1510,28 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Decision: the redundancy hurts PySR as the story needs. Next: ours on L1
   (FEY-L1-A), which needs a pipeline config with a linear encoder on raw
   inputs (no log features).
+
+## 87. FEY-L1-A dev: linear encoder on raw inputs, 3 L1 equations (2026-11-18)
+
+- Config `configs/feynman_redundant_linear.toml` = `feynman_pysr_paper.toml`
+  with only the feature map changed: `input_transform` pairwise without
+  products or ratios (= raw inputs, J = sum a_i u_i) and
+  `encoded_feature_transform = "identity"`. Stages 1-2 still on log y. No
+  code change: the pipeline already supported it.
+- Dev on the Mac, seed 42, arm pipeline, 10-min PySR limit (dev only), three
+  equations PySR alone lost on L1 (FEY-L1-B). Console
+  `experiments/outputs/fey_l1_a_dev_console.txt`, results
+  `results/feynman_benchmark/fey_l1_a_dev/`.
+
+  | equation | d | n chosen | rows | recovered (fresh rel. L2) | PySR s |
+  |---|---|---|---|---|---|
+  | II_11_20 Ef n p^2/(3 kb T) | 5 | 5 | all 5 exact sums w + z | yes (2.1e-8, symbolic) | 176 |
+  | I_11_19 x1 y1 + x2 y2 + x3 y3 | 6 | 6 | all 6 exact sums | yes (8.0e-10, symbolic) | 276 |
+  | I_40_1 n0 exp(-m g x/(kb T)) | 6 | 7 | 5 exact sums; x split into u8 and u12 | no (0.12), hit the 10-min limit | 608 |
+
+- I_40_1: n = 6 not accepted (val nrmse 0.086, reference x 2 not met), n = 7
+  at 0.042. PySR did use J1 + J6 = x, but returned kb T/(m g x) inside a
+  wrong outer function within 10 min. One extra row is harmless for the span
+  but lengthens the search.
+- Stage 1 + 2 took 4-6 min per equation.
+- Decision: run FEY-L1-A on all 119 with the full FEY-L1-B budget (1 h).
