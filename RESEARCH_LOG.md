@@ -1492,3 +1492,21 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   (not recovered, 0.40; a 1-min smoke, not a result).
 - No shared code changed (new script only).
 - Next: FEY-L1-B (PySR alone on L1, FEY-B settings).
+
+## 86. FEY-L1-B: PySR alone on Feynman L1 (x = w + z), 54/119 (2026-11-18)
+
+- Job `5420110`, commit `ef54f8b`, same settings as FEY-B
+  (`configs/feynman_pysr_paper.toml`, 8 cores, 1 h, 40 x 1000), seed 42,
+  119/119 done. Results `results/feynman_benchmark/fey_l1_b/seed42/`.
+- Recovered (relative L2 < 1e-6 on fresh points): **54/119 (45%)** vs
+  FEY-B 93/119 (78%). All 54 were also recovered in FEY-B; none gained,
+  39 lost. Symbolic check passes on 41.
+- Drop grows with the number of original inputs d (FEY-B -> L1):
+  d=2 13->12, d=3 32->21, d=4 24->15, d=5 15->5, d>=6 8->0.
+- Time: 65 of 119 searches run the full hour (FEY-B: 26). On the 54 kept,
+  median time 38 s -> 484 s (~13x).
+- Lost 39: median fresh error 5.6e-2; 9 are near misses (< 1e-3).
+- Single seed, but 39 lost vs 0 gained is far beyond the +-2 noise.
+- Decision: the redundancy hurts PySR as the story needs. Next: ours on L1
+  (FEY-L1-A), which needs a pipeline config with a linear encoder on raw
+  inputs (no log features).

@@ -604,3 +604,27 @@ quadratic.
   same config and seed.
 - **Contribution supported.** Fair, literature-matched baseline; none of the
   method's claims rest on it alone.
+
+## FEY-L1-B: PySR alone when each input is split in two (RESEARCH_LOG 86)
+
+- **Result.** Same rows, same y, same PySR budget as FEY-B; only each input
+  x is replaced by two columns w, z with x = w + z. PySR alone drops from
+  93/119 (78%) to 54/119 (45%). It recovers nothing new: the 54 are a
+  subset of FEY-B's 93, and 39 are lost.
+- **Meaning.** A purely representational change, which leaves the formula
+  and its difficulty unchanged, costs PySR 39 equations. This is the
+  failure mode the method targets: the useful variables are linear
+  combinations of the given inputs, and PySR has to discover the sums
+  inside its own expression search.
+- **Why.** Each sum adds at least 2 nodes per occurrence and doubles the
+  number of input symbols, so the search space grows and the expressions
+  approach maxsize 35. The loss grows with d: no losses at d = 1, one at
+  d = 2, all 14 equations with d >= 6 are lost. Even the kept equations
+  take ~13x longer (median 38 s -> 484 s), and 65 of 119 searches use the
+  full hour (26 in FEY-B).
+- **Caveats.** One seed (39 lost vs 0 gained is well beyond the +-2 noise).
+  maxsize 35 is part of the effect for large d; the budget equals the
+  PySR paper's. 9 of the lost are near misses (< 1e-3).
+- **Contribution supported.** Motivation: redundancy in the input
+  representation alone breaks PySR; sets the gap the encoder must close
+  (FEY-L1-A should return toward 93).

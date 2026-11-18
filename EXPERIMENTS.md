@@ -244,7 +244,7 @@ Data `data/feynman_redundant/{L1,L2,L3}` (`scripts/prepare_redundant_feynman.py`
 
 | ID | Dataset | Method | Req | Status | Seeds | Commit | Result | Log |
 |---|---|---|---|---|---|---|---|---|
-| FEY-L1-B | Feynman L1 | PySR alone | R | planned | | | | 85 |
+| FEY-L1-B | Feynman L1 | PySR alone | R | done | 1/5 (42) | `ef54f8b` | 54/119 (45%) vs FEY-B 93/119; 39 lost, 0 gained; d >= 6: 0/14 | 85, 86 |
 | FEY-L1-A | Feynman L1 | Ours | R | planned | | | | |
 | FEY-L2-B | Feynman L2 | PySR alone | R | planned | | | | |
 | FEY-L2-A | Feynman L2 | Ours | R | planned | | | | |
