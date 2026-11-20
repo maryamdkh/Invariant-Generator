@@ -628,3 +628,37 @@ quadratic.
 - **Contribution supported.** Motivation: redundancy in the input
   representation alone breaks PySR; sets the gap the encoder must close
   (FEY-L1-A should return toward 93).
+
+## FEY-L1-A: ours when each input is split in two (RESEARCH_LOG 88)
+
+- **Result.** On the same split inputs, rows and PySR budget as FEY-L1-B,
+  the pipeline (linear encoder on raw inputs, exact rows, PySR on J)
+  recovers 75/119 (63%) vs 54/119 (45%) for PySR alone, and the original
+  baseline is 93/119 (78%). 26 gained and 5 lost vs PySR alone; the
+  encoder recovers 21 of the 39 equations the redundancy cost PySR.
+- **Meaning.** The encoder does what the story claims: it finds which
+  linear combinations of redundant inputs matter and hands PySR the
+  original variables. In 88/119 equations every snapped row is exactly one
+  true sum (e.g. u3 + u8), with no supervision about the split. When Stage
+  1 selects n = d, 69/85 equations are recovered (81%), at or above the
+  FEY-B rate (78%): with the right n, redundancy costs almost nothing.
+- **Why the gap to 93 remains.** Almost all of it is Stage 1 choosing n
+  too small (n < d on 33 equations, only 5 recovered). Acceptance is
+  relative_to_reference with factor 2: a model with one variable fewer is
+  accepted if its val error is within 2x of the dense reference. This
+  fails in two ways: (i) the reference itself fits poorly (9 equations,
+  e.g. III_15_12, where log y of 2U(1-cos kd) is hard to fit, so n = 1
+  passes), and (ii) n = d - 1 is genuinely within 2x of a good reference
+  (24 equations). The rows are then sums of two variables, and no formula
+  in the merged variables exists. The remaining 16 failures with correct
+  rows are PySR budget (15 of 16 reach the 1 h cap; 11 near misses < 1e-3).
+- **Caveats.** One seed. Stage 1+2 add a median 284 s before PySR. A
+  stricter acceptance would likely raise the n = d share, but it is a
+  tuned change and must be opt-in so the rotated-Hill defaults stay. The
+  gain is largest at d = 3-4 (21 -> 30, 15 -> 22); at d >= 6 only 2/14,
+  mostly due to under-selected n.
+- **Contribution supported.** Main generalization claim, partially: on a
+  redundant linear input space the encoder restores most of PySR's
+  success (+21 net), selects exact interpretable rows, and the residual
+  gap is attributed to a specific, fixable stage (n selection), not to
+  the idea.

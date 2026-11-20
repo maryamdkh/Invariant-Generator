@@ -1,0 +1,1073 @@
+[
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.006279769181746911,
+  "threshold": 0.012559538363493822,
+  "ours": false,
+  "eq": "feynman_III_10_19",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0040894981776607095,
+  "threshold": 0.008178996355321419,
+  "ours": true,
+  "eq": "feynman_III_12_43",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009049079398495889,
+  "threshold": 0.018098158796991778,
+  "ours": true,
+  "eq": "feynman_III_13_18",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009824544719291214,
+  "threshold": 0.01964908943858243,
+  "ours": true,
+  "eq": "feynman_III_14_14",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.7826511338005975,
+  "threshold": 1.565302267601195,
+  "ours": false,
+  "eq": "feynman_III_15_12",
+  "n": 1,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.006461163186666018,
+  "threshold": 0.012922326373332037,
+  "ours": true,
+  "eq": "feynman_III_15_14",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005862234577398111,
+  "threshold": 0.011724469154796222,
+  "ours": true,
+  "eq": "feynman_III_15_27",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01734451697312974,
+  "threshold": 0.03468903394625948,
+  "ours": true,
+  "eq": "feynman_III_17_37",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.16352918410652037,
+  "threshold": 0.32705836821304074,
+  "ours": false,
+  "eq": "feynman_III_19_51",
+  "n": 1,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0084811028536625,
+  "threshold": 0.016962205707325,
+  "ours": true,
+  "eq": "feynman_III_21_20",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009916773210759495,
+  "threshold": 0.01983354642151899,
+  "ours": true,
+  "eq": "feynman_III_4_32",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0054484420797585404,
+  "threshold": 0.010896884159517081,
+  "ours": false,
+  "eq": "feynman_III_4_33",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009536044246652843,
+  "threshold": 0.019072088493305685,
+  "ours": true,
+  "eq": "feynman_III_7_38",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.9049638417239834,
+  "threshold": 1.8099276834479667,
+  "ours": false,
+  "eq": "feynman_III_8_54",
+  "n": 1,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.5298964288459874,
+  "threshold": 1.0597928576919748,
+  "ours": false,
+  "eq": "feynman_III_9_52",
+  "n": 1,
+  "d": 6
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.003791917490531621,
+  "threshold": 0.007583834981063242,
+  "ours": true,
+  "eq": "feynman_II_10_9",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.012772438353681692,
+  "threshold": 0.025544876707363384,
+  "ours": true,
+  "eq": "feynman_II_11_20",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.0882223017968423,
+  "threshold": 0.1764446035936846,
+  "ours": false,
+  "eq": "feynman_II_11_27",
+  "n": 2,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.003359160223978193,
+  "threshold": 0.006718320447956386,
+  "ours": false,
+  "eq": "feynman_II_11_28",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.007702487379922405,
+  "threshold": 0.01540497475984481,
+  "ours": false,
+  "eq": "feynman_II_11_3",
+  "n": 4,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01032759811908107,
+  "threshold": 0.02065519623816214,
+  "ours": true,
+  "eq": "feynman_II_13_17",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.002933272780605983,
+  "threshold": 0.005866545561211966,
+  "ours": true,
+  "eq": "feynman_II_13_23",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005273869645360407,
+  "threshold": 0.010547739290720814,
+  "ours": true,
+  "eq": "feynman_II_13_34",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01653090393802856,
+  "threshold": 0.03306180787605712,
+  "ours": true,
+  "eq": "feynman_II_15_4",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.014666698986300264,
+  "threshold": 0.02933339797260053,
+  "ours": true,
+  "eq": "feynman_II_15_5",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.013240563187740527,
+  "threshold": 0.026481126375481053,
+  "ours": false,
+  "eq": "feynman_II_21_32",
+  "n": 4,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.003150288170327943,
+  "threshold": 0.006300576340655886,
+  "ours": false,
+  "eq": "feynman_II_24_17",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0075554967973644515,
+  "threshold": 0.015110993594728903,
+  "ours": true,
+  "eq": "feynman_II_27_16",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.004427250951377968,
+  "threshold": 0.008854501902755937,
+  "ours": true,
+  "eq": "feynman_II_27_18",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.01293451292754523,
+  "threshold": 0.02586902585509046,
+  "ours": true,
+  "eq": "feynman_II_2_42",
+  "n": 4,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010538273689695466,
+  "threshold": 0.021076547379390933,
+  "ours": true,
+  "eq": "feynman_II_34_11",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010635858501154036,
+  "threshold": 0.021271717002308073,
+  "ours": true,
+  "eq": "feynman_II_34_2",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.007453698138771883,
+  "threshold": 0.014907396277543766,
+  "ours": true,
+  "eq": "feynman_II_34_29a",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.014595612558514083,
+  "threshold": 0.029191225117028166,
+  "ours": true,
+  "eq": "feynman_II_34_29b",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.011838530690633878,
+  "threshold": 0.023677061381267756,
+  "ours": true,
+  "eq": "feynman_II_34_2a",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.013280479840293352,
+  "threshold": 0.026560959680586704,
+  "ours": false,
+  "eq": "feynman_II_35_18",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.015290680430084714,
+  "threshold": 0.030581360860169427,
+  "ours": true,
+  "eq": "feynman_II_35_21",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.01591353854823368,
+  "threshold": 0.03182707709646736,
+  "ours": false,
+  "eq": "feynman_II_36_38",
+  "n": 6,
+  "d": 8
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.006078513796428088,
+  "threshold": 0.012157027592856176,
+  "ours": true,
+  "eq": "feynman_II_37_1",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.002563976444945108,
+  "threshold": 0.005127952889890216,
+  "ours": true,
+  "eq": "feynman_II_38_14",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009831578995480946,
+  "threshold": 0.019663157990961893,
+  "ours": true,
+  "eq": "feynman_II_38_3",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.004206470007949557,
+  "threshold": 0.008557992994512863,
+  "ours": true,
+  "eq": "feynman_II_3_24",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0050850659665306495,
+  "threshold": 0.010170131933061299,
+  "ours": true,
+  "eq": "feynman_II_4_23",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0180635319514485,
+  "threshold": 0.036127063902897,
+  "ours": true,
+  "eq": "feynman_II_6_11",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.010424383014671164,
+  "threshold": 0.02084876602934233,
+  "ours": false,
+  "eq": "feynman_II_6_15a",
+  "n": 5,
+  "d": 6
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.026269274045373728,
+  "threshold": 0.052538548090747456,
+  "ours": true,
+  "eq": "feynman_II_6_15b",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0054837583277216155,
+  "threshold": 0.010967516655443231,
+  "ours": true,
+  "eq": "feynman_II_8_31",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005933142817605519,
+  "threshold": 0.011866285635211037,
+  "ours": true,
+  "eq": "feynman_II_8_7",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0031301353754666426,
+  "threshold": 0.006260270750933285,
+  "ours": true,
+  "eq": "feynman_I_10_7",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010835551793670257,
+  "threshold": 0.021671103587340514,
+  "ours": true,
+  "eq": "feynman_I_11_19",
+  "n": 6,
+  "d": 6
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005592306932383501,
+  "threshold": 0.011184613864767002,
+  "ours": true,
+  "eq": "feynman_I_12_1",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.018891673368440165,
+  "threshold": 0.03778334673688033,
+  "ours": true,
+  "eq": "feynman_I_12_11",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010829278519342657,
+  "threshold": 0.021658557038685314,
+  "ours": true,
+  "eq": "feynman_I_12_2",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.007389536328736858,
+  "threshold": 0.014779072657473717,
+  "ours": true,
+  "eq": "feynman_I_12_4",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.00419794685117046,
+  "threshold": 0.00839589370234092,
+  "ours": true,
+  "eq": "feynman_I_12_5",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01823537044042986,
+  "threshold": 0.03647074088085972,
+  "ours": true,
+  "eq": "feynman_I_13_12",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.008591765393388634,
+  "threshold": 0.017183530786777267,
+  "ours": false,
+  "eq": "feynman_I_13_4",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009334092625174274,
+  "threshold": 0.018668185250348548,
+  "ours": true,
+  "eq": "feynman_I_14_3",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.006182410438062955,
+  "threshold": 0.01236482087612591,
+  "ours": true,
+  "eq": "feynman_I_14_4",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005074301079830095,
+  "threshold": 0.01014860215966019,
+  "ours": true,
+  "eq": "feynman_I_15_10",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.007558516291870539,
+  "threshold": 0.015117032583741079,
+  "ours": false,
+  "eq": "feynman_I_15_3t",
+  "n": 3,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.00815761522978428,
+  "threshold": 0.01631523045956856,
+  "ours": false,
+  "eq": "feynman_I_15_3x",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.008368773802771555,
+  "threshold": 0.01673754760554311,
+  "ours": true,
+  "eq": "feynman_I_16_6",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.026803417008966168,
+  "threshold": 0.053606834017932335,
+  "ours": true,
+  "eq": "feynman_I_18_12",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.015383168351016765,
+  "threshold": 0.03076633670203353,
+  "ours": true,
+  "eq": "feynman_I_18_14",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.00822692009508223,
+  "threshold": 0.01645384019016446,
+  "ours": true,
+  "eq": "feynman_I_18_4",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.007360945096428779,
+  "threshold": 0.014721890192857558,
+  "ours": true,
+  "eq": "feynman_I_24_6",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0018827429524163435,
+  "threshold": 0.003765485904832687,
+  "ours": true,
+  "eq": "feynman_I_25_13",
+  "n": 3,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.03357094554699512,
+  "threshold": 0.07517187035686947,
+  "ours": false,
+  "eq": "feynman_I_26_2",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.003305975093941368,
+  "threshold": 0.006611950187882736,
+  "ours": true,
+  "eq": "feynman_I_27_6",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.15584473915229868,
+  "threshold": 0.31168947830459737,
+  "ours": true,
+  "eq": "feynman_I_29_16",
+  "n": 3,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0025899445337782094,
+  "threshold": 0.005703447560211168,
+  "ours": true,
+  "eq": "feynman_I_29_4",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.6166774975325159,
+  "threshold": 1.2333549950650318,
+  "ours": false,
+  "eq": "feynman_I_30_3",
+  "n": 1,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0035177104115382218,
+  "threshold": 0.0070354208230764435,
+  "ours": false,
+  "eq": "feynman_I_30_5",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.008348999233209344,
+  "threshold": 0.016697998466418687,
+  "ours": false,
+  "eq": "feynman_I_32_17",
+  "n": 5,
+  "d": 6
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01073788056248021,
+  "threshold": 0.02147576112496042,
+  "ours": true,
+  "eq": "feynman_I_32_5",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0033540848860524647,
+  "threshold": 0.006708169772104929,
+  "ours": true,
+  "eq": "feynman_I_34_1",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.002229668916250115,
+  "threshold": 0.00445933783250023,
+  "ours": true,
+  "eq": "feynman_I_34_14",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.003399568266618168,
+  "threshold": 0.0072187211436458695,
+  "ours": true,
+  "eq": "feynman_I_34_27",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010933335302411145,
+  "threshold": 0.02186667060482229,
+  "ours": true,
+  "eq": "feynman_I_34_8",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.10245945069459217,
+  "threshold": 0.20491890138918434,
+  "ours": false,
+  "eq": "feynman_I_37_4",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009084157985889343,
+  "threshold": 0.018168315971778686,
+  "ours": true,
+  "eq": "feynman_I_38_12",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0045794553497142815,
+  "threshold": 0.009158910699428563,
+  "ours": true,
+  "eq": "feynman_I_39_1",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01112812121583364,
+  "threshold": 0.02225624243166728,
+  "ours": true,
+  "eq": "feynman_I_39_11",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010208600586757356,
+  "threshold": 0.020417201173514712,
+  "ours": true,
+  "eq": "feynman_I_39_22",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.03166252983760205,
+  "threshold": 0.0633250596752041,
+  "ours": false,
+  "eq": "feynman_I_40_1",
+  "n": 6,
+  "d": 6
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.014376005963955548,
+  "threshold": 0.028752011927911096,
+  "ours": false,
+  "eq": "feynman_I_41_16",
+  "n": 4,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.012565815568503336,
+  "threshold": 0.02513163113700667,
+  "ours": true,
+  "eq": "feynman_I_43_16",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.009146636107290699,
+  "threshold": 0.018293272214581397,
+  "ours": true,
+  "eq": "feynman_I_43_31",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.010456155000271744,
+  "threshold": 0.02091231000054349,
+  "ours": true,
+  "eq": "feynman_I_43_43",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01798945468770575,
+  "threshold": 0.0359789093754115,
+  "ours": false,
+  "eq": "feynman_I_44_4",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005649124917721964,
+  "threshold": 0.011298249835443927,
+  "ours": true,
+  "eq": "feynman_I_47_23",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.005177181913973254,
+  "threshold": 0.010354363827946508,
+  "ours": true,
+  "eq": "feynman_I_48_2",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.1033775128898042,
+  "threshold": 0.2067550257796084,
+  "ours": true,
+  "eq": "feynman_I_50_26",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0032849574151597723,
+  "threshold": 0.0065699148303195445,
+  "ours": false,
+  "eq": "feynman_I_6_2",
+  "n": 2,
+  "d": 2
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.0011951437509547635,
+  "threshold": 0.0024216942667168043,
+  "ours": true,
+  "eq": "feynman_I_6_2a",
+  "n": 1,
+  "d": 1
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.004775513918125336,
+  "threshold": 0.009551027836250671,
+  "ours": true,
+  "eq": "feynman_I_6_2b",
+  "n": 2,
+  "d": 3
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.19956984490901886,
+  "threshold": 0.3991396898180377,
+  "ours": true,
+  "eq": "feynman_I_8_14",
+  "n": 2,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.009876109987482043,
+  "threshold": 0.019752219974964087,
+  "ours": false,
+  "eq": "feynman_I_9_18",
+  "n": 6,
+  "d": 9
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.01281571056152951,
+  "threshold": 0.02563142112305902,
+  "ours": true,
+  "eq": "feynman_test_1",
+  "n": 7,
+  "d": 7
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.004334971130824337,
+  "threshold": 0.008669942261648673,
+  "ours": false,
+  "eq": "feynman_test_10",
+  "n": 3,
+  "d": 3
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.011283858982360402,
+  "threshold": 0.022567717964720804,
+  "ours": false,
+  "eq": "feynman_test_11",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.009175627962775944,
+  "threshold": 0.01835125592555189,
+  "ours": false,
+  "eq": "feynman_test_12",
+  "n": 4,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.03440965616246671,
+  "threshold": 0.06881931232493342,
+  "ours": false,
+  "eq": "feynman_test_13",
+  "n": 4,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.2755739184546849,
+  "threshold": 0.5511478369093697,
+  "ours": false,
+  "eq": "feynman_test_14",
+  "n": 2,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.016350317934910742,
+  "threshold": 0.032700635869821484,
+  "ours": false,
+  "eq": "feynman_test_15",
+  "n": 3,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.02126141481049132,
+  "threshold": 0.04252282962098264,
+  "ours": false,
+  "eq": "feynman_test_16",
+  "n": 5,
+  "d": 6
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.015943993709969087,
+  "threshold": 0.031887987419938174,
+  "ours": false,
+  "eq": "feynman_test_17",
+  "n": 5,
+  "d": 6
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.019375083829085468,
+  "threshold": 0.038750167658170936,
+  "ours": true,
+  "eq": "feynman_test_18",
+  "n": 5,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.06281343931647293,
+  "threshold": 0.12562687863294586,
+  "ours": false,
+  "eq": "feynman_test_19",
+  "n": 3,
+  "d": 6
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.05419470465554636,
+  "threshold": 0.10838940931109271,
+  "ours": false,
+  "eq": "feynman_test_2",
+  "n": 2,
+  "d": 6
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.12533325055827804,
+  "threshold": 0.2506665011165561,
+  "ours": false,
+  "eq": "feynman_test_20",
+  "n": 2,
+  "d": 7
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.005698824711636422,
+  "threshold": 0.011397649423272843,
+  "ours": false,
+  "eq": "feynman_test_3",
+  "n": 3,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.008760027804868387,
+  "threshold": 0.017520055609736775,
+  "ours": false,
+  "eq": "feynman_test_4",
+  "n": 3,
+  "d": 5
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.004254919796986325,
+  "threshold": 0.00850983959397265,
+  "ours": true,
+  "eq": "feynman_test_5",
+  "n": 3,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.0242572996367621,
+  "threshold": 0.0485145992735242,
+  "ours": false,
+  "eq": "feynman_test_6",
+  "n": 6,
+  "d": 7
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.007120613349983448,
+  "threshold": 0.014241226699966896,
+  "ours": false,
+  "eq": "feynman_test_7",
+  "n": 3,
+  "d": 5
+ },
+ {
+  "n_lt_d": false,
+  "ref_test_nrmse": 0.007687725804843168,
+  "threshold": 0.015375451609686336,
+  "ours": false,
+  "eq": "feynman_test_8",
+  "n": 4,
+  "d": 4
+ },
+ {
+  "n_lt_d": true,
+  "ref_test_nrmse": 0.08053628686312922,
+  "threshold": 0.16107257372625844,
+  "ours": false,
+  "eq": "feynman_test_9",
+  "n": 2,
+  "d": 5
+ }
+]

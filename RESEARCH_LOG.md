@@ -1535,3 +1535,38 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   but lengthens the search.
 - Stage 1 + 2 took 4-6 min per equation.
 - Decision: run FEY-L1-A on all 119 with the full FEY-L1-B budget (1 h).
+
+## 88. FEY-L1-A: ours on Feynman L1 (x = w + z), 75/119 (2026-11-20)
+
+- Job `5431719`, commit `3c00369`, `configs/feynman_redundant_linear.toml`
+  (linear encoder on raw inputs; PySR budget = FEY-B / FEY-L1-B: 8 cores,
+  1 h, 40 x 1000), seed 42, 119/119 done (one stuck throttle, reset with
+  `scontrol update ... ArrayTaskThrottle=40`). Results
+  `results/feynman_benchmark/fey_l1_a/seed42/`.
+- Scoring probe `experiments/probes/fey_redundant_score.py`; console
+  `experiments/outputs/fey_l1_a_score_console.txt`, per-equation table
+  `experiments/outputs/fey_l1_a_scores.json`, Stage 1 reference fits
+  `experiments/outputs/fey_l1_a_stage1_reference.json`.
+- Recovered (fresh relative L2 < 1e-6): **75/119 (63%)** vs PySR alone on
+  the same inputs (FEY-L1-B) 54/119 and on the original inputs (FEY-B)
+  93/119. Vs FEY-L1-B: 26 gained, 5 lost. Vs FEY-B: 5 recovered only by
+  ours, 23 only by FEY-B.
+- By d (FEY-B / FEY-L1-B / ours): d=1 1/1/1, d=2 13/12/12, d=3 32/21/30,
+  d=4 24/15/22, d=5 15/5/8, d>=6 8/0/2.
+- Encoder rows vs the true sums: 88 equations have every row exactly one
+  true sum (`pure`), 26 have rows in the span of the sums but mixing
+  variables (`span`), 5 other. n = d on 85, n < d on 33, n > d on 1.
+- **When n = d (85 eqs): 69 recovered** (all pure rows). The 16 failures
+  with correct rows are PySR budget: 15 of 16 hit the 1 h cap and 11 are near
+  misses < 1e-3 (II_11_28 1.5e-6, II_24_17 1.6e-6, I_40_1 2e-5).
+- **When n < d (33 eqs): 5 recovered.** Stage 1 accepted a too-small n:
+  the accepted val nrmse is within relative_factor 2 of the dense
+  reference. In 9 of them the reference itself fits poorly (threshold
+  0.25-1.8, e.g. III_15_12 ref test nrmse 0.78, so n = 1 passes); in the
+  rest n = d - 1 is within 2x of a good reference (e.g. II_11_3 n=4
+  0.0148). All 5 lost vs FEY-L1-B are in this group.
+- Time: median Stage 1+2 284 s, median PySR 253 s; 45 searches hit the cap.
+- Decision: the encoder closes most of the gap (54 -> 75 of 93). The main
+  remaining loss is Stage 1 under-selecting n, not row quality. A stricter
+  acceptance (opt-in; Hill defaults unchanged) is the candidate fix, to be
+  decided by the author before L2/L3.

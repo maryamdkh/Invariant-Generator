@@ -1,0 +1,20 @@
+equations 119 (ours present 119)
+recovered: ours 75  PySR-alone same inputs 54  PySR-alone original 93
+vs same-input baseline: gained 26, lost 5
+vs original: ours-not-orig 5, orig-not-ours 23
+lost: ['feynman_III_15_12', 'feynman_II_11_27', 'feynman_I_30_3', 'feynman_test_4', 'feynman_test_7']
+row classes: {'pure': 88, 'span': 26, 'other': 5}
+n vs d: {'n=d': 85, 'n<d': 33, 'n>d': 1}
+  pure   88 eqs, recovered ours 69, orig 73
+  span   26 eqs, recovered ours 5, orig 16
+  other   5 eqs, recovered ours 1, orig 4
+by d:   d  count  orig  base  ours
+        1      1     1     1     1
+        2     15    13    12    12
+        3     37    32    21    30
+        4     32    24    15    22
+        5     20    15     5     8
+      >=6     14     8     0     2
+median stage1+2 s 284; median PySR s 253; PySR at 1 h cap 45
+near misses (<1e-3) 13: ['feynman_III_4_33', 'feynman_II_11_28', 'feynman_II_24_17', 'feynman_II_35_18', 'feynman_I_15_3x', 'feynman_I_30_5', 'feynman_I_37_4', 'feynman_I_40_1', 'feynman_I_44_4', 'feynman_I_6_2', 'feynman_test_10', 'feynman_test_12', 'feynman_test_3']
+-> experiments/outputs/fey_l1_a_scores.json
