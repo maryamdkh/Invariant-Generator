@@ -1605,3 +1605,9 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
     held-out L1 equations. Then implement the frozen rule as opt-in config
     (Hill defaults unchanged, `hill_old_vs_new.py` must print IDENTICAL),
     rerun FEY-L1-A, and run L2/L3 with the rule untouched (held out).
+- Update: sweep capped at n <= min(inputs - 1, d + 2) (diagnostic only; no
+  candidate rule needs more, and the rules never see d): 683 instead of 805
+  n values per target over the 119 equations, largest n 11. True n* for
+  scoring will be computed from each formula (rank of its input gradients),
+  since n* < d for some equations (e.g. I_8_14, distance: d = 4, n* = 2).
+  Run on Arrhenius (array of 119, `-c 2`).

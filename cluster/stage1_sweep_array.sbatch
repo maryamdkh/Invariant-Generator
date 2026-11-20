@@ -10,9 +10,9 @@
 #SBATCH -J stage1-sweep
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 4
+#SBATCH -c 2
 #SBATCH -t 02:00:00
-#SBATCH --mem=16G
+#SBATCH --mem=8G
 #SBATCH -o cluster/logs/%x-%A_%a.out
 set -euo pipefail
 

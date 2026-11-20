@@ -2,7 +2,7 @@
 
 Purpose: data for choosing a better n-selection rule offline (RESEARCH_LOG
 89). For each equation and each Stage 1 target (log y, y) it trains the
-bottleneck-free reference and every n = 1 .. n_max (= inputs - 1) with the
+bottleneck-free reference and every n = 1 .. min(inputs - 1, d + 2) with the
 usual restarts, without stopping at the first accepted n. Uses the existing
 pipeline code unchanged (only `adaptive.stop_on_first_success = false` and
 `data.target_transform` are set per run), so the old rule's choice is still
@@ -58,6 +58,9 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--targets", default="log,identity")
     p.add_argument("--n-max", type=int, default=0, help="Cap n (smoke tests only); 0 = inputs - 1.")
+    p.add_argument("--above-d", type=int, default=2,
+                   help="Diagnostic cap n <= d + above_d (d = original variables); -1 = no cap. "
+                        "No candidate rule needs n beyond d + 2; the rules never see d.")
     args = p.parse_args()
 
     from invariant_generator.adaptive import run_adaptive_sweep
@@ -85,6 +88,8 @@ def main() -> None:
             config.adaptive.stop_on_first_success = False
             if args.n_max:
                 config.adaptive.n_max = min(config.adaptive.n_max, args.n_max)
+            if args.above_d >= 0 and "d" in out:
+                config.adaptive.n_max = min(config.adaptive.n_max, out["d"] + args.above_d)
             started = time.perf_counter()
             result = run_adaptive_sweep(config)
             summary = json.loads(Path(result.summary_path).read_text(encoding="utf-8"))
