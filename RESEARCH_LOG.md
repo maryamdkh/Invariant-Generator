@@ -1570,3 +1570,38 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   remaining loss is Stage 1 under-selecting n, not row quality. A stricter
   acceptance (opt-in; Hill defaults unchanged) is the candidate fix, to be
   decided by the author before L2/L3.
+
+## 89. FEY-L1-S1: Stage 1 sweep to fix n selection, plan and pre-registration (2026-11-20)
+
+- Problem (entry 88): Stage 1 picks n < d on 33/119 L1 equations (5
+  recovered). Two causes: (A) the factor-2 margin of `relative_to_reference`
+  is too loose, so n = d - 1 passes when the reference fits well (24 eqs,
+  e.g. II_11_3 n=4 at 1.9x the reference); (B) the reference itself fits
+  poorly on log y (9 eqs, e.g. III_15_12, y = 2U(1 - cos kd) -> 0), so 2x a
+  bad fit accepts almost any n.
+- History: the factor 2 was an untuned default chosen when the fixed 1%
+  threshold failed on the 21-equation pilot (entries 9, 11, 14).
+- Experiment FEY-L1-S1 (no PySR, no shared-code change): for every L1
+  equation and both Stage 1 targets (log y and y), train the reference and
+  every n = 1 .. inputs-1 (3 restarts each) without stopping at the first
+  accepted n; keep per-n train/val nrmse and every restart.
+  Probe `experiments/probes/stage1_sweep.py`; cluster
+  `cluster/stage1_sweep_array.sbatch`; Mac `experiments/probes/run_stage1_sweep_local.sh`.
+  Output `results/feynman_benchmark/fey_l1_s1/seed42/<eq>/stage1_sweep.json`.
+  Smoke on the Mac (III_12_43, d=2): 215 s per target; old rule n=2 under
+  both targets; the y target's reference fits better than log y's
+  (val nrmse 0.0029 vs 0.0047).
+- Pre-registered rules, to be chosen offline from the sweep:
+  - (B) target: use the target (log y or y) whose reference has the lower
+    val nrmse. No tuned number.
+  - (A) knee: accept the smallest n that passes the old threshold and whose
+    val nrmse is <= r x that of n + 1 (adding a row no longer helps).
+    r chosen on the dev set only, the 21 pilot equations (III_9_52,
+    II_36_38, II_6_15a, I_11_19, I_32_17, I_40_1, I_9_18, test_1, test_11,
+    test_12, test_16, test_17, test_18, test_19, test_3, test_4, test_5,
+    test_6, test_7, test_8, test_9), from candidates {1.1, 1.25, 1.5, 2} and
+    the restart-to-restart spread at the selected n; then frozen.
+  - Score: share of equations with n = d (old rule vs A, B, A+B) on the 98
+    held-out L1 equations. Then implement the frozen rule as opt-in config
+    (Hill defaults unchanged, `hill_old_vs_new.py` must print IDENTICAL),
+    rerun FEY-L1-A, and run L2/L3 with the rule untouched (held out).

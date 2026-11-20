@@ -246,6 +246,7 @@ Data `data/feynman_redundant/{L1,L2,L3}` (`scripts/prepare_redundant_feynman.py`
 |---|---|---|---|---|---|---|---|---|
 | FEY-L1-B | Feynman L1 | PySR alone | R | done | 1/5 (42) | `ef54f8b` | 54/119 (45%) vs FEY-B 93/119; 39 lost, 0 gained; d >= 6: 0/14 | 85, 86 |
 | FEY-L1-A | Feynman L1 | Ours (`configs/feynman_redundant_linear.toml`) | R | done | 1/5 (42) | `3c00369` | 75/119 (63%) vs L1-B 54, FEY-B 93; 26 gained, 5 lost vs L1-B; n=d: 69/85; n<d: 5/33 | 87, 88 |
+| FEY-L1-S1 | Feynman L1 | Stage 1 sweep only (every n, log y and y), no PySR | R | ready | 1 (42) | | choose n-selection rule on 21 dev eqs, score n = d on 98 held out | 89 |
 | FEY-L2-B | Feynman L2 | PySR alone | R | planned | | | | |
 | FEY-L2-A | Feynman L2 | Ours | R | planned | | | | |
 | FEY-L3-B | Feynman L3 | PySR alone | R | planned | | | | |
