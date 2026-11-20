@@ -58,6 +58,7 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--targets", default="log,identity")
     p.add_argument("--n-max", type=int, default=0, help="Cap n (smoke tests only); 0 = inputs - 1.")
+    p.add_argument("--device", default="", help="Override [train].device (cpu, cuda); default: config.")
     p.add_argument("--above-d", type=int, default=2,
                    help="Diagnostic cap n <= d + above_d (d = original variables); -1 = no cap. "
                         "No candidate rule needs n beyond d + 2; the rules never see d.")
@@ -70,6 +71,10 @@ def main() -> None:
     base = load_config(args.config)
     base.data.data_dir = args.data_dir if args.data_dir.is_absolute() else PROJECT_ROOT / args.data_dir
     base.train.seed = args.seed
+    if args.device:
+        base.train.device = args.device
+    import torch
+    print(f"device {base.train.device}, cuda available {torch.cuda.is_available()}", flush=True)
     base.symbolic.random_state = args.seed
     entries = {e["equation_id"]: e for e in json.loads(args.manifest.read_text(encoding="utf-8"))}
 
