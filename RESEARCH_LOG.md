@@ -1620,3 +1620,49 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   -I command-length limit; equation id now passed as an argument).
 - Correction: the Arrhenius login node uses `.venv-aarch64`, not
   `.venv-x86_64`; `cluster/make_tasks.py` needs only `python3`.
+
+## 90. FEY-L1-S1 results: knee rule r = 1.25 plus target choice, held-out n = n* 82 -> 88 of 98 (2026-11-21)
+
+- Run (entry 89): finished on the Mac 2026-11-21 13:55, 119/119 equations,
+  no failures (~4 h 15 min, 8 at a time, CPU). Log y impossible on 20
+  equations (y <= 0), so those have only the y target.
+- Analysis: `experiments/probes/fey_l1_s1_analysis.py`; console
+  `experiments/outputs/fey_l1_s1_analysis_console.txt`; per-equation
+  `experiments/outputs/fey_l1_s1_analysis.json`. Old rule recomputed from
+  the sweep matches the pipeline's recorded choice on 119/119.
+- True n* (rank of the formula's input gradients at 400 rows): n* < d on
+  10 equations (III_9_52 6->5, II_2_42 5->4, I_29_16 4->3, I_6_2b 3->2,
+  I_8_14 4->2, I_9_18 9->6, test_2 6->5, test_3 4->3, test_4 5->4,
+  test_5 4->3). These are scored against n*, not d.
+- Dev (21 pilot equations), n = n*: old rule 8/21 (12 under, 1 over).
+  Knee A(r), default target: r = 1.1: 13, 1.25: 15, 1.5: 14, 2: 12.
+  With target choice B: 12, 16, 15, 13. Chosen r = 1.25 (best on dev for
+  both). Step ratios val(n)/val(n+1) on dev: steps below n* median 1.54
+  (5% 0.94); steps at or above n* median 0.96 (95% 1.27). Restart spread at
+  n* (second-best / best val) median 1.09, 90% 1.18. So r = 1.25 sits just
+  above the noise of an unneeded row. The two distributions overlap, so no
+  r separates them perfectly.
+- Held out (98 equations, rule frozen), n = n*:
+  old 82 (15 under, 1 over); A(1.25) 86 (7 under, 5 over);
+  A(1.25)+B 88 (5 under, 5 over). n = d: old 78, A+B 85.
+  B alone does not change the old rule (82): the target choice only
+  matters together with the knee.
+  A+B vs old: 10 fixed (III_15_12 1->3, I_30_3 1->3, test_2 3->5,
+  II_11_27 2->4, II_11_3, II_21_32, I_41_16, I_50_26, test_13, test_15
+  each +1); 4 newly one too many (II_34_29a, I_16_6, I_48_2 3->4,
+  I_6_2b 2->3).
+  Other r on held out (for the record, not used to choose): A+B r = 1.5 gives
+  90, r = 1.1 gives 85, r = 2 gives 88.
+- Remaining held-out misses: 4 with a bad reference that no threshold can
+  fix (III_19_51 ref val 0.16, III_8_54 0.56, test_14 0.28, test_20 0.13),
+  1 still one short (I_15_3t), 1 old-rule overshoot kept (I_25_13), 4 new
+  overshoots.
+- Decision: freeze A(1.25) + B as the Stage 1 rule for Feynman
+  (opt-in). One seed: the +6 is above the +-2 PySR noise only in Stage 1
+  terms. The recovery effect needs the FEY-L1-A rerun. Overshoot (n = n* + 1) is expected
+  to cost less than undershoot: an extra row can be snapped or ignored by
+  PySR, a missing one makes recovery impossible. The rerun checks this.
+- Next: implement as opt-in config (new acceptance option and a
+  target-choice switch; Hill defaults unchanged, `hill_old_vs_new.py`
+  IDENTICAL), then rerun FEY-L1-A with it. The knee needs n + 1 trained,
+  so it costs one extra n per equation.

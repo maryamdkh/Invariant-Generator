@@ -1,0 +1,50 @@
+equations 119 (dev 21, held out 98)
+old rule recomputed == recorded: 119/119
+n* < d: 10: [('III_9_52', 6, 5), ('II_2_42', 5, 4), ('I_29_16', 4, 3), ('I_6_2b', 3, 2), ('I_8_14', 4, 2), ('I_9_18', 9, 6), ('test_2', 6, 5), ('test_3', 4, 3), ('test_4', 5, 4), ('test_5', 4, 3)]
+best target: log 58, y 61 (log impossible 20)
+
+DEV (21 eqs): rule  n=n*  n<n*  n>n*  none  n=d
+  old_def       8    12     1     0     5
+  old_B         8    12     1     0     5
+  A1.1_def     13     5     3     0    10
+  A1.25_def    15     5     1     0    11
+  A1.5_def     14     6     1     0    10
+  A2.0_def     12     8     1     0     8
+  A1.1_B       12     4     5     0     8
+  A1.25_B      16     4     1     0    11
+  A1.5_B       15     5     1     0    10
+  A2.0_B       13     7     1     0     8
+dev step ratios val(n)/val(n+1): missing-variable steps n<n* (n=92) min 0.64 5% 0.94 median 1.54; unneeded steps n>=n* (n=49) median 0.96 95% 1.27 max 2.03
+dev restart spread at n* (2nd best / best val): median 1.09, 90% 1.18
+dev choice (def target): scores {1.1: 13, 1.25: 15, 1.5: 14, 2.0: 12} -> r = 1.25
+dev choice (B target): scores {1.1: 12, 1.25: 16, 1.5: 15, 2.0: 13} -> r = 1.25
+
+FROZEN: r = {'def': 1.25, 'B': 1.25}
+
+HELD OUT (98 eqs): rule  n=n*  n<n*  n>n*  none  n=d
+  old_def      82    15     1     0    78
+  old_B        82    15     1     0    78
+  A1.1_def     84     4    10     0    83
+  A1.25_def    86     7     5     0    85
+  A1.5_def     87     9     2     0    82
+  A2.0_def     86    11     1     0    82
+  A1.1_B       85     3    10     0    83
+  A1.25_B      88     5     5     0    85
+  A1.5_B       90     6     2     0    85
+  A2.0_B       88     9     1     0    84
+  frozen A1.25_def: held-out n=n* 86/98 vs old 82/98
+  frozen A1.25_B: held-out n=n* 88/98 vs old 82/98
+held-out step ratios: missing 5% 1.19 min 0.35; unneeded 95% 1.19 max 1.91
+
+held-out misses under frozen A+B:
+  III_19_51    d=5 n*=5 old=1 A+B=2 target=identity ref_val={'identity': 0.1616}
+  III_8_54     d=3 n*=3 old=1 A+B=2 target=identity ref_val={'log': 0.905, 'identity': 0.5601}
+  II_34_29a    d=3 n*=3 old=3 A+B=4 target=identity ref_val={'log': 0.0073, 'identity': 0.0058}
+  I_15_3t      d=4 n*=4 old=3 A+B=3 target=log ref_val={'log': 0.0074, 'identity': 0.0077}
+  I_16_6       d=3 n*=3 old=3 A+B=4 target=log ref_val={'log': 0.0068, 'identity': 0.011}
+  I_25_13      d=2 n*=2 old=3 A+B=3 target=log ref_val={'log': 0.0019, 'identity': 0.0032}
+  I_48_2       d=3 n*=3 old=3 A+B=4 target=identity ref_val={'log': 0.0047, 'identity': 0.0039}
+  I_6_2b       d=3 n*=2 old=2 A+B=3 target=log ref_val={'log': 0.0048, 'identity': 0.0104}
+  test_14      d=5 n*=5 old=2 A+B=4 target=identity ref_val={'identity': 0.2762}
+  test_20      d=7 n*=7 old=2 A+B=2 target=log ref_val={'log': 0.1253, 'identity': 0.4346}
+-> experiments/outputs/fey_l1_s1_analysis.json

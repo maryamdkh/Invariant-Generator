@@ -662,3 +662,42 @@ quadratic.
   success (+21 net), selects exact interpretable rows, and the residual
   gap is attributed to a specific, fixable stage (n selection), not to
   the idea.
+
+## FEY-L1-S1: choosing n in Stage 1 (RESEARCH_LOG 89, 90)
+
+- **Result.** A knee rule chooses the bottleneck size much more reliably
+  than the factor-2 rule. The knee rule accepts the first n that passes the
+  old threshold only if adding one more row improves val nrmse by less than
+  1.25x. It is combined with choosing log y or y by the reference's val
+  error. On the 98 held-out L1 equations, n equals the true minimal
+  bottleneck n* in 88 cases, vs 82 for the old rule. Under-selection, the
+  failure that makes recovery impossible, drops from 15 to 5. r was chosen
+  on the 21 pilot equations only (16/21 vs 8/21 for the old rule) and then
+  frozen.
+- **Meaning.** Choosing n is a model-selection problem. The old rule asked
+  "is this n good enough compared with the full model?", which is too lax
+  when the full model is good. The knee asks "does one more row still
+  help?", which is scale-free: it does not depend on how well an MLP can
+  fit the equation. The gap between the two kinds of step supports this.
+  A row that is still missing usually reduces val error by more than 1.5x
+  (dev median 1.54). An unneeded row changes it by about the restart noise
+  (median 0.96, 95% 1.27).
+- **Why some still fail.** 4 of the 10 held-out misses have a reference
+  MLP that cannot fit the equation (val nrmse 0.13-0.56: III_19_51,
+  III_8_54, test_14, test_20). With no good fit at any n, no threshold
+  can select n; the problem lies in Stage 1 training, not the rule. The
+  other misses are off by one, mostly one row too many (5).
+- **Caveats.** One seed. The two step distributions overlap (dev: some
+  missing-row steps change val by < 1.0x when n is far below n*), so the
+  rule trades a few overshoots (4 new) for fewer undershoots (10 fixed).
+  n* is the rank of the formula's input gradients, a property of the
+  formula, so it is valid ground truth for a linear bottleneck. 10/119
+  equations have n* < d (e.g. a distance needs only two differences).
+  This measures Stage 1 only; recovery is not shown until FEY-L1-A is
+  rerun with the rule.
+- **Contribution supported.** The adaptive choice of n, the
+  pipeline's first claim, works on redundant inputs when it is a
+  relative-improvement (knee) test. Ground truth for n is obtained from the
+  formula without supervision of the encoder. This also gives a dev /
+  held-out protocol for Stage 1 hyperparameters that does not involve
+  PySR.
