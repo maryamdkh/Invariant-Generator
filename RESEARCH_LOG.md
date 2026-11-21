@@ -1611,3 +1611,12 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   scoring will be computed from each formula (rank of its input gradients),
   since n* < d for some equations (e.g. I_8_14, distance: d = 4, n* = 2).
   Run on Arrhenius (array of 119, `-c 2`).
+- Run moved to the Mac (Arrhenius queue too slow; no PySR, so no
+  hardware-fairness issue): `caffeinate -i bash experiments/probes/run_stage1_sweep_local.sh`,
+  8 equations at a time, CPU, started 2026-11-21 09:39; expected 4-6 h
+  (~4,300 trainings, ~21 s each on one core). Logs
+  `experiments/outputs/fey_l1_s1_logs/`, runner output
+  `experiments/outputs/fey_l1_s1_runner.txt`. Runner fixed first (BSD xargs
+  -I command-length limit; equation id now passed as an argument).
+- Correction: the Arrhenius login node uses `.venv-aarch64`, not
+  `.venv-x86_64`; `cluster/make_tasks.py` needs only `python3`.
