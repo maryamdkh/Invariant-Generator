@@ -1,0 +1,125 @@
+# Redundant-input Feynman, ours, with the FEY-L1-S1 Stage 1 rule (FEY-L1-A2,
+# RESEARCH_LOG 90, 91): knee_ratio = 1.25 and target_choice = "reference".
+# Otherwise identical to configs/feynman_redundant_linear.toml (RESEARCH_LOG 87).
+# configs/feynman_pysr_paper.toml (same PySR budget as FEY-B and FEY-L1-B) with
+# only the feature map changed from log features to the raw inputs:
+# - input_transform: pairwise with no products and no ratios = the raw inputs,
+#   so each encoder row is a linear combination J = sum_i a_i u_i;
+# - symbolic.encoded_feature_transform = identity: PySR gets J itself (with the
+#   exact snapped rational coefficients), not exp(J).
+# Stages 1-2 still train on log y (falls back to y when y <= 0), as in v3;
+# Stage 3 still fits y. Submit with -c 8 and TIMEOUT_MINUTES=60.
+
+[data]
+kind = "supervised"
+data_dir = "data/feynman"
+dataset_name = "set_per_equation"
+dataset_key = "X"
+target_key = "y"
+feature_names = ["set_per_equation"]
+validation_size = 0.1
+test_size = 0.1
+random_state = 42
+shuffle = true
+target_transform = "log"
+
+[augmentation]
+enabled = false
+
+[input_transform]
+kind = "pairwise"
+include_products = false
+include_ratios = false
+
+[encoder]
+enabled = true
+output_dim = 1
+init = "random"
+
+[normalization]
+enabled = true
+mode = "standard"
+
+[model]
+hidden_dims = [64, 64]
+output_activation = "none"
+standardize_target = true
+
+[loss]
+lambda_structure = 0.0
+lambda_encoder_l1_ratio = 0.0
+lambda_encoder_l2 = 0.0
+
+[train]
+run_id = "feynman_benchmark"
+results_dir = "results/feynman_benchmark"
+split_dir = "results/feynman_benchmark/splits"
+use_saved_split = true
+save_split_if_missing = true
+seed = 42
+epochs = 3000
+batch_size = 0
+learning_rate = 1e-3
+encoder_learning_rate_scale = 30.0
+# CPU is as fast as MPS for this small MLP and is reproducible.
+device = "cpu"
+log_every = 25
+save_every = 0
+lr_plateau_min_delta = 0.0
+early_stopping_min_delta = 0.0
+early_stopping_patience = 20
+
+[adaptive]
+results_subdir = "set_per_equation"
+metric = "nrmse"
+nrmse_threshold = 0.01
+stop_on_first_success = true
+restarts = 3
+acceptance = "relative_to_reference"
+relative_factor = 2.0
+relative_floor = 1e-3
+reference_init = true
+knee_ratio = 1.25
+target_choice = "reference"
+
+[sparsification]
+method = "snap"
+snap_denominators = [1, 2, 3, 4, 6]
+masked_refit_epochs = 1500
+masked_refit_learning_rate = 3e-3
+masked_refit_schedule = "cosine"
+masked_refit_min_learning_rate = 1e-5
+snap_basis = "rref"
+snap_acceptance = "relative_to_dense"
+run_id = "stage2_snap"
+
+[symbolic]
+# Shared by both arms; only the inputs differ (monomial groups vs raw inputs).
+target_source = "data"
+target_transform = "exp"
+encoded_feature_transform = "identity"
+output_subdir = "stage3_pysr"
+run_id = "pysr_search"
+weight_mode = "none"
+elementwise_loss = "loss(prediction, target) = (prediction - target)^2"
+binary_operators = ["+", "-", "*", "/"]
+unary_operators = ["square", "sqrt", "exp", "log", "sin", "cos"]
+constraints = {}
+nested_constraints = { exp = { exp = 0, log = 0 }, log = { exp = 0, log = 0 }, sin = { sin = 0, cos = 0 }, cos = { sin = 0, cos = 0 } }
+maxsize = 35
+maxdepth = -1
+parsimony = 0.0
+complexity_of_constants = 1
+model_selection = "best"
+parallelism = "multithreading"
+numprocs = 8
+populations = 40
+population_size = 1000
+ncycles_per_iteration = 500
+niterations = 1000000
+timeout_hours = 1.0
+batching = false
+warm_start = false
+progress = false
+precision = 64
+random_state = 42

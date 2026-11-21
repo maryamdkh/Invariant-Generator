@@ -257,7 +257,11 @@ def _train_reference(config: Config, metric: str) -> dict[str, object]:
     }
 
 
-def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
+def run_adaptive_sweep(
+    config: Config, *, reference: dict[str, object] | None = None,
+) -> AdaptiveSweepResult:
+    """Stage 1. `reference`, when given, is a result of _train_reference for
+    this config (reused instead of retrained, e.g. after a target choice)."""
     metric, threshold = adaptive_metric_threshold(config)
     summary_dir = adaptive_stage1_dir(config)
     summary_dir.mkdir(parents=True, exist_ok=True)
@@ -265,9 +269,11 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
     acceptance = config.adaptive.acceptance.lower()
     if acceptance not in {"absolute", "relative_to_reference"}:
         raise ValueError("adaptive.acceptance must be 'absolute' or 'relative_to_reference'.")
-    reference: dict[str, object] | None = None
-    if acceptance == "relative_to_reference":
+    if acceptance != "relative_to_reference":
+        reference = None
+    elif reference is None:
         reference = _train_reference(config, metric)
+    if acceptance == "relative_to_reference":
         attainable = max(
             float(reference["train_metrics"][metric]),  # type: ignore[index]
             float(reference["test_metrics"][metric]),  # type: ignore[index]
@@ -279,6 +285,10 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
     selected_checkpoint: Path | None = None
     passing_streak: list[AdaptiveRunSummary] = []
     confirmation_count = max(0, int(config.adaptive.patience)) + 1
+    knee_ratio = float(config.adaptive.knee_ratio)
+    if knee_ratio > 0 and confirmation_count != 1:
+        raise ValueError("adaptive.knee_ratio needs adaptive.patience = 0.")
+    knee_candidate: AdaptiveRunSummary | None = None  # passed; waits for n + 1
 
     restarts = max(1, int(config.adaptive.restarts))
     for n in adaptive_n_values(config):
@@ -341,7 +351,24 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
         else:
             passing_streak.clear()
 
-        if len(passing_streak) >= confirmation_count and selected_n is None:
+        if knee_ratio > 0:
+            # Knee: accept the previous passing n if this row barely helped.
+            chosen = None
+            if knee_candidate is not None and selected_n is None and (
+                float(knee_candidate.test_metrics[metric])
+                <= knee_ratio * float(run_summary.test_metrics[metric])
+            ):
+                chosen = knee_candidate
+            knee_candidate = run_summary if passes else None
+            if chosen is None and knee_candidate is not None and n == adaptive_n_values(config)[-1]:
+                chosen = knee_candidate  # last swept n: no n + 1 to compare
+            if chosen is not None and selected_n is None:
+                chosen.selected = True
+                selected_n = chosen.n
+                selected_checkpoint = chosen.checkpoint
+                if config.adaptive.stop_on_first_success:
+                    break
+        elif len(passing_streak) >= confirmation_count and selected_n is None:
             chosen = passing_streak[0]
             chosen.selected = True
             selected_n = chosen.n
@@ -357,6 +384,7 @@ def run_adaptive_sweep(config: Config) -> AdaptiveSweepResult:
             "threshold": threshold,
             **({} if reference is None else {
                 "acceptance": acceptance,
+                **({"knee_ratio": knee_ratio} if knee_ratio > 0 else {}),
                 "reference": {k: v for k, v in reference.items() if k != "right_singular_vectors"},
             }),
             "max_generalization_gap": config.adaptive.max_generalization_gap,

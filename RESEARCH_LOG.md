@@ -1666,3 +1666,33 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   target-choice switch; Hill defaults unchanged, `hill_old_vs_new.py`
   IDENTICAL), then rerun FEY-L1-A with it. The knee needs n + 1 trained,
   so it costs one extra n per equation.
+
+## 91. Stage 1 rule implemented (opt-in) and FEY-L1-A2 prepared (2026-11-21)
+
+- Code (shared, opt-in, defaults reproduce the old behaviour):
+  - `adaptive.knee_ratio` (default 0 = off), in `adaptive.run_adaptive_sweep`:
+    a passing n is accepted only when its val metric is <= knee_ratio x
+    val(n + 1); the last swept n needs no n + 1; requires patience = 0.
+    With stop_on_first_success the sweep stops right after n + 1.
+  - `adaptive.target_choice` (default "fixed"), in
+    `feynman_benchmark.choose_stage1_target`, called from `run_pipeline`:
+    "reference" trains the reference on log y and on y and keeps the lower
+    val metric; the y candidate lives under `<eq>_y`; the choice is saved to
+    `stage1_target_choice.json` and reported as `stage1_target_choice` in
+    the benchmark row. `run_adaptive_sweep` takes an optional precomputed
+    `reference`, so the chosen reference is not retrained.
+- Checks: `hill_old_vs_new.py 142549f` prints IDENTICAL; full pytest passes
+  (3 new knee tests in `tests/test_adaptive.py`).
+- Config `configs/feynman_redundant_linear_knee.toml` = 
+  `feynman_redundant_linear.toml` + `knee_ratio = 1.25`,
+  `target_choice = "reference"`.
+- Real-pipeline check of Stage 1 with that config
+  (`experiments/probes/stage1_rule_check.py`, outputs
+  `experiments/outputs/stage1_rule_check_<eq>.txt`): target and n match
+  the offline FEY-L1-S1 prediction on all 4 tested equations: I_8_14
+  (y, n = 2), III_15_12 (y, n = 3, old rule 1), II_11_3 (log, n = 5, old
+  4), I_48_2 (y, n = 4, a predicted overshoot; n* = 3). Stage 1 took
+  155-273 s on one core.
+- Next: FEY-L1-A2 on Arrhenius, same command as FEY-L1-A with
+  `CONFIG=configs/feynman_redundant_linear_knee.toml RUN=fey_l1_a2`
+  (same PySR budget, 8 cores, 1 h, 2 h wall).

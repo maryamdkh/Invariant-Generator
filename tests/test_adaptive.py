@@ -361,3 +361,55 @@ def test_stage1_restarts_keep_the_best_seed_per_dimension(tmp_path, monkeypatch)
         tmp_path / "results" / "restart_test" / "stage1" / "n01" / "seed011" / "checkpoint_best.pt"
     )
     assert [record["seed"] for record in result.runs[0].restarts] == [10, 11, 12]
+
+
+def _knee_sweep(tmp_path, monkeypatch, values, *, knee_ratio, stop=True):
+    config = Config()
+    config.invariants.selected = ["I1", "I2", "I3", "I4", "I5"]
+    config.invariants.enable_second_order = True
+    config.invariants.enable_fourth_order = False
+    config.train.results_dir = tmp_path / "results"
+    config.adaptive.results_subdir = "knee_test"
+    config.adaptive.metric = "rmse"
+    config.adaptive.n_min = 1
+    config.adaptive.n_max = len(values)
+    config.adaptive.rmse_threshold = 0.2
+    config.adaptive.knee_ratio = knee_ratio
+    config.adaptive.stop_on_first_success = stop
+
+    def fake_train_from_config(run_config):
+        exp = run_config.experiment_dir
+        exp.mkdir(parents=True, exist_ok=True)
+        checkpoint = exp / "checkpoint_best.pt"
+        checkpoint.write_text("fake", encoding="utf-8")
+        return TrainResult(experiment_dir=exp, best_checkpoint=checkpoint,
+                           recovery_checkpoint=exp / "checkpoint_latest.pt",
+                           history_path=exp / "history.json", best_epoch=1, best_test_mse=0.0)
+
+    def fake_evaluate(run_config, _checkpoint):
+        value = values[run_config.encoder.output_dim - 1]
+        return {"rmse": value, "mse": value**2}, {"rmse": value, "mse": value**2}
+
+    monkeypatch.setattr("invariant_generator.adaptive.train_from_config", fake_train_from_config)
+    monkeypatch.setattr("invariant_generator.adaptive.evaluate_checkpoint_on_train_and_test", fake_evaluate)
+    return run_adaptive_sweep(config)
+
+
+def test_knee_rule_off_keeps_first_passing_n(tmp_path, monkeypatch):
+    result = _knee_sweep(tmp_path, monkeypatch, [0.5, 0.15, 0.05, 0.048, 0.047], knee_ratio=0.0)
+    assert result.selected_n == 2
+    assert [run.n for run in result.runs] == [1, 2]
+
+
+def test_knee_rule_waits_until_one_more_row_stops_helping(tmp_path, monkeypatch):
+    # n = 2 passes (0.15 <= 0.2) but n = 3 is 3x better; n = 3 vs 4 is 1.04x.
+    result = _knee_sweep(tmp_path, monkeypatch, [0.5, 0.15, 0.05, 0.048, 0.047], knee_ratio=1.25)
+    assert result.selected_n == 3
+    assert [run.n for run in result.runs] == [1, 2, 3, 4]  # n + 1 trained, then stop
+    assert [run.selected for run in result.runs] == [False, False, True, False]
+
+
+def test_knee_rule_accepts_last_n_without_successor(tmp_path, monkeypatch):
+    result = _knee_sweep(tmp_path, monkeypatch, [0.5, 0.4, 0.15, 0.05], knee_ratio=1.25, stop=False)
+    assert result.selected_n == 4
+    assert len(result.runs) == 4

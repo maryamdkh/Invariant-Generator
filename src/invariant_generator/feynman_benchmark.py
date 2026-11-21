@@ -19,6 +19,9 @@ from typing import Any
 import numpy as np
 
 from invariant_generator.adaptive import (
+    _train_reference,
+    adaptive_metric_threshold,
+    adaptive_results_dir,
     adaptive_sparsification_run_id,
     adaptive_stage1_dir,
     config_for_adaptive_n,
@@ -65,6 +68,39 @@ def problem_config(base: Config, entry: dict[str, Any], *, results_dir: Path) ->
             config.data.target_transform = "identity"
             config.symbolic.target_transform = "identity"
     return config
+
+
+def choose_stage1_target(
+    config: Config, *, reuse: bool = False,
+) -> tuple[Config, dict[str, Any] | None, dict[str, Any]]:
+    """adaptive.target_choice = "reference": train the bottleneck-free
+    reference on log y and on y, keep the target with the lower validation
+    metric (RESEARCH_LOG 89, 90). Returns the config for the chosen target, its
+    reference (to reuse in Stage 1) and a record of the choice. The y candidate
+    lives under `<results_subdir>_y`. With target_choice = "fixed", or when
+    log y is impossible, the config is returned unchanged."""
+    if config.adaptive.target_choice.lower() == "fixed" or config.data.target_transform.lower() != "log":
+        return config, None, {}
+    if config.adaptive.target_choice.lower() != "reference":
+        raise ValueError("adaptive.target_choice must be 'fixed' or 'reference'.")
+    if config.adaptive.acceptance.lower() != "relative_to_reference":
+        raise ValueError("adaptive.target_choice = 'reference' needs acceptance = 'relative_to_reference'.")
+    y_config = deepcopy(config)
+    y_config.data.target_transform = "identity"
+    y_config.symbolic.target_transform = "identity"
+    y_config.adaptive.results_subdir = f"{config.adaptive.results_subdir}_y"
+    candidates = {"log": config, "identity": y_config}
+    record_path = adaptive_results_dir(config) / "stage1_target_choice.json"
+    if reuse and record_path.exists():
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        return candidates[record["stage1_target"]], None, record
+    metric, _ = adaptive_metric_threshold(config)
+    references = {name: _train_reference(cfg, metric) for name, cfg in candidates.items()}
+    val = {name: float(ref["test_metrics"][metric]) for name, ref in references.items()}  # type: ignore[index]
+    chosen = min(val, key=val.get)
+    record = {"stage1_target": chosen, "reference_val_metric": val, "metric": metric}
+    save_json(record_path, record)
+    return candidates[chosen], references[chosen], record
 
 
 def _with_stop_condition(config: Config, y: np.ndarray) -> Config:
@@ -144,6 +180,10 @@ def run_pipeline(
             # Log features need positive inputs; the pipeline has nothing to add
             # and the row reports the PySR-alone result for this problem.
             return {"reduction": False, "skipped": "non-positive inputs for log features"}
+    started = time.perf_counter()
+    config, reference, target_record = choose_stage1_target(config, reuse=reuse_stages)
+    if target_record:
+        result["stage1_target_choice"] = {**target_record, "seconds": time.perf_counter() - started}
     stage1_summary = adaptive_stage1_dir(config) / config.adaptive.summary_name
     if reuse_stages and stage1_summary.exists():
         saved = json.loads(stage1_summary.read_text(encoding="utf-8"))
@@ -152,7 +192,7 @@ def run_pipeline(
         result["stage1_reused"] = True
     else:
         started = time.perf_counter()
-        sweep = run_adaptive_sweep(config)
+        sweep = run_adaptive_sweep(config, reference=reference)
         result["stage1_seconds"] = time.perf_counter() - started
         result["stage1_runs"] = [
             {"n": run.n, "val_metric": run.test_metrics.get(config.adaptive.metric)}

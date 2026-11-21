@@ -268,6 +268,18 @@ class AdaptiveSweepConfig:
     relative_factor: float = 2.0
     relative_floor: float = 1e-3
     reference_init: bool = False
+    # Knee rule (opt-in; 0 = off, the old behaviour). When > 0, a passing n is
+    # accepted only if its selection metric is <= knee_ratio x that of n + 1,
+    # i.e. one more row no longer helps; n + 1 is trained to check this. The
+    # last swept n needs no n + 1. Requires patience = 0. FEY-L1-S1 chose 1.25
+    # (RESEARCH_LOG 90).
+    knee_ratio: float = 0.0
+    # Stage 1 target for Feynman runs (feynman_benchmark.run_pipeline only):
+    # fixed = data.target_transform as configured (old behaviour);
+    # reference = train the bottleneck-free reference on log y and on y and
+    # keep the target whose reference has the lower validation metric
+    # (needs acceptance = relative_to_reference; y only when log y is impossible).
+    target_choice: str = "fixed"
     run_id_prefix: str = "n"
     summary_name: str = "adaptive_stage1_summary.json"
 
