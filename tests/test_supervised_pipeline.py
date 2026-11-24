@@ -328,3 +328,37 @@ def test_target_noise_touches_train_and_validation_only(tmp_path):
     config.data.target_noise = -0.1
     with pytest.raises(ValueError, match="target_noise"):
         prepare_training_data(config)
+
+
+def test_neglog_target_round_trips_through_stage3(tmp_path):
+    from invariant_generator.symbolic import transform_symbolic_target
+
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    rng = np.random.default_rng(0)
+    X = rng.uniform(1.0, 2.0, size=(40, 2))
+    y = -X[:, 0] ** 2 / X[:, 1]
+    with h5py.File(data_dir / "case.h5", "w") as f:
+        f.create_dataset("X", data=X)
+        f.create_dataset("y", data=y)
+    config = Config()
+    config.data.kind = "supervised"
+    config.data.data_dir = data_dir
+    config.data.dataset_name = "case"
+    config.data.dataset_key = "X"
+    config.data.feature_names = ["a", "b"]
+    config.train.split_dir = tmp_path / "splits"
+    config.augmentation.enabled = False
+    config.input_transform.kind = "log"
+    raw = prepare_training_data(config)
+    config.data.target_transform = "neglog"
+    logged = prepare_training_data(config)
+    np.testing.assert_allclose(logged.y_train, np.log(-raw.y_train))
+    np.testing.assert_allclose(
+        transform_symbolic_target(logged.y_test, target_transform="negexp"), raw.y_test,
+    )
+    with h5py.File(data_dir / "case.h5", "r+") as f:
+        f["y"][0] = 1.0
+    config.train.use_saved_split = False
+    with pytest.raises(ValueError, match="strictly negative"):
+        prepare_training_data(config)

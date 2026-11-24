@@ -568,8 +568,13 @@ def prepare_supervised_data(config: Config) -> PreparedData:
         if np.any(y <= 0):
             raise ValueError("data.target_transform='log' requires a strictly positive target.")
         y = np.log(y)
+    elif target_transform == "neglog":
+        # log(-y) for a target that is negative everywhere (opt-in, RESEARCH_LOG 95).
+        if np.any(y >= 0):
+            raise ValueError("data.target_transform='neglog' requires a strictly negative target.")
+        y = np.log(-y)
     elif target_transform != "identity":
-        raise ValueError("data.target_transform must be 'identity' or 'log'.")
+        raise ValueError("data.target_transform must be 'identity', 'log' or 'neglog'.")
     return PreparedData(
         X_train=X[train_idx], y_train=y[train_idx],
         X_validation=X[val_idx], y_validation=y[val_idx],

@@ -279,6 +279,8 @@ class AdaptiveSweepConfig:
     # reference = train the bottleneck-free reference on log y and on y and
     # keep the target whose reference has the lower validation metric
     # (needs acceptance = relative_to_reference; y only when log y is impossible).
+    # reference_signed = as reference, and when y < 0 everywhere the
+    # candidates are log(-y) and y (RESEARCH_LOG 94, 95).
     target_choice: str = "fixed"
     run_id_prefix: str = "n"
     summary_name: str = "adaptive_stage1_summary.json"

@@ -1793,3 +1793,29 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
   fits y). It only changes equations with y < 0 everywhere (for y > 0,
   log|y| = log y), so rerunning those 4 equations is equivalent to rerunning
   all 119. Expected to fix III_19_51 and maybe test_9.
+
+## 95. log(-y) Stage 1 target implemented (opt-in); FEY-L1-A3 prepared (2026-11-24)
+
+- Code (opt-in; existing values unchanged):
+  - `data.target_transform = "neglog"`: log(-y), needs y < 0 everywhere.
+  - `symbolic.target_transform = "negexp"`: -exp(t), its inverse, so Stage 3
+    PySR still fits y.
+  - `adaptive.target_choice = "reference_signed"`: as "reference"; in
+    addition, when y < 0 everywhere (problem_config fell back to y), the
+    candidates are log(-y) (under `<eq>_neglog`) and y.
+  - Test `test_neglog_target_round_trips_through_stage3`. Full pytest passes;
+    `hill_old_vs_new.py ba5c3cf` IDENTICAL.
+- Config `configs/feynman_redundant_linear_knee_signed.toml` =
+  `feynman_redundant_linear_knee.toml` with `target_choice =
+  "reference_signed"`. It only differs from A2 on equations with y < 0
+  everywhere: 4 in L1.
+- Stage 1 check with that config (`stage1_rule_check.py`, outputs
+  `experiments/outputs/stage1_rule_check_signed_<eq>.txt`):
+  - III_19_51: log(-y) chosen (ref val 0.013 vs y 0.162), **n = 5 = n***
+    (A2: 2).
+  - test_9: log(-y) chosen (0.009 vs 0.078), **n = 5 = n*** (S1 rule on y: 3).
+  - III_21_20 (0.012 vs 0.008) and test_3 (0.007 vs 0.006): y kept, n
+    unchanged (4, 3).
+- Next: FEY-L1-A3 = the 4 equations with y < 0 everywhere on Arrhenius
+  (`cluster/tasks_l1_neg.txt`), same PySR budget. Scoring: A3 for these 4,
+  A2 for the other 115 (identical config there).

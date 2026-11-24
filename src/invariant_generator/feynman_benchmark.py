@@ -70,6 +70,15 @@ def problem_config(base: Config, entry: dict[str, Any], *, results_dir: Path) ->
     return config
 
 
+def _target_negative_everywhere(config: Config) -> bool:
+    import h5py
+
+    with h5py.File(config.data.data_dir / f"{config.data.dataset_name}.h5", "r") as handle:
+        y = np.asarray(handle[config.data.target_key], dtype=np.float64).reshape(-1)
+    # Same check as problem_config: noise on every row, a superset of the noisy rows.
+    return bool(np.all(y + supervised_target_noise(y, config) < 0))
+
+
 def choose_stage1_target(
     config: Config, *, reuse: bool = False,
 ) -> tuple[Config, dict[str, Any] | None, dict[str, Any]]:
@@ -79,17 +88,28 @@ def choose_stage1_target(
     reference (to reuse in Stage 1) and a record of the choice. The y candidate
     lives under `<results_subdir>_y`. With target_choice = "fixed", or when
     log y is impossible, the config is returned unchanged."""
-    if config.adaptive.target_choice.lower() == "fixed" or config.data.target_transform.lower() != "log":
+    choice = config.adaptive.target_choice.lower()
+    if choice == "fixed":
         return config, None, {}
-    if config.adaptive.target_choice.lower() != "reference":
-        raise ValueError("adaptive.target_choice must be 'fixed' or 'reference'.")
+    if choice not in {"reference", "reference_signed"}:
+        raise ValueError("adaptive.target_choice must be 'fixed', 'reference' or 'reference_signed'.")
     if config.adaptive.acceptance.lower() != "relative_to_reference":
-        raise ValueError("adaptive.target_choice = 'reference' needs acceptance = 'relative_to_reference'.")
-    y_config = deepcopy(config)
-    y_config.data.target_transform = "identity"
-    y_config.symbolic.target_transform = "identity"
-    y_config.adaptive.results_subdir = f"{config.adaptive.results_subdir}_y"
-    candidates = {"log": config, "identity": y_config}
+        raise ValueError("adaptive.target_choice needs acceptance = 'relative_to_reference'.")
+    if config.data.target_transform.lower() == "log":
+        y_config = deepcopy(config)
+        y_config.data.target_transform = "identity"
+        y_config.symbolic.target_transform = "identity"
+        y_config.adaptive.results_subdir = f"{config.adaptive.results_subdir}_y"
+        candidates = {"log": config, "identity": y_config}
+    elif choice == "reference_signed" and _target_negative_everywhere(config):
+        # problem_config fell back to y; also try log(-y) (RESEARCH_LOG 94, 95).
+        neg_config = deepcopy(config)
+        neg_config.data.target_transform = "neglog"
+        neg_config.symbolic.target_transform = "negexp"
+        neg_config.adaptive.results_subdir = f"{config.adaptive.results_subdir}_neglog"
+        candidates = {"neglog": neg_config, "identity": config}
+    else:
+        return config, None, {}
     record_path = adaptive_results_dir(config) / "stage1_target_choice.json"
     if reuse and record_path.exists():
         record = json.loads(record_path.read_text(encoding="utf-8"))
