@@ -1696,3 +1696,40 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Next: FEY-L1-A2 on Arrhenius, same command as FEY-L1-A with
   `CONFIG=configs/feynman_redundant_linear_knee.toml RUN=fey_l1_a2`
   (same PySR budget, 8 cores, 1 h, 2 h wall).
+
+## 92. FEY-L1-A2: ours with the S1 Stage 1 rule, 91/118 (A 75, FEY-B 92 on the same 118) (2026-11-24)
+
+- Job `5603017` (Arrhenius), commit `8439328`,
+  `configs/feynman_redundant_linear_knee.toml` (knee 1.25 + target choice),
+  same PySR budget as FEY-L1-A / FEY-B (8 cores, 1 h, 40 x 1000), seed 42.
+  118/119 done, no errors; task 119 (test_9) still pending in the queue
+  (Priority). The FEY-L1-A run missed test_9 too. Results rsynced to
+  `results/feynman_benchmark/fey_l1_a2/seed42/`. (The first rsync was run
+  from the home folder and landed in `~/results/...`; moved into the repo.)
+- Scoring: `fey_redundant_score.py --run fey_l1_a2` ->
+  `experiments/outputs/fey_l1_a2_score_console.txt`, `fey_l1_a2_scores.json`;
+  comparison with FEY-L1-A on the same 118 ->
+  `experiments/outputs/fey_l1_a2_vs_a_console.txt`.
+- Recovered on the same 118 equations: **A2 91**, A 75, PySR alone on the
+  redundant inputs (FEY-L1-B) 54, PySR alone on the original inputs (FEY-B)
+  92. Held out (98, not used to choose r): A2 81, A 71, FEY-B 81. Dev (20):
+  A2 10, A 4, FEY-B 11. Vs FEY-L1-B: 38 gained, 1 lost (test_7).
+  By d (FEY-B / L1-B / A2): 2: 13/12/12, 3: 32/21/33, 4: 24/15/26,
+  5: 15/5/12, >=6: 8/0/7.
+- A2 vs A: 17 gained, 1 lost (I_29_16). Where n changed (23 equations):
+  recovered 1 -> 11. n unchanged, target switched to y (35): 24 -> 27.
+  n and target unchanged (60): 50 -> 53. That +3 (III_10_19, I_40_1, I_9_18)
+  is run-to-run noise (PySR multithreading, Stage 1 retrained on other
+  hardware); read the +16 net as about +10 from n, a few from the target,
+  a few noise.
+- n vs n*: A 92 n = n*, 25 under, 1 over; A2 110 n = n*, 6 under, 2 over.
+  Under-selected n is never recovered (A 0/25, A2 0/6); n = n* recovers
+  89/110. A2's n equals the offline S1 prediction on 109/118 (Mac vs
+  cluster retraining; differences are +-1 near the r boundary).
+- 27 failures: 4 bad reference (III_19_51, III_8_54, test_20, test_7 n
+  far below n*), 2 other under-selections (test_12, test_19), 21 with
+  n = n* where PySR hit the 1 h cap (13 near misses < 1e-3). Rows: 101
+  pure, 14 span, 3 other.
+- Decision: the S1 rule is the Feynman Stage 1 setting from now on (L2/L3
+  held out with it unchanged). Pending: test_9; more seeds before claiming
+  the exact margin.

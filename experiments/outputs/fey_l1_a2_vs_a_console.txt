@@ -1,0 +1,44 @@
+same 118 equations (test_9 pending); test_9 in A recovered: False
+recovered on these 118: A 75, A2 91, L1-B 54, FEY-B 92
+A2 vs A: gained 17 ['III_10_19', 'III_15_12', 'III_4_33', 'II_11_27', 'II_11_3', 'II_21_32', 'II_35_18', 'II_36_38', 'I_13_4', 'I_30_3', 'I_37_4', 'I_40_1', 'I_9_18', 'test_15', 'test_17', 'test_4', 'test_6']
+          lost 1 ['I_29_16']
+A: n vs n* {'n=n*': 92, 'n<n*': 25, 'n>n*': 1}; recovered by class {'n=n*': 74, 'n<n*': 0, 'n>n*': 1}
+A2: n vs n* {'n=n*': 110, 'n>n*': 2, 'n<n*': 6}; recovered by class {'n=n*': 89, 'n>n*': 2, 'n<n*': 0}
+A2 selected n == S1 offline prediction: 109/118; differ: [('III_17_37', 4, 3), ('II_34_29a', 3, 4), ('I_15_3t', 4, 3), ('I_16_6', 3, 4), ('I_40_1', 6, 7), ('I_48_2', 3, 4), ('I_6_2b', 2, 3), ('test_14', 5, 4), ('test_7', 3, 4)]
+A selected n == S1 old-rule prediction: 115/118
+dev (20): A 4, A2 10, FEY-B 11
+held out (98): A 71, A2 81, FEY-B 81
+n changed on 23: recovered A 1 -> A2 11
+n unchanged on 95: recovered A 74 -> A2 80 (PySR noise)
+A2 failures:
+  III_19_51   d=5 n*=5 n=2 rows=other l2=0.5713736693292933 pysr_s=3624
+  III_8_54    d=3 n*=3 n=2 rows=span l2=0.18052229940948678 pysr_s=3618
+  III_9_52    d=6 n*=5 n=5 rows=span l2=4.15171226608461e-05 pysr_s=3859
+  II_11_28    d=2 n*=2 n=2 rows=pure l2=None pysr_s=3660
+  II_24_17    d=3 n*=3 n=3 rows=pure l2=0.0002118382360111754 pysr_s=3767
+  II_6_15a    d=6 n*=6 n=6 rows=pure l2=4.626361476187858e-06 pysr_s=3625
+  I_15_3t     d=4 n*=4 n=4 rows=pure l2=4.9210944083676895e-05 pysr_s=3744
+  I_15_3x     d=4 n*=4 n=4 rows=pure l2=2.4487687449159594e-05 pysr_s=3741
+  I_26_2      d=2 n*=2 n=2 rows=pure l2=0.0027151660077954195 pysr_s=3868
+  I_29_16     d=4 n*=3 n=3 rows=span l2=nan pysr_s=3618
+  I_30_5      d=3 n*=3 n=3 rows=pure l2=0.00021113546624948001 pysr_s=3771
+  I_32_17     d=6 n*=6 n=6 rows=pure l2=0.009028511308361358 pysr_s=3857
+  I_41_16     d=5 n*=5 n=5 rows=pure l2=0.00011064755058285571 pysr_s=3859
+  I_44_4      d=5 n*=5 n=5 rows=pure l2=1.3228662538669719e-05 pysr_s=3858
+  I_6_2       d=2 n*=2 n=2 rows=pure l2=0.0006749687108309537 pysr_s=3668
+  test_10     d=3 n*=3 n=3 rows=pure l2=0.0002874649708900739 pysr_s=3856
+  test_11     d=4 n*=4 n=4 rows=pure l2=0.0070872105980871025 pysr_s=3857
+  test_12     d=5 n*=5 n=4 rows=pure l2=0.0004409783754566063 pysr_s=3777
+  test_13     d=5 n*=5 n=5 rows=pure l2=0.014938675839010342 pysr_s=3617
+  test_14     d=5 n*=5 n=5 rows=pure l2=1.579032694112852e-05 pysr_s=3857
+  test_16     d=6 n*=6 n=6 rows=pure l2=0.025129057536864213 pysr_s=3618
+  test_19     d=6 n*=6 n=5 rows=span l2=0.03956779481724007 pysr_s=3619
+  test_2      d=6 n*=5 n=5 rows=span l2=0.0011571024842572896 pysr_s=3859
+  test_20     d=7 n*=7 n=2 rows=span l2=0.7807500528674842 pysr_s=3618
+  test_3      d=4 n*=3 n=3 rows=span l2=2.1538438096268667e-05 pysr_s=3858
+  test_7      d=5 n*=5 n=3 rows=span l2=0.002558217792320337 pysr_s=3618
+  test_8      d=4 n*=4 n=4 rows=pure l2=0.006033251199029085 pysr_s=3648
+A2 Stage 1 target: Counter({'log': 56, 'identity': 43, 'log-impossible': 19})
+n unchanged, target y (changed from log): 35 eqs, recovered A 24 -> A2 27; gained ['III_4_33', 'II_35_18', 'I_13_4', 'I_37_4'] lost ['I_29_16']
+n unchanged, target log (unchanged): 46 eqs, recovered A 39 -> A2 42; gained ['III_10_19', 'I_40_1', 'I_9_18'] lost []
+n unchanged, log impossible (unchanged): 14 eqs, recovered A 11 -> A2 11; gained [] lost []

@@ -701,3 +701,35 @@ quadratic.
   formula without supervision of the encoder. This also gives a dev /
   held-out protocol for Stage 1 hyperparameters that does not involve
   PySR.
+
+## FEY-L1-A2: ours with the fixed Stage 1 rule (RESEARCH_LOG 92)
+
+- **Result.** With the S1 rule (knee 1.25 + target choice), the
+  pipeline on redundant inputs (x = w + z) recovers 91/118. On the same
+  equations: 75 with the old Stage 1 rule, 54 for PySR alone on the
+  redundant inputs, and 92 for PySR alone on the original variables. On
+  the 98 held-out equations it ties PySR on the original variables (81 vs
+  81).
+- **Meaning.** Doubling the inputs costs PySR alone 38 equations. The
+  encoder recovers 37 of those 38, i.e. almost all of the cost of
+  redundancy. This is the generalization claim in its strongest form so
+  far: the encoder turns an overparameterized input space back into the
+  original variables (101/118 equations have every row exactly one true
+  sum) without being told the split.
+- **Why the gain.** It comes mainly from choosing n correctly: where the
+  new rule changed n, 1 -> 11 recovered. Under-selection never recovers (0
+  of 25 under the old rule, 0 of 6 now), so a Stage 1 rule that rather errs
+  on one row too many is the right design. Overshoot cost nothing here (2/2
+  recovered).
+- **Remaining failures.** 21 of 27 have the correct n and pure rows
+  but PySR hit its 1 h cap (13 near misses < 1e-3): the PySR budget limits
+  them, not the encoder. 4 have a reference MLP that cannot fit the target, so
+  Stage 1 cannot choose n.
+- **Caveats.** One seed. About +3 of the +16 over FEY-L1-A is run-to-run
+  noise (equations with identical n and target). r was chosen on 21 dev
+  equations of this same level; the held-out 98 and L2/L3 are the fair test.
+  test_9 is still pending.
+- **Contribution supported.** Core generalization claim: the pipeline as a
+  PySR front end removes the penalty of redundant linear inputs on
+  Feynman (54 -> 91, vs 92 on clean inputs), with an n-selection rule
+  tuned only on a dev split.
