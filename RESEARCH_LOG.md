@@ -1733,3 +1733,25 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Decision: the S1 rule is the Feynman Stage 1 setting from now on (L2/L3
   held out with it unchanged). Pending: test_9; more seeds before claiming
   the exact margin.
+
+## 93. Two FEY-L1-A2 failures checked; recovery-report bug fixed; A2 = 92/118 (2026-11-24)
+
+- II_11_28 (A2 not recovered, FEY-B recovered) was a bug: SymPy raised
+  RecursionError inside `recovery_report` (simplify of a deep exp nest), and
+  `original_input_evaluation` then dropped the whole report, including the
+  numerical score. Rescored offline with the fix: fresh relative L2
+  2.7e-7 < 1e-6, so **numerically recovered** (symbolic None, same as FEY-B
+  on this equation: L2 8.2e-7, symbolic None). A2 = **92/118** (FEY-B 92 on
+  the same 118). PySR found an exp-series approximation of
+  n a / (1 - n a / 3) + 1, not the closed form; both arms pass only the
+  numerical criterion here.
+- Fix (`adaptive_symbolic.recovery_report`): the symbolic checks are in a
+  try/except; on failure symbolic fields are None and `symbolic_error` is
+  recorded, the numerical result is kept. Evaluation only; pytest passes,
+  `hill_old_vs_new.py 81824dd` IDENTICAL.
+- Same bug in older runs (`recovery_error` in the row): llmsr_v3 seed44
+  lsrt_I.48.2_1_0, llmsr_v3 seed46 lsrt_II.13.23_1_0, sa_C seed42
+  sa_d03_02. Not rescored yet.
+- I_29_16 (fresh L2 NaN) is not a bug: rows are exactly x1, x2 and
+  theta1 - theta2 (n = n* = 3), PySR's best formula is wrong (test L2 4.6e-3)
+  and takes sqrt of a negative number on some fresh points.

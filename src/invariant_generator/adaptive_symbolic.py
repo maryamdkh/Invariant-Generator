@@ -266,14 +266,21 @@ def recovery_report(
     strict: bool | None = False
     symbolic: bool | None = False
     ratio: str | None = None
+    symbolic_error: str | None = None
     if np.isfinite(relative_l2) and relative_l2 <= 1e-2:
         # Larger errors cannot be a recovery; skipping them also avoids
         # simplify() stalling on large wrong candidates.
-        cleaned = _rationalize_floats(candidate, digits=17, zero_tolerance=zero_tolerance)
-        strict = _with_time_limit(symbolic_seconds, lambda: bool(sp.simplify(candidate - truth) == 0))
-        checked = _with_time_limit(symbolic_seconds, lambda: symbolic_ratio_check(cleaned, truth))
-        symbolic, ratio = (None, None) if checked is None else checked
+        try:
+            cleaned = _rationalize_floats(candidate, digits=17, zero_tolerance=zero_tolerance)
+            strict = _with_time_limit(symbolic_seconds, lambda: bool(sp.simplify(candidate - truth) == 0))
+            checked = _with_time_limit(symbolic_seconds, lambda: symbolic_ratio_check(cleaned, truth))
+            symbolic, ratio = (None, None) if checked is None else checked
+        except Exception as exc:
+            # SymPy can fail (e.g. RecursionError on deep exp nests); keep the
+            # numerical result instead of losing the whole report (II_11_28).
+            strict, symbolic, ratio, symbolic_error = None, None, None, repr(exc)
     return {
+        **({} if symbolic_error is None else {"symbolic_error": symbolic_error}),
         "numerical_recovery": numerical,
         "symbolic_recovery": symbolic,
         "exact_symbolic_recovery": strict,
