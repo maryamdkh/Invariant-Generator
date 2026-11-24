@@ -1755,3 +1755,41 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - I_29_16 (fresh L2 NaN) is not a bug: rows are exactly x1, x2 and
   theta1 - theta2 (n = n* = 3), PySR's best formula is wrong (test L2 4.6e-3)
   and takes sqrt of a negative number on some fresh points.
+
+## 94. Poor-reference equations: diagnosis and fix options (2026-11-24)
+
+- Question: III_19_51, III_8_54, test_20 and test_7 are recovered by FEY-B but
+  not by A2, with Stage 1 n far below n*. Can Stage 1 be fixed without
+  using the original variables?
+- Probe `experiments/probes/reference_fix_probe.py` (reference only, no
+  sweep, no PySR); output `experiments/outputs/reference_fix_probe.txt`.
+  Reference val nrmse:
+  - log(-y) for y < 0 everywhere (4 L1 equations: III_19_51, III_21_20,
+    test_3, test_9). III_19_51: y 0.162 -> log(-y) 0.013 (0.004 with a
+    bigger MLP). test_9: y 0.078 -> 0.009. III_21_20 0.008 -> 0.012 and
+    test_3 0.006 -> 0.007 (both already fit well).
+  - Bigger reference ([128,128,128], 20000 epochs, early-stopping patience
+    200): test_20 log 0.125 -> 0.127 (no help; train 0.093, so not
+    overfitting); III_8_54 y 0.56 -> 0.28 (still poor; sin^2 over ~4
+    periods); test_7 0.006 -> 0.002.
+- Diagnosis per equation:
+  - III_19_51 (and test_9): y negative everywhere, so log y was impossible and y
+    spans 3 decades. Fix: fit log|y| when y has one sign.
+  - III_8_54: highly oscillatory target; the MLP surrogate cannot fit it.
+    Limit of an MLP-based Stage 1.
+  - test_7: not a reference problem (reference 0.006). The alpha c^2/d^2
+    term is small next to 8 pi G rho / 3, so n = 3 already fits to 0.005;
+    gradient spectrum 1, 0.20, 0.08, then 0.006. Weak variables below the
+    surrogate's precision. PySR alone on the raw inputs (L1-B) recovers it.
+  - test_20: log y underfit (train 0.09) by both MLP sizes; cause unknown.
+    The reference gradient spectrum still shows ~6-7 directions (n* = 7)
+    while Stage 1 picks 2.
+- Rejected: a floor n >= rank of the reference gradient spectrum when the
+  reference is poor (val > 0.05). On 12 such equations the spectrum is
+  flat when the fit is poor (rank = all inputs for III_15_12, I_30_3, which
+  A2 already gets right at n = n* = 3), so the floor would break them.
+- Proposal: opt-in sign-aware log target as a third candidate of
+  target_choice ("log|y|" when y < 0 everywhere; PySR in Stage 3 still
+  fits y). It only changes equations with y < 0 everywhere (for y > 0,
+  log|y| = log y), so rerunning those 4 equations is equivalent to rerunning
+  all 119. Expected to fix III_19_51 and maybe test_9.

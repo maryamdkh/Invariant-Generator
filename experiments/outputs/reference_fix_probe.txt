@@ -1,0 +1,36 @@
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/neglog/log/feynman_III_19_51/feynman_III_19_51/stage1/reference
+feynman_III_19_51 neglog log: reference train 0.0104 val 0.0133, 97 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/neglog/log/feynman_test_3/feynman_test_3/stage1/reference
+feynman_test_3 neglog log: reference train 0.0059 val 0.0067, 98 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/neglog/log/feynman_III_21_20/feynman_III_21_20/stage1/reference
+feynman_III_21_20 neglog log: reference train 0.0098 val 0.0116, 98 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/neglog/log/feynman_test_9/feynman_test_9/stage1/reference
+feynman_test_9 neglog log: reference train 0.0080 val 0.0089, 99 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/base/log/feynman_test_20/feynman_test_20/stage1/reference
+feynman_test_20 base log: reference train 0.1017 val 0.1253, 28 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/base/identity/feynman_test_20/feynman_test_20/stage1/reference
+feynman_test_20 base identity: reference train 0.0894 val 0.4346, 22 s
+feynman_III_19_51 base log: log impossible
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/base/identity/feynman_III_19_51/feynman_III_19_51/stage1/reference
+feynman_III_19_51 base identity: reference train 0.0141 val 0.1616, 81 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/base/log/feynman_III_8_54/feynman_III_8_54/stage1/reference
+feynman_III_8_54 base log: reference train 0.7944 val 0.9050, 37 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/base/identity/feynman_III_8_54/feynman_III_8_54/stage1/reference
+feynman_III_8_54 base identity: reference train 0.4195 val 0.5601, 70 s
+feynman_III_19_51 big log: log impossible
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/identity/feynman_III_19_51/feynman_III_19_51/stage1/reference
+feynman_III_19_51 big identity: reference train 0.0193 val 0.0957, 297 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/log/feynman_test_20/feynman_test_20/stage1/reference
+feynman_test_20 big log: reference train 0.0929 val 0.1274, 218 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/identity/feynman_test_20/feynman_test_20/stage1/reference
+feynman_test_20 big identity: reference train 0.1445 val 0.4721, 131 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/log/feynman_III_8_54/feynman_III_8_54/stage1/reference
+feynman_III_8_54 big log: reference train 0.4943 val 0.5429, 255 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/identity/feynman_III_8_54/feynman_III_8_54/stage1/reference
+feynman_III_8_54 big identity: reference train 0.2204 val 0.2802, 160 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big+neglog/log/feynman_III_19_51/feynman_III_19_51/stage1/reference
+feynman_III_19_51 big+neglog log: reference train 0.0018 val 0.0041, 426 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/log/feynman_test_7/feynman_test_7/stage1/reference
+feynman_test_7 big log: reference train 0.0013 val 0.0026, 496 s
+[INFO] Results dir:  results/feynman_benchmark/ref_probe/big/identity/feynman_test_7/feynman_test_7/stage1/reference
+feynman_test_7 big identity: reference train 0.0013 val 0.0023, 258 s
