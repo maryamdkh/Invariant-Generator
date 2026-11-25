@@ -1819,3 +1819,36 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Next: FEY-L1-A3 = the 4 equations with y < 0 everywhere on Arrhenius
   (`cluster/tasks_l1_neg.txt`), same PySR budget. Scoring: A3 for these 4,
   A2 for the other 115 (identical config there).
+
+## 96. FEY-L1-A3: log(-y) fixes Stage 1 on III_19_51 and test_9; L1 total 92/119 (2026-11-25)
+
+- Job on Arrhenius (4 tasks, `cluster/tasks_l1_neg.txt`), commit `567b458`,
+  `configs/feynman_redundant_linear_knee_signed.toml`, same PySR budget.
+  A2's pending test_9 task (5603017_119) was cancelled; A3 replaces it.
+  Results `results/feynman_benchmark/fey_l1_a3/seed42/`; scores
+  `experiments/outputs/fey_l1_a3_scores.json`; combined A2 + A3 table
+  `experiments/outputs/fey_l1_a23_scores.json`, console
+  `experiments/outputs/fey_l1_a23_console.txt` (II_11_28 counted as
+  recovered, entry 93).
+- The 4 equations:
+  - III_19_51: log(-y), n = 5 = n*, pure rows (A2: n = 2). PySR found
+    the right structure, but with a spurious constant inside one variable
+    (J5 + 7.1e-6) and a fitted 1/8; fresh L2 1.06e-6, just above the
+    1e-6 criterion: **not recovered**, near miss. PySR stopped after 67 s on
+    the stop condition (train nrmse < 1e-6), which is looser than the
+    fresh-sample criterion.
+  - test_9: log(-y), n = 5 = n*, pure rows; PySR hit the 1 h cap, L2 3.5e-3.
+    Not recovered.
+  - III_21_20 (y kept, recovered) and test_3 (y kept, near miss 1.9e-5):
+    as in A2.
+- L1, all 119: **ours (A2/A3) 92**, FEY-B 93, FEY-L1-A 75, FEY-L1-B 54.
+  Held out (98): ours 82, FEY-B 81, A 71, L1-B 52. n = n* on 112/119
+  (5 under, 2 over).
+- Vs FEY-B: both 83; only FEY-B 10; only ours 9. Of the 10 only-FEY-B:
+  5 Stage 1 under-selections (III_8_54 oscillatory target the MLP cannot fit,
+  test_20 log y underfit, test_7 weak variables, test_12 and test_19 one
+  short) and 5 with n = n* where PySR missed (III_19_51 1.06e-6 near
+  miss, test_9, II_24_17 and I_44_4 at the 1 h cap, I_29_16 wrong formula).
+- Decision: the log(-y) candidate stays (it fixes Stage 1 where it applies
+  and changes nothing else); no recovery gain on this seed. The Stage 1
+  rule for L2/L3 is `feynman_redundant_linear_knee_signed.toml`, frozen.

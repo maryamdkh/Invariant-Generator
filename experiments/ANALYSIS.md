@@ -733,3 +733,33 @@ quadratic.
   PySR front end removes the penalty of redundant linear inputs on
   Feynman (54 -> 91, vs 92 on clean inputs), with an n-selection rule
   tuned only on a dev split.
+
+## FEY-L1 final (A2 + A3): the three-way comparison (RESEARCH_LOG 92-96)
+
+- **Result (all 119 L1 equations, one seed).** PySR alone on the original
+  inputs 93; PySR alone after splitting each input in two 54; ours (A2 rule
+  + log(-y) target) 92. Held out (98 equations not used to tune Stage 1):
+  ours 82, PySR on the original inputs 81.
+- **Meaning.** This is the story in numbers: splitting and expanding the
+  inputs breaks PySR (-39), and the encoder in front of PySR brings it back
+  to its level on the original inputs. The two do not solve the same set:
+  83 both, 9 only ours (the encoder hands PySR the right combinations and it
+  finishes in time; e.g. I_9_18 with 9 variables but only 6 that matter),
+  10 only PySR on the original inputs.
+- **Why ours misses those 10.** Half are Stage 1 choosing n too small,
+  each for a stated reason: a target the MLP cannot fit (III_8_54, sin^2 over
+  several periods; test_20, unexplained underfit), variables too weak
+  for the MLP to notice (test_7), or one row short near the knee
+  threshold (test_12, test_19). The other half have the right n and exact
+  rows but PySR misses: two at the time cap, one wrong formula, one
+  spurious constant (III_19_51, L2 1.06e-6 vs the 1e-6 criterion).
+- **Caveats.** One seed; the +-2 PySR noise means ours vs FEY-B (92 vs 93)
+  is a tie. Stage 1 hyperparameters (r = 1.25, target choice) were chosen
+  on the 21 dev equations; held-out and L2/L3 are the fair tests. Two
+  pipeline fixes came from looking at L1 failures (scoring bug, log(-y)).
+  Both are generic (no equation-specific choice), but L2/L3 must be run
+  with the rule frozen.
+- **Contribution supported.** Main generalization claim: as a PySR front
+  end, the encoder removes the cost of a redundant linear input space
+  (54 -> 92, PySR on clean inputs 93), finding exact interpretable
+  combinations; the remaining misses have identified causes.

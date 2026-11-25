@@ -1,0 +1,12 @@
+FEY-L1-A2 + A3 (log(-y) on the 4 equations with y < 0), all 119 equations
+  PySR alone, original inputs (FEY-B)         93/119   held out 81/98
+  PySR alone, redundant inputs (FEY-L1-B)     54/119   held out 52/98
+  ours, old Stage 1 (FEY-L1-A)                75/119   held out 71/98
+  ours, new Stage 1 (FEY-L1-A2/A3)            92/119   held out 82/98
+A3 rows:
+  III_19_51 n 5 n* 5 rec False l2 1.0576738801336639e-06 | A2 n 2 rec False
+  III_21_20 n 4 n* 4 rec True l2 2.1590784618677855e-09 | A2 n 4 rec True
+  test_3 n 3 n* 3 rec False l2 1.8858397026284185e-05 | A2 n 3 rec False
+  test_9 n 5 n* 5 rec False l2 0.0035410599922006615 | A2 n None rec False
+vs FEY-B: both 83, only FEY-B 10 ['III_19_51', 'III_8_54', 'II_24_17', 'I_29_16', 'I_44_4', 'test_12', 'test_19', 'test_20', 'test_7', 'test_9'], only ours 9 ['III_10_19', 'III_4_32', 'III_4_33', 'II_35_21', 'I_16_6', 'I_34_14', 'I_37_4', 'I_9_18', 'test_18']
+n vs n*: {'n=n*': 112, 'n>n*': 2, 'n<n*': 5}
