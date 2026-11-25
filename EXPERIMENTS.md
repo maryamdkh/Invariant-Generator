@@ -249,10 +249,10 @@ Data `data/feynman_redundant/{L1,L2,L3}` (`scripts/prepare_redundant_feynman.py`
 | FEY-L1-S1 | Feynman L1 | Stage 1 sweep only (every n, log y and y), no PySR | R | done | 1 (42) | knee r = 1.25 + target choice: held-out n = n* 88/98 vs old rule 82/98 (dev r choice 16/21 vs 8/21) | choose n-selection rule on 21 dev eqs, score n = n* on 98 held out | 89, 90 |
 | FEY-L1-A2 | Feynman L1 | Ours with the S1 Stage 1 rule (`configs/feynman_redundant_linear_knee.toml`: knee 1.25 + target choice) | R | done 118/119 (test_9 cancelled, run in A3) | 1 (42) | `8439328` | 91/118 (92 after the II_11_28 scoring fix, 93) vs A 75, L1-B 54, FEY-B 92 (same 118); held out 81 = FEY-B 81; n = n* 110/118 | 91, 92 |
 | FEY-L1-A3 | Feynman L1, 4 eqs with y < 0 | A2 + log(-y) Stage 1 target (`configs/feynman_redundant_linear_knee_signed.toml`) | R | done | 1 (42) | `567b458` | III_19_51, test_9 now n = n* = 5 but not recovered (1.06e-6 near miss; 1 h cap). L1 total A2+A3 92/119 vs FEY-B 93, A 75, L1-B 54; held out 82 vs FEY-B 81 | 94, 95, 96 |
-| FEY-L2-B | Feynman L2 | PySR alone | R | planned | | | | |
-| FEY-L2-A | Feynman L2 | Ours | R | planned | | | | |
-| FEY-L3-B | Feynman L3 | PySR alone | R | planned | | | | |
-| FEY-L3-A | Feynman L3 | Ours | R | planned | | | | |
+| FEY-L2-B | Feynman L2 (x = u1 + u2 + u3, 3d inputs) | PySR alone (`configs/feynman_pysr_paper.toml`) | R | ready | 1 (42) | | vs FEY-B 93 | 97 |
+| FEY-L2-A | Feynman L2 | Ours, Stage 1 rule frozen (`configs/feynman_redundant_linear_knee_signed.toml`) | R | planned | 1 (42) | | vs FEY-L2-B, FEY-B; held out | 97 |
+| FEY-L3-B | Feynman L3 (L1 + d distractors, 3d inputs) | PySR alone (`configs/feynman_pysr_paper.toml`) | R | planned | 1 (42) | | vs FEY-B 93 | 97 |
+| FEY-L3-A | Feynman L3 | Ours, Stage 1 rule frozen (`configs/feynman_redundant_linear_knee_signed.toml`) | R | planned | 1 (42) | | vs FEY-L3-B, FEY-B; held out | 97 |
 
 ### 6. Noise robustness
 

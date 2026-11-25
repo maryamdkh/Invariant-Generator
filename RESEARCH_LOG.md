@@ -1852,3 +1852,16 @@ scored by `scripts/score_noisy_benchmark.py`, `noisy_scores.json`):
 - Decision: the log(-y) candidate stays (it fixes Stage 1 where it applies
   and changes nothing else); no recovery gain on this seed. The Stage 1
   rule for L2/L3 is `feynman_redundant_linear_knee_signed.toml`, frozen.
+
+## 97. FEY-L2/L3 held out: plan (2026-11-25)
+
+- Levels (data/feynman_redundant, gitignored, 119 equations each, up to 27
+  inputs): L2 splits each variable in three (x = u1 + u2 + u3); L3 is L1
+  plus d distractor inputs that do not enter y.
+- Pipeline frozen: `configs/feynman_redundant_linear_knee_signed.toml`
+  (knee 1.25, target choice with log(-y)); nothing tuned on L2/L3.
+  Baselines: PySR alone on the same inputs, `configs/feynman_pysr_paper.toml`
+  (same budget as FEY-B / FEY-L1-B).
+- Order (one at a time): FEY-L2-B, FEY-L2-A, FEY-L3-B, FEY-L3-A. Task lists
+  `cluster/tasks_l2.txt`, `cluster/tasks_l3.txt` (119 each, seed 42).
+  Data reach Arrhenius by rsync from the Mac (gitignored).
